@@ -1,9 +1,13 @@
 {
   "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
+  "/api/leagues/register/route": "app/api/leagues/register/route.js",
   "/api/matches/route": "app/api/matches/route.js",
+  "/api/profile/route": "app/api/profile/route.js",
+  "/api/stats/route": "app/api/stats/route.js",
+  "/login/page": "app/login/page.js",
   "/(authenticated)/dashboard/page": "app/(authenticated)/dashboard/page.js",
   "/(authenticated)/leagues/page": "app/(authenticated)/leagues/page.js",
-  "/(authenticated)/standings/page": "app/(authenticated)/standings/page.js",
-  "/(authenticated)/matches/results/page": "app/(authenticated)/matches/results/page.js",
-  "/(authenticated)/matches/[matchId]/page": "app/(authenticated)/matches/[matchId]/page.js"
+  "/(authenticated)/matches/page": "app/(authenticated)/matches/page.js",
+  "/(authenticated)/profile/page": "app/(authenticated)/profile/page.js",
+  "/(authenticated)/admin/page": "app/(authenticated)/admin/page.js"
 }

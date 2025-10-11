@@ -252,6 +252,57 @@ export default function AdminDashboard() {
           </Link>
 
           <Link
+            href="/admin/league-members"
+            style={{
+              display: 'block',
+              backgroundColor: 'white',
+              boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
+              borderRadius: '0',
+              padding: '1.5rem',
+              textDecoration: 'none',
+              color: 'inherit',
+              transition: 'transform 0.2s, box-shadow 0.2s'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-4px)';
+              e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.1)';
+            }}
+          >
+            <div>
+              <div style={{
+                width: '3rem',
+                height: '3rem',
+                backgroundColor: '#fee2e2',
+                borderRadius: '0.5rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: '1rem'
+              }}>
+                <svg style={{ width: '1.5rem', height: '1.5rem', color: '#dc2626' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+              </div>
+              <h3 style={{
+                fontSize: '1.125rem',
+                fontWeight: '600',
+                color: '#111827',
+                marginBottom: '0.5rem'
+              }}>League Members</h3>
+              <p style={{
+                fontSize: '0.875rem',
+                color: '#6b7280'
+              }}>
+                View and manage league registrations, remove members from leagues.
+              </p>
+            </div>
+          </Link>
+
+          <Link
             href="/admin/emails"
             style={{
               display: 'block',

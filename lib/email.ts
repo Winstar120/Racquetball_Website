@@ -1,16 +1,18 @@
-import * as nodemailer from 'nodemailer';
+import nodemailer from 'nodemailer';
 import { User, Match, League, Division } from '@prisma/client';
 
 // Create reusable transporter
-const transporter = nodemailer.createTransporter({
-  host: process.env.SMTP_HOST || 'smtp.gmail.com',
-  port: parseInt(process.env.SMTP_PORT || '587'),
-  secure: false, // true for 465, false for other ports
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASSWORD,
-  },
-});
+const transporter = process.env.SMTP_USER && process.env.SMTP_PASSWORD
+  ? nodemailer.createTransporter({
+      host: process.env.SMTP_HOST || 'smtp.gmail.com',
+      port: parseInt(process.env.SMTP_PORT || '587'),
+      secure: false, // true for 465, false for other ports
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASSWORD,
+      },
+    })
+  : null;
 
 interface MatchWithPlayers extends Match {
   player1: User;
@@ -19,6 +21,10 @@ interface MatchWithPlayers extends Match {
 }
 
 export async function sendMatchReminder(match: MatchWithPlayers, recipientId: string) {
+  if (!transporter) {
+    console.warn('Email transporter not configured - skipping email');
+    return;
+  }
   const recipient = match.player1Id === recipientId ? match.player1 : match.player2;
   const opponent = match.player1Id === recipientId ? match.player2 : match.player1;
 
@@ -152,6 +158,10 @@ If you need to cancel or reschedule, please contact your opponent directly and n
 }
 
 export async function sendWelcomeEmail(user: User) {
+  if (!transporter) {
+    console.warn('Email transporter not configured - skipping email');
+    return;
+  }
   const subject = 'Welcome to Racquetball League!';
 
   const htmlContent = `

@@ -70,14 +70,24 @@ export default function Leagues() {
         body: JSON.stringify({ leagueId, divisionLevel }),
       });
 
+      const contentType = response.headers.get("content-type");
+
       if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Failed to register');
+        if (contentType && contentType.indexOf("application/json") !== -1) {
+          const data = await response.json();
+          throw new Error(data.error || 'Failed to register');
+        } else {
+          // Response is not JSON (likely HTML error page)
+          console.error('Server returned non-JSON response:', response.status, response.statusText);
+          throw new Error(`Server error: ${response.status} ${response.statusText}`);
+        }
       }
 
+      const data = await response.json();
       await fetchLeagues();
       alert('Successfully registered for the league!');
     } catch (err: any) {
+      console.error('Registration error:', err);
       alert(err.message || 'Failed to register for league');
     }
   }
