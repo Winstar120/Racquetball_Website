@@ -1,0 +1,23 @@
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { getToken } from 'next-auth/jwt';
+
+export async function middleware(request: NextRequest) {
+  const pathname = request.nextUrl.pathname;
+
+  // Check if the path starts with /admin
+  if (pathname.startsWith('/admin')) {
+    const token = await getToken({ req: request });
+
+    // If no session or not an admin, redirect to dashboard
+    if (!token || !token.isAdmin) {
+      return NextResponse.redirect(new URL('/dashboard', request.url));
+    }
+  }
+
+  return NextResponse.next();
+}
+
+export const config = {
+  matcher: '/admin/:path*',
+};

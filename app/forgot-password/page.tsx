@@ -1,0 +1,194 @@
+'use client';
+
+import { useState } from 'react';
+import Link from 'next/link';
+
+export default function ForgotPassword() {
+  const [email, setEmail] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
+
+  async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setIsLoading(true);
+    setError('');
+    setMessage('');
+
+    try {
+      const response = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setMessage(data.message);
+      } else {
+        setError(data.error || 'Something went wrong');
+      }
+    } catch (error) {
+      setError('Something went wrong. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  return (
+    <div style={{
+      minHeight: '100vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: 'linear-gradient(135deg, #1f2937 0%, #374151 50%, #1f2937 100%)',
+      padding: '1rem'
+    }}>
+      <div style={{
+        width: '100%',
+        maxWidth: '28rem',
+        backgroundColor: 'white',
+        padding: '3rem',
+        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
+      }}>
+        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+          <Link href="/">
+            <img src="/logo.png" alt="DRA" style={{
+              height: '100px',
+              width: 'auto',
+              margin: '0 auto 1.5rem',
+              display: 'block',
+              cursor: 'pointer'
+            }} />
+          </Link>
+          <h1 style={{
+            fontSize: '2rem',
+            fontFamily: 'var(--font-playfair), Georgia, serif',
+            color: '#111827',
+            marginBottom: '0.5rem'
+          }}>Forgot Password</h1>
+          <p style={{
+            color: '#6b7280',
+            fontSize: '1rem'
+          }}>Enter your email to receive a password reset link</p>
+        </div>
+
+        <form onSubmit={onSubmit}>
+          {message && (
+            <div style={{
+              marginBottom: '1rem',
+              padding: '0.75rem',
+              backgroundColor: '#f0f9ff',
+              border: '1px solid #bfdbfe',
+              fontSize: '0.875rem',
+              color: '#1e40af'
+            }}>
+              {message}
+            </div>
+          )}
+
+          {error && (
+            <div style={{
+              marginBottom: '1rem',
+              padding: '0.75rem',
+              backgroundColor: '#fef2f2',
+              border: '1px solid #fecaca',
+              fontSize: '0.875rem',
+              color: '#991b1b'
+            }}>
+              {error}
+            </div>
+          )}
+
+          <div style={{ marginBottom: '1.5rem' }}>
+            <label htmlFor="email" style={{
+              display: 'block',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              color: '#374151',
+              marginBottom: '0.25rem'
+            }}>
+              Email
+            </label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              required
+              disabled={isLoading}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              style={{
+                display: 'block',
+                width: '100%',
+                padding: '0.75rem',
+                fontSize: '1rem',
+                color: '#111827',
+                backgroundColor: 'white',
+                border: '1px solid #d1d5db',
+                outline: 'none',
+                transition: 'all 0.2s'
+              }}
+              onFocus={(e) => {
+                e.target.style.borderColor = '#111827';
+                e.target.style.boxShadow = '0 0 0 1px #111827';
+              }}
+              onBlur={(e) => {
+                e.target.style.borderColor = '#d1d5db';
+                e.target.style.boxShadow = 'none';
+              }}
+            />
+          </div>
+
+          <div style={{ marginTop: '1.5rem' }}>
+            <button
+              type="submit"
+              disabled={isLoading}
+              style={{
+                width: '100%',
+                padding: '0.75rem',
+                fontSize: '1rem',
+                fontWeight: '500',
+                color: 'white',
+                backgroundColor: isLoading ? '#6b7280' : '#1f2937',
+                border: 'none',
+                cursor: isLoading ? 'not-allowed' : 'pointer',
+                transition: 'all 0.2s'
+              }}
+              onMouseOver={(e) => {
+                if (!isLoading) {
+                  e.currentTarget.style.backgroundColor = '#111827';
+                }
+              }}
+              onMouseOut={(e) => {
+                if (!isLoading) {
+                  e.currentTarget.style.backgroundColor = '#1f2937';
+                }
+              }}
+            >
+              {isLoading ? 'Sending...' : 'Send Reset Link'}
+            </button>
+          </div>
+
+          <div style={{
+            marginTop: '1.5rem',
+            textAlign: 'center',
+            fontSize: '0.875rem'
+          }}>
+            <Link href="/login" style={{
+              color: '#111827',
+              fontWeight: '500',
+              textDecoration: 'none'
+            }}>
+              Back to Sign In
+            </Link>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}

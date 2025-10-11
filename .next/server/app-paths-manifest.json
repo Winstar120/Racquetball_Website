@@ -1,0 +1,9 @@
+{
+  "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
+  "/api/matches/route": "app/api/matches/route.js",
+  "/(authenticated)/dashboard/page": "app/(authenticated)/dashboard/page.js",
+  "/(authenticated)/leagues/page": "app/(authenticated)/leagues/page.js",
+  "/(authenticated)/standings/page": "app/(authenticated)/standings/page.js",
+  "/(authenticated)/matches/results/page": "app/(authenticated)/matches/results/page.js",
+  "/(authenticated)/matches/[matchId]/page": "app/(authenticated)/matches/[matchId]/page.js"
+}
