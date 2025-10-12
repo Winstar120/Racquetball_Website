@@ -440,7 +440,7 @@ export default function ManageUsersPage() {
                   </button>
                 </div>
 
-                <div style={{ space: '1rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                   <div style={{ marginBottom: '1rem' }}>
                     <h3 style={{ fontSize: '0.875rem', fontWeight: '500', color: '#6b7280', marginBottom: '0.5rem' }}>
                       Personal Information
@@ -463,7 +463,7 @@ export default function ManageUsersPage() {
                       {selectedUser.leagues.length === 0 ? (
                         <p style={{ color: '#6b7280' }}>Not registered in any leagues</p>
                       ) : (
-                        <div style={{ space: '0.5rem' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                           {selectedUser.leagues.map((league) => (
                             <div key={league.id} style={{
                               paddingTop: '0.5rem',
