@@ -88,8 +88,8 @@ function courtLabel(match: ScheduleMatch) {
   return 'TBD';
 }
 
-export default function LeagueSchedulePage({ params }: { params: { leagueId: string } }) {
-  const { leagueId } = params;
+export default function LeagueSchedulePage({ params }: { params: Promise<{ leagueId: string }> }) {
+  const [leagueId, setLeagueId] = useState<string | null>(null);
   const [state, setState] = useState<
     | { kind: 'loading' }
     | { kind: 'error'; message: string }
@@ -100,10 +100,12 @@ export default function LeagueSchedulePage({ params }: { params: { leagueId: str
   const [isSaving, setIsSaving] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
 
-  const fetchSchedule = useCallback(async (currentLeagueId: string) => {
+  const fetchSchedule = useCallback(async (currentLeagueId?: string) => {
+    const targetLeagueId = currentLeagueId ?? leagueId;
+    if (!targetLeagueId) return;
     setState({ kind: 'loading' });
     try {
-      const response = await fetch(`/api/admin/leagues/${currentLeagueId}/schedule`, {
+      const response = await fetch(`/api/admin/leagues/${targetLeagueId}/schedule`, {
         credentials: 'include',
       });
       if (!response.ok) throw new Error('Failed to load schedule');
@@ -148,12 +150,19 @@ export default function LeagueSchedulePage({ params }: { params: { leagueId: str
         message: err instanceof Error ? err.message : 'Failed to load schedule',
       });
     }
-  }, []);
+  }, [leagueId]);
 
   useEffect(() => {
-    if (!leagueId) return;
-    fetchSchedule(leagueId);
-  }, [fetchSchedule, leagueId]);
+    let active = true;
+    params.then((value) => {
+      if (!active) return;
+      setLeagueId(value.leagueId);
+      fetchSchedule(value.leagueId);
+    });
+    return () => {
+      active = false;
+    };
+  }, [fetchSchedule, params]);
 
   async function handleShuffle() {
     if (!leagueId) return;
@@ -181,7 +190,7 @@ export default function LeagueSchedulePage({ params }: { params: { leagueId: str
         const message = (payload as any)?.error ?? 'Failed to generate schedule';
         throw new Error(message);
       }
-      await fetchSchedule(leagueId);
+      await fetchSchedule();
       setFeedback('Schedule saved. Matches are now available in Admin → Matches.');
     } catch (err) {
       setState({
