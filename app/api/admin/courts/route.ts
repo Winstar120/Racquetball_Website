@@ -49,11 +49,29 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { name, location } = await request.json();
+    const payload = await request.json();
+    const name = payload?.name;
+    const location = payload?.location;
+    const numberValue = payload?.number;
+
+    const courtNumber =
+      typeof numberValue === 'number'
+        ? numberValue
+        : typeof numberValue === 'string' && numberValue.trim() !== ''
+        ? Number.parseInt(numberValue, 10)
+        : undefined;
+
+    if (!name || Number.isNaN(courtNumber) || courtNumber === undefined) {
+      return NextResponse.json(
+        { error: "Court name and number are required" },
+        { status: 400 }
+      );
+    }
 
     const court = await prisma.court.create({
       data: {
         name,
+        number: courtNumber,
         location: location || null,
         isActive: true
       }

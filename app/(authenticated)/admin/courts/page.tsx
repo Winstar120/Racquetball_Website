@@ -22,7 +22,8 @@ const TIME_SLOTS = [
 interface Court {
   id: string;
   name: string;
-  location: string;
+  number: number;
+  location: string | null;
   isActive: boolean;
   availability: CourtAvailability[];
 }
@@ -60,14 +61,33 @@ export default function CourtsAdmin() {
   async function handleAddCourt(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
+    const name = (formData.get('name') as string)?.trim();
+    const numberRaw = formData.get('number');
+    const location = (formData.get('location') as string)?.trim();
+    const parsedNumber =
+      typeof numberRaw === 'string' && numberRaw.trim() !== ''
+        ? Number.parseInt(numberRaw, 10)
+        : Number.NaN;
+
+    if (!name) {
+      setError('Court name is required');
+      return;
+    }
+
+    if (Number.isNaN(parsedNumber) || parsedNumber < 1) {
+      setError('Court number must be a positive integer');
+      return;
+    }
 
     try {
+      setError('');
       const response = await fetch('/api/admin/courts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name: formData.get('name'),
-          location: formData.get('location'),
+          name,
+          number: parsedNumber,
+          location,
         }),
       });
 
@@ -162,7 +182,7 @@ export default function CourtsAdmin() {
           <div className="mb-6 bg-white shadow rounded-lg p-6">
             <h3 className="text-lg font-medium mb-4">Add New Court</h3>
             <form onSubmit={handleAddCourt} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div>
                   <label htmlFor="name" className="block text-sm font-medium text-gray-700">
                     Court Name
@@ -174,6 +194,20 @@ export default function CourtsAdmin() {
                     required
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                     placeholder="Court 1"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="number" className="block text-sm font-medium text-gray-700">
+                    Court Number
+                  </label>
+                  <input
+                    type="number"
+                    name="number"
+                    id="number"
+                    min={1}
+                    required
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                    placeholder="1"
                   />
                 </div>
                 <div>
@@ -226,7 +260,9 @@ export default function CourtsAdmin() {
               <div key={court.id} className="bg-white shadow rounded-lg p-6">
                 <div className="flex justify-between items-start mb-4">
                   <div>
-                    <h3 className="text-lg font-medium text-gray-900">{court.name}</h3>
+                    <h3 className="text-lg font-medium text-gray-900">
+                      Court {court.number}: {court.name}
+                    </h3>
                     {court.location && (
                       <p className="text-sm text-gray-500">{court.location}</p>
                     )}
