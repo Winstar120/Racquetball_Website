@@ -370,7 +370,7 @@ export default function LeagueSchedulePage({ params }: { params: Promise<{ leagu
       >
         <p style={{ color: '#b91c1c', marginBottom: '1rem' }}>{state.message}</p>
         <button
-          onClick={fetchSchedule}
+          onClick={() => fetchSchedule()}
           style={{
             padding: '0.75rem 1.5rem',
             fontSize: '0.95rem',
