@@ -9,7 +9,7 @@ interface User {
   email: string;
   isAdmin: boolean;
   skillLevel?: string;
-  phoneNumber?: string;
+  phone?: string | null;
   createdAt: string;
   leagues: {
     id: string;
@@ -448,7 +448,7 @@ export default function ManageUsersPage() {
                     <div style={{ backgroundColor: '#f9fafb', padding: '1rem', borderRadius: '0.375rem' }}>
                       <p><strong>Name:</strong> {selectedUser.name}</p>
                       <p><strong>Email:</strong> {selectedUser.email}</p>
-                      {selectedUser.phoneNumber && <p><strong>Phone:</strong> {selectedUser.phoneNumber}</p>}
+                      {selectedUser.phone && <p><strong>Phone:</strong> {selectedUser.phone}</p>}
                       {selectedUser.skillLevel && <p><strong>Skill Level:</strong> {selectedUser.skillLevel}</p>}
                       <p><strong>Role:</strong> {selectedUser.isAdmin ? 'Administrator' : 'Regular User'}</p>
                       <p><strong>Member Since:</strong> {formatDate(selectedUser.createdAt)}</p>

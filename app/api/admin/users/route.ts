@@ -67,7 +67,7 @@ export async function GET(request: NextRequest) {
         email: user.email,
         isAdmin: user.isAdmin,
         skillLevel: user.skillLevel,
-        phoneNumber: user.phoneNumber,
+        phone: user.phone,
         createdAt: user.createdAt,
         leagues: user.registrations.map(reg => ({
           id: reg.league.id,
