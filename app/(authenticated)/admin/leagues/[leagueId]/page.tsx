@@ -59,8 +59,9 @@ function formatDateInput(value?: string | null) {
   return date.toISOString().slice(0, 10);
 }
 
-export default function EditLeaguePage({ params }: { params: { leagueId: string } }) {
+export default function EditLeaguePage({ params }: { params: Promise<{ leagueId: string }> }) {
   const router = useRouter();
+  const [leagueId, setLeagueId] = useState<string | null>(null);
   const [state, setState] = useState<
     | { kind: 'loading' }
     | { kind: 'error'; message: string }
@@ -88,12 +89,22 @@ export default function EditLeaguePage({ params }: { params: { leagueId: string 
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  async function loadLeague() {
+  useEffect(() => {
+    let isMounted = true;
+    params.then((value) => {
+      if (isMounted) setLeagueId(value.leagueId);
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, [params]);
+
+  async function loadLeague(currentLeagueId: string) {
     setState({ kind: 'loading' });
     setError(null);
     setMessage(null);
     try {
-      const response = await fetch(`/api/admin/leagues/${params.leagueId}`, {
+      const response = await fetch(`/api/admin/leagues/${currentLeagueId}`, {
         credentials: 'include',
       });
       if (!response.ok) throw new Error('Failed to load league');
@@ -125,9 +136,9 @@ export default function EditLeaguePage({ params }: { params: { leagueId: string 
   }
 
   useEffect(() => {
-    loadLeague();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [params.leagueId]);
+    if (!leagueId) return;
+    loadLeague(leagueId);
+  }, [leagueId]);
 
   function handleChange<K extends keyof typeof form>(key: K, value: string) {
     setForm((prev) => {
@@ -145,7 +156,7 @@ export default function EditLeaguePage({ params }: { params: { leagueId: string 
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
-    if (state.kind !== 'ready') return;
+    if (state.kind !== 'ready' || !leagueId) return;
     setSaving(true);
     setMessage(null);
     setError(null);
@@ -166,7 +177,7 @@ export default function EditLeaguePage({ params }: { params: { leagueId: string 
         leagueFee: Number(form.leagueFee),
       };
 
-      const response = await fetch(`/api/admin/leagues/${params.leagueId}`, {
+      const response = await fetch(`/api/admin/leagues/${leagueId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -213,11 +224,12 @@ export default function EditLeaguePage({ params }: { params: { leagueId: string 
     ) {
       return;
     }
+    if (!leagueId) return;
     setDeleting(true);
     setMessage(null);
     setError(null);
     try {
-      const response = await fetch(`/api/admin/leagues/${params.leagueId}`, {
+      const response = await fetch(`/api/admin/leagues/${leagueId}`, {
         method: 'DELETE',
         credentials: 'include',
       });
@@ -320,7 +332,7 @@ export default function EditLeaguePage({ params }: { params: { leagueId: string 
       >
         <p style={{ color: '#b91c1c', marginBottom: '1rem' }}>{state.message}</p>
         <button
-          onClick={loadLeague}
+          onClick={() => leagueId && loadLeague(leagueId)}
           style={{
             padding: '0.75rem 1.5rem',
             fontSize: '0.95rem',
