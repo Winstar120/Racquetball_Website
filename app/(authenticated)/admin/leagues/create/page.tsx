@@ -1,8 +1,33 @@
 'use client';
 
 import { useState } from 'react';
+import type { FormEvent, FocusEvent, CSSProperties } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+
+const baseInputStyle: CSSProperties = {
+  width: '100%',
+  padding: '0.65rem 0.75rem',
+  border: '1px solid #d1d5db',
+  fontSize: '1rem',
+  color: '#111827',
+  outline: 'none',
+  backgroundColor: 'white' as const,
+};
+
+function focusHandlers(disabled?: boolean) {
+  if (disabled) return {};
+  return {
+    onFocus: (e: FocusEvent<HTMLInputElement | HTMLSelectElement>) => {
+      e.currentTarget.style.borderColor = '#111827';
+      e.currentTarget.style.boxShadow = '0 0 0 1px #111827';
+    },
+    onBlur: (e: FocusEvent<HTMLInputElement | HTMLSelectElement>) => {
+      e.currentTarget.style.borderColor = '#d1d5db';
+      e.currentTarget.style.boxShadow = 'none';
+    },
+  };
+}
 
 export default function CreateLeague() {
   const router = useRouter();
@@ -11,7 +36,7 @@ export default function CreateLeague() {
   const [isFree, setIsFree] = useState(true);
   const [gameType, setGameType] = useState('SINGLES');
 
-  async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setIsLoading(true);
     setError('');
@@ -26,9 +51,17 @@ export default function CreateLeague() {
       winByTwo: formData.get('winByTwo') === 'true',
       isFree: formData.get('isFree') === 'true',
       leagueFee: formData.get('isFree') === 'true' ? 0 : parseFloat(formData.get('leagueFee') as string),
-      playersPerMatch: formData.get('gameType') === 'SINGLES' ? 2 : formData.get('gameType') === 'CUTTHROAT' ? 3 : 4,
+      playersPerMatch:
+        formData.get('gameType') === 'SINGLES'
+          ? 2
+          : formData.get('gameType') === 'CUTTHROAT'
+          ? 3
+          : 4,
       matchDuration: parseInt(formData.get('matchDuration') as string),
-      weeksForCutthroat: formData.get('gameType') === 'CUTTHROAT' ? parseInt(formData.get('weeksForCutthroat') as string) : null,
+      weeksForCutthroat:
+        formData.get('gameType') === 'CUTTHROAT'
+          ? parseInt(formData.get('weeksForCutthroat') as string)
+          : null,
       startDate: formData.get('startDate'),
       endDate: formData.get('endDate'),
       registrationOpens: formData.get('registrationOpens'),
@@ -39,9 +72,7 @@ export default function CreateLeague() {
     try {
       const response = await fetch('/api/admin/leagues', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(leagueData),
       });
 
@@ -52,7 +83,7 @@ export default function CreateLeague() {
       }
 
       router.push('/admin/leagues');
-    } catch (error) {
+    } catch {
       setError('An error occurred. Please try again.');
     } finally {
       setIsLoading(false);
@@ -60,370 +91,617 @@ export default function CreateLeague() {
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#111827' }}>
-      <div className="bg-gray-800 shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="py-6">
-            <nav className="flex" aria-label="Breadcrumb">
-              <ol className="flex items-center list-none p-0 m-0">
-                <li className="flex items-center">
-                  <Link href="/admin" className="text-gray-400 hover:text-gray-200" style={{ color: 'inherit', textDecoration: 'none' }}>
-                    Admin
-                  </Link>
-                  <span className="mx-2 text-gray-500">/</span>
-                </li>
-                <li className="flex items-center">
-                  <Link href="/admin/leagues" className="text-gray-400 hover:text-gray-200" style={{ color: 'inherit', textDecoration: 'none' }}>
-                    Leagues
-                  </Link>
-                  <span className="mx-2 text-gray-500">/</span>
-                </li>
-                <li>
-                  <span className="text-white font-medium">Create</span>
-                </li>
-              </ol>
-            </nav>
-            <h1 className="mt-2 text-2xl font-bold text-white">Create New League</h1>
-          </div>
+    <div style={{ minHeight: 'calc(100vh - 64px)' }}>
+      <div
+        style={{
+          backgroundColor: 'white',
+          boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
+        }}
+      >
+        <div
+          style={{
+            maxWidth: '80rem',
+            margin: '0 auto',
+            padding: '1.5rem 1rem',
+          }}
+        >
+          <nav style={{ display: 'flex' }} aria-label="Breadcrumb">
+            <ol
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                margin: 0,
+                padding: 0,
+                listStyle: 'none',
+              }}
+            >
+              <li>
+                <Link
+                  href="/admin"
+                  style={{ color: '#6b7280', textDecoration: 'none', fontSize: '0.875rem' }}
+                >
+                  Admin
+                </Link>
+                <span style={{ margin: '0 0.5rem', color: '#9ca3af' }}>/</span>
+              </li>
+              <li>
+                <Link
+                  href="/admin/leagues"
+                  style={{ color: '#6b7280', textDecoration: 'none', fontSize: '0.875rem' }}
+                >
+                  Leagues
+                </Link>
+                <span style={{ margin: '0 0.5rem', color: '#9ca3af' }}>/</span>
+              </li>
+              <li>
+                <span style={{ color: '#111827', fontWeight: 500, fontSize: '0.875rem' }}>
+                  Create
+                </span>
+              </li>
+            </ol>
+          </nav>
+          <h1
+            style={{
+              marginTop: '0.75rem',
+              fontSize: '1.75rem',
+              fontWeight: 'bold',
+              color: '#111827',
+              fontFamily: 'var(--font-playfair), Georgia, serif',
+            }}
+          >
+            Create New League
+          </h1>
+          <p
+            style={{
+              marginTop: '0.25rem',
+              color: '#6b7280',
+              fontSize: '0.975rem',
+            }}
+          >
+            Configure the season structure, scoring rules, and registration window before inviting
+            players.
+          </p>
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white shadow-xl rounded-lg mx-auto p-8 border border-gray-200" style={{ maxWidth: '800px', backgroundColor: 'white' }}>
-          <form onSubmit={onSubmit}>
+      <div
+        style={{
+          maxWidth: '70rem',
+          margin: '0 auto',
+          padding: '2rem 1rem',
+        }}
+      >
+        <div
+          style={{
+            backgroundColor: 'white',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+            padding: '2.25rem',
+            maxWidth: '46rem',
+            margin: '0 auto',
+          }}
+        >
+          <form onSubmit={onSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
             {error && (
-              <div className="mb-6">
-                <div className="rounded-md bg-red-50 p-4 text-red-800 border border-red-200">
-                  {error}
-                </div>
+              <div
+                style={{
+                  padding: '1rem',
+                  backgroundColor: '#fef2f2',
+                  border: '1px solid #fecaca',
+                  color: '#991b1b',
+                }}
+              >
+                {error}
               </div>
             )}
 
-            {/* Basic Information Section */}
-            <div className="py-6 border-b border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4 text-center">Basic Information</h2>
-            <div className="mx-auto" style={{ maxWidth: '320px' }}>
-              <label htmlFor="name" className="block text-base font-medium text-gray-700 mb-2">
-                League Name
-              </label>
-              <input
-                type="text"
-                name="name"
-                id="name"
-                required
-                disabled={isLoading}
-                className="mt-1 block w-full rounded-md border border-gray-300 text-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-base px-4 py-2.5"
-                placeholder="Winter League 2025"
-              />
-            </div>
-          </div>
-
-            {/* Game Settings Section */}
-            <div className="py-6 border-b border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4 text-center">Game Settings</h2>
-            <div className="space-y-6 mx-auto" style={{ maxWidth: '640px' }}>
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                <div>
-                  <label htmlFor="gameType" className="block text-base font-medium text-gray-700 mb-2">
-                    Game Type
-                  </label>
-                  <select
-                    name="gameType"
-                    id="gameType"
-                    required
-                    disabled={isLoading}
-                    value={gameType}
-                    onChange={(e) => setGameType(e.target.value)}
-                    className="mt-1 block w-full rounded-md border border-gray-300 text-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-base px-3 py-2.5"
-                  >
-                    <option value="SINGLES">Singles (1v1)</option>
-                    <option value="DOUBLES">Doubles (2v2)</option>
-                    <option value="CUTTHROAT">Cut-throat (3 players)</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label htmlFor="rankingMethod" className="block text-base font-medium text-gray-700 mb-2">
-                    Ranking Method
-                  </label>
-                  <select
-                    name="rankingMethod"
-                    id="rankingMethod"
-                    required
-                    disabled={isLoading}
-                    className="mt-1 block w-full rounded-md border border-gray-300 text-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-base px-3 py-2.5"
-                  >
-                    <option value="BY_WINS">By Wins (Traditional)</option>
-                    <option value="BY_POINTS">By Total Points Scored</option>
-                  </select>
-                  <p className="mt-1 text-sm text-gray-600">
-                    Choose how players are ranked in standings
-                  </p>
-                </div>
+            <section>
+              <h2
+                style={{
+                  fontSize: '1.2rem',
+                  fontWeight: 600,
+                  color: '#111827',
+                  marginBottom: '1rem',
+                  textAlign: 'center',
+                }}
+              >
+                Basic Information
+              </h2>
+              <div style={{ maxWidth: '22rem', margin: '0 auto' }}>
+                <label
+                  htmlFor="name"
+                  style={{
+                    display: 'block',
+                    fontSize: '0.95rem',
+                    fontWeight: 500,
+                    color: '#374151',
+                    marginBottom: '0.5rem',
+                  }}
+                >
+                  League Name
+                </label>
+                <input
+                  type="text"
+                  name="name"
+                  id="name"
+                  required
+                  disabled={isLoading}
+                  placeholder="Winter League 2025"
+                  style={baseInputStyle}
+                  {...focusHandlers(isLoading)}
+                />
               </div>
+            </section>
 
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                <div>
-                  <label htmlFor="pointsToWin" className="block text-base font-medium text-gray-700 mb-2">
-                    Points to Win
-                  </label>
-                  <input
-                    type="number"
-                    name="pointsToWin"
-                    id="pointsToWin"
-                    defaultValue="15"
-                    min="7"
-                    max="21"
-                    required
-                    disabled={isLoading}
-                    className="mt-1 block w-full rounded-md border border-gray-300 text-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-base px-3 py-2.5"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="winByTwo" className="block text-base font-medium text-gray-700 mb-2">
-                    Win by Two
-                  </label>
-                  <select
-                    name="winByTwo"
-                    id="winByTwo"
-                    required
-                    disabled={isLoading}
-                    className="mt-1 block w-full rounded-md border border-gray-300 text-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-base px-3 py-2.5"
-                  >
-                    <option value="true">Yes</option>
-                    <option value="false">No</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                <div>
-                  <label htmlFor="matchDuration" className="block text-base font-medium text-gray-700 mb-2">
-                    Match Duration (minutes)
-                  </label>
-                  <input
-                    type="number"
-                    name="matchDuration"
-                    id="matchDuration"
-                    defaultValue="45"
-                    min="30"
-                    max="120"
-                    required
-                    disabled={isLoading}
-                    className="mt-1 block w-full rounded-md border border-gray-300 text-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-base px-3 py-2.5"
-                  />
-                  <p className="mt-1 text-sm text-gray-600">
-                    Includes 5 minute warmup time
-                  </p>
-                </div>
-
-                {gameType === 'CUTTHROAT' && (
+            <section>
+              <h2
+                style={{
+                  fontSize: '1.2rem',
+                  fontWeight: 600,
+                  color: '#111827',
+                  marginBottom: '1rem',
+                  textAlign: 'center',
+                }}
+              >
+                Game Settings
+              </h2>
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '1.5rem',
+                  maxWidth: '40rem',
+                  margin: '0 auto',
+                }}
+              >
+                <div
+                  style={{
+                    display: 'grid',
+                    gap: '1.5rem',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+                  }}
+                >
                   <div>
-                    <label htmlFor="weeksForCutthroat" className="block text-base font-medium text-gray-700 mb-2">
-                      Number of Weeks
+                    <label
+                      htmlFor="gameType"
+                      style={{
+                        display: 'block',
+                        fontSize: '0.95rem',
+                        fontWeight: 500,
+                        color: '#374151',
+                        marginBottom: '0.5rem',
+                      }}
+                    >
+                      Game Type
+                    </label>
+                    <select
+                      name="gameType"
+                      id="gameType"
+                      required
+                      disabled={isLoading}
+                      value={gameType}
+                      onChange={(e) => setGameType(e.target.value)}
+                      style={baseInputStyle}
+                      {...focusHandlers(isLoading)}
+                    >
+                      <option value="SINGLES">Singles (1v1)</option>
+                      <option value="DOUBLES">Doubles (2v2)</option>
+                      <option value="CUTTHROAT">Cut-throat (3 players)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="rankingMethod"
+                      style={{
+                        display: 'block',
+                        fontSize: '0.95rem',
+                        fontWeight: 500,
+                        color: '#374151',
+                        marginBottom: '0.5rem',
+                      }}
+                    >
+                      Ranking Method
+                    </label>
+                    <select
+                      name="rankingMethod"
+                      id="rankingMethod"
+                      required
+                      disabled={isLoading}
+                      style={baseInputStyle}
+                      {...focusHandlers(isLoading)}
+                    >
+                      <option value="BY_WINS">By Wins (Traditional)</option>
+                      <option value="BY_POINTS">By Total Points Scored</option>
+                    </select>
+                    <p style={{ marginTop: '0.35rem', fontSize: '0.85rem', color: '#6b7280' }}>
+                      Determines how standings are ordered.
+                    </p>
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    display: 'grid',
+                    gap: '1.5rem',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+                  }}
+                >
+                  <div>
+                    <label
+                      htmlFor="pointsToWin"
+                      style={{
+                        display: 'block',
+                        fontSize: '0.95rem',
+                        fontWeight: 500,
+                        color: '#374151',
+                        marginBottom: '0.5rem',
+                      }}
+                    >
+                      Points to Win
                     </label>
                     <input
                       type="number"
-                      name="weeksForCutthroat"
-                      id="weeksForCutthroat"
-                      defaultValue="8"
-                      min="4"
-                      max="20"
+                      name="pointsToWin"
+                      id="pointsToWin"
+                      defaultValue="11"
+                      min="7"
+                      max="21"
                       required
                       disabled={isLoading}
-                      className="mt-1 block w-full rounded-md border border-gray-300 text-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-base px-3 py-2.5"
+                      style={baseInputStyle}
+                      {...focusHandlers(isLoading)}
                     />
-                    <p className="mt-1 text-sm text-gray-600">
-                      Groups will rotate weekly to maximize variety
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="winByTwo"
+                      style={{
+                        display: 'block',
+                        fontSize: '0.95rem',
+                        fontWeight: 500,
+                        color: '#374151',
+                        marginBottom: '0.5rem',
+                      }}
+                    >
+                      Win by Two
+                    </label>
+                    <select
+                      name="winByTwo"
+                      id="winByTwo"
+                      required
+                      disabled={isLoading}
+                      style={baseInputStyle}
+                      {...focusHandlers(isLoading)}
+                    >
+                      <option value="true">Yes</option>
+                      <option value="false">No</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    display: 'grid',
+                    gap: '1.5rem',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+                  }}
+                >
+                  <div>
+                    <label
+                      htmlFor="matchDuration"
+                      style={{
+                        display: 'block',
+                        fontSize: '0.95rem',
+                        fontWeight: 500,
+                        color: '#374151',
+                        marginBottom: '0.5rem',
+                      }}
+                    >
+                      Match Duration (minutes)
+                    </label>
+                    <input
+                      type="number"
+                      name="matchDuration"
+                      id="matchDuration"
+                      defaultValue="45"
+                      min="30"
+                      max="120"
+                      required
+                      disabled={isLoading}
+                      style={baseInputStyle}
+                      {...focusHandlers(isLoading)}
+                    />
+                    <p style={{ marginTop: '0.35rem', fontSize: '0.85rem', color: '#6b7280' }}>
+                      Includes pre-match warmup time.
                     </p>
                   </div>
-                )}
+                  {gameType === 'CUTTHROAT' && (
+                    <div>
+                      <label
+                        htmlFor="weeksForCutthroat"
+                        style={{
+                          display: 'block',
+                          fontSize: '0.95rem',
+                          fontWeight: 500,
+                          color: '#374151',
+                          marginBottom: '0.5rem',
+                        }}
+                      >
+                        Number of Weeks
+                      </label>
+                      <input
+                        type="number"
+                        name="weeksForCutthroat"
+                        id="weeksForCutthroat"
+                        defaultValue="8"
+                        min="4"
+                        max="20"
+                        required
+                        disabled={isLoading}
+                        style={baseInputStyle}
+                        {...focusHandlers(isLoading)}
+                      />
+                      <p style={{ marginTop: '0.35rem', fontSize: '0.85rem', color: '#6b7280' }}>
+                        Recommended 8–12 weeks for rotating matchups.
+                      </p>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          </div>
+            </section>
 
-            {/* Schedule Section */}
-            <div className="py-6 border-b border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4 text-center">Schedule Dates</h2>
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 mx-auto" style={{ maxWidth: '640px' }}>
-              <div>
-                <label htmlFor="startDate" className="block text-base font-medium text-gray-700 mb-2">
-                  Start Date
-                </label>
-                <input
-                  type="date"
-                  name="startDate"
-                  id="startDate"
-                  required
-                  disabled={isLoading}
-                  className="mt-1 block w-full rounded-md border border-gray-300 text-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-base px-3 py-2.5"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="endDate" className="block text-base font-medium text-gray-700 mb-2">
-                  End Date
-                </label>
-                <input
-                  type="date"
-                  name="endDate"
-                  id="endDate"
-                  required
-                  disabled={isLoading}
-                  className="mt-1 block w-full rounded-md border border-gray-300 text-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-base px-3 py-2.5"
-                />
-              </div>
-            </div>
-          </div>
-
-            {/* Registration Period Section */}
-            <div className="py-6 border-b border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4 text-center">Registration Period</h2>
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 mx-auto" style={{ maxWidth: '640px' }}>
-              <div>
-                <label htmlFor="registrationOpens" className="block text-base font-medium text-gray-700 mb-2">
-                  Registration Opens
-                </label>
-                <input
-                  type="datetime-local"
-                  name="registrationOpens"
-                  id="registrationOpens"
-                  required
-                  disabled={isLoading}
-                  className="mt-1 block w-full rounded-md border border-gray-300 text-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-base px-3 py-2.5"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="registrationCloses" className="block text-base font-medium text-gray-700 mb-2">
-                  Registration Closes
-                </label>
-                <input
-                  type="datetime-local"
-                  name="registrationCloses"
-                  id="registrationCloses"
-                  required
-                  disabled={isLoading}
-                  className="mt-1 block w-full rounded-md border border-gray-300 text-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-base px-3 py-2.5"
-                />
-              </div>
-            </div>
-          </div>
-
-            {/* League Type & Fees Section */}
-            <div className="py-6 border-b border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4 text-center">League Type & Fees</h2>
-            <div className="space-y-4 mx-auto" style={{ maxWidth: '320px' }}>
-              <div>
-                <label htmlFor="isFree" className="block text-base font-medium text-gray-700 mb-2">
-                  League Type
-                </label>
-                <select
-                  name="isFree"
-                  id="isFree"
-                  required
-                  disabled={isLoading}
-                  value={isFree ? 'true' : 'false'}
-                  onChange={(e) => setIsFree(e.target.value === 'true')}
-                  className="mt-1 block w-full rounded-md border border-gray-300 text-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-base px-3 py-2.5"
-                >
-                  <option value="true">Free League</option>
-                  <option value="false">Paid League</option>
-                </select>
-                <p className="mt-1 text-sm text-gray-600">
-                  Choose whether to track payment status for this league
-                </p>
-              </div>
-
-              {!isFree && (
+            <section>
+              <h2
+                style={{
+                  fontSize: '1.2rem',
+                  fontWeight: 600,
+                  color: '#111827',
+                  marginBottom: '1rem',
+                  textAlign: 'center',
+                }}
+              >
+                Registration & Fees
+              </h2>
+              <div
+                style={{
+                  display: 'grid',
+                  gap: '1.5rem',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+                }}
+              >
                 <div>
-                  <label htmlFor="leagueFee" className="block text-base font-medium text-gray-700 mb-2">
-                    League Fee ($)
+                  <label
+                    htmlFor="isFree"
+                    style={{
+                      display: 'block',
+                      fontSize: '0.95rem',
+                      fontWeight: 500,
+                      color: '#374151',
+                      marginBottom: '0.5rem',
+                    }}
+                  >
+                    Registration Type
+                  </label>
+                  <select
+                    name="isFree"
+                    id="isFree"
+                    disabled={isLoading}
+                    value={isFree ? 'true' : 'false'}
+                    onChange={(e) => setIsFree(e.target.value === 'true')}
+                    style={baseInputStyle}
+                    {...focusHandlers(isLoading)}
+                  >
+                    <option value="true">Free League</option>
+                    <option value="false">Paid League</option>
+                  </select>
+                </div>
+                <div>
+                  <label
+                    htmlFor="leagueFee"
+                    style={{
+                      display: 'block',
+                      fontSize: '0.95rem',
+                      fontWeight: 500,
+                      color: '#374151',
+                      marginBottom: '0.5rem',
+                    }}
+                  >
+                    League Fee (USD)
                   </label>
                   <input
                     type="number"
                     name="leagueFee"
                     id="leagueFee"
-                    step="0.01"
                     min="0"
+                    step="0.01"
+                    disabled={isLoading || isFree}
                     defaultValue="0"
-                    required={!isFree}
-                    disabled={isLoading}
-                    className="mt-1 block w-full rounded-md border border-gray-300 text-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-base px-3 py-2.5"
-                    placeholder="25.00"
+                    style={{
+                      ...baseInputStyle,
+                      backgroundColor: isFree ? '#f9fafb' : 'white',
+                    }}
+                    {...focusHandlers(isLoading || isFree)}
                   />
-                  <p className="mt-1 text-sm text-gray-600">
-                    Enter the fee amount for league registration
+                  <p style={{ marginTop: '0.35rem', fontSize: '0.85rem', color: '#6b7280' }}>
+                    Disabled when the league is marked as free.
                   </p>
                 </div>
-              )}
-            </div>
-          </div>
-
-            {/* Skill Divisions Section */}
-            <div className="py-6 border-b border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4 text-center">Skill Divisions</h2>
-            <div className="mx-auto" style={{ maxWidth: '400px' }}>
-                <p className="text-base text-gray-600 mb-3 text-center">
-                  Select which skill divisions will be available for this league
-                </p>
-              <div className="space-y-3">
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    name="divisions"
-                    value="A"
-                    className="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                  />
-                  <span className="ml-3 text-base text-gray-700">Division A (Advanced)</span>
-                </label>
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    name="divisions"
-                    value="B"
-                    className="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                  />
-                  <span className="ml-3 text-base text-gray-700">Division B (Intermediate)</span>
-                </label>
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    name="divisions"
-                    value="C"
-                    defaultChecked
-                    className="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                  />
-                  <span className="ml-3 text-base text-gray-700">Division C (Beginner)</span>
-                </label>
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    name="divisions"
-                    value="D"
-                    className="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                  />
-                  <span className="ml-3 text-base text-gray-700">Division D (Novice)</span>
-                </label>
               </div>
-            </div>
-          </div>
+            </section>
 
-            {/* Form Actions */}
-            <div className="py-6 flex justify-center gap-3">
-            <Link
-              href="/admin/leagues"
-              className="px-5 py-2.5 text-base font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            <section>
+              <h2
+                style={{
+                  fontSize: '1.2rem',
+                  fontWeight: 600,
+                  color: '#111827',
+                  marginBottom: '1rem',
+                  textAlign: 'center',
+                }}
+              >
+                Season Timeline
+              </h2>
+              <div
+                style={{
+                  display: 'grid',
+                  gap: '1.5rem',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+                }}
+              >
+                {['startDate', 'endDate', 'registrationOpens', 'registrationCloses'].map(
+                  (field) => (
+                    <div key={field}>
+                      <label
+                        htmlFor={field}
+                        style={{
+                          display: 'block',
+                          fontSize: '0.95rem',
+                          fontWeight: 500,
+                          color: '#374151',
+                          marginBottom: '0.5rem',
+                        }}
+                      >
+                        {{
+                          startDate: 'Season Starts',
+                          endDate: 'Season Ends',
+                          registrationOpens: 'Registration Opens',
+                          registrationCloses: 'Registration Closes',
+                        }[field as keyof Record<string, string>]}
+                      </label>
+                      <input
+                        type="date"
+                        name={field}
+                        id={field}
+                        required
+                        disabled={isLoading}
+                        style={baseInputStyle}
+                        {...focusHandlers(isLoading)}
+                      />
+                    </div>
+                  )
+                )}
+              </div>
+            </section>
+
+            <section>
+              <h2
+                style={{
+                  fontSize: '1.2rem',
+                  fontWeight: 600,
+                  color: '#111827',
+                  marginBottom: '1rem',
+                  textAlign: 'center',
+                }}
+              >
+                Skill Divisions
+              </h2>
+              <p
+                style={{
+                  color: '#6b7280',
+                  fontSize: '0.9rem',
+                  marginBottom: '0.75rem',
+                  textAlign: 'center',
+                }}
+              >
+                Select at least one division. You can choose multiple options.
+              </p>
+              <div
+                style={{
+                  display: 'grid',
+                  gap: '0.75rem',
+                  maxWidth: '28rem',
+                  margin: '0 auto',
+                }}
+              >
+                {[
+                  { value: 'A', label: 'Division A (Advanced)' },
+                  { value: 'B', label: 'Division B (Intermediate)' },
+                  { value: 'C', label: 'Division C (Beginner)' },
+                  { value: 'D', label: 'Division D (Novice)' },
+                ].map((division) => (
+                  <label
+                    key={division.value}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.75rem',
+                      fontSize: '0.95rem',
+                      color: '#374151',
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      name="divisions"
+                      value={division.value}
+                      defaultChecked={division.value === 'C'}
+                      disabled={isLoading}
+                      style={{ width: '1.1rem', height: '1.1rem' }}
+                    />
+                    <span>{division.label}</span>
+                  </label>
+                ))}
+              </div>
+            </section>
+
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'flex-end',
+                gap: '0.75rem',
+              }}
             >
-              Cancel
-            </Link>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="px-5 py-2.5 text-base font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
-            >
-              {isLoading ? 'Creating...' : 'Create League'}
+              <Link
+                href="/admin/leagues"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '0.75rem 1.5rem',
+                  fontSize: '0.95rem',
+                  fontWeight: 500,
+                  color: '#1f2937',
+                  backgroundColor: 'white',
+                  border: '1px solid #d1d5db',
+                  textDecoration: 'none',
+                  transition: 'all 0.2s',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#f3f4f6';
+                  e.currentTarget.style.borderColor = '#9ca3af';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'white';
+                  e.currentTarget.style.borderColor = '#d1d5db';
+                }}
+              >
+                Cancel
+              </Link>
+              <button
+                type="submit"
+                disabled={isLoading}
+                style={{
+                  padding: '0.75rem 1.75rem',
+                  fontSize: '0.95rem',
+                  fontWeight: 600,
+                  color: 'white',
+                  backgroundColor: isLoading ? '#4b5563' : '#1f2937',
+                  border: '1px solid ' + (isLoading ? '#4b5563' : '#1f2937'),
+                  cursor: isLoading ? 'not-allowed' : 'pointer',
+                  opacity: isLoading ? 0.75 : 1,
+                  transition: 'all 0.2s',
+                }}
+                onMouseEnter={(e) => {
+                  if (!isLoading) {
+                    e.currentTarget.style.backgroundColor = '#111827';
+                    e.currentTarget.style.borderColor = '#111827';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = isLoading ? '#4b5563' : '#1f2937';
+                  e.currentTarget.style.borderColor = isLoading ? '#4b5563' : '#1f2937';
+                }}
+              >
+                {isLoading ? 'Creating...' : 'Create League'}
               </button>
             </div>
           </form>

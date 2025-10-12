@@ -23,7 +23,9 @@ export async function GET() {
         divisions: true,
         matches: {
           where: {
-            status: 'COMPLETED',
+            status: {
+              in: ['IN_PROGRESS', 'COMPLETED', 'DISPUTED'],
+            },
           },
           include: {
             games: true,
@@ -56,61 +58,90 @@ export async function GET() {
 
         // Calculate standings for each player
         const standings = divisionPlayers.map(player => {
-          const playerMatches = league.matches.filter(match =>
-            match.divisionId === division.id &&
-            (match.player1Id === player.playerId ||
-             match.player2Id === player.playerId ||
-             match.player3Id === player.playerId)
-          );
+          const playerMatches = league.matches.filter(match => {
+            if (!match.games || match.games.length === 0) {
+              return false;
+            }
+
+            const isPlayerInMatch =
+              match.player1Id === player.playerId ||
+              match.player2Id === player.playerId ||
+              match.player3Id === player.playerId;
+
+            if (!isPlayerInMatch) {
+              return false;
+            }
+
+            if (match.divisionId) {
+              return match.divisionId === division.id;
+            }
+
+            const registration = league.registrations.find(reg => reg.userId === player.playerId);
+            return registration?.divisionId === division.id;
+          });
 
           let wins = 0;
           let losses = 0;
           let gamesWon = 0;
           let gamesLost = 0;
           let pointsFor = 0;
-          let pointsAgainst = 0;
+          const pointsToWin = league.pointsToWin ?? 11;
 
           playerMatches.forEach(match => {
-            if (match.winnerId === player.playerId) {
-              wins++;
-            } else if (match.winnerId) {
-              losses++;
-            }
+            const gameWinCounts = new Map<string, number>();
+            let participatedInMatch = false;
 
             match.games.forEach(game => {
-              if (league.gameType === 'CUTTHROAT') {
-                // Handle cut-throat scoring
-                if (match.player1Id === player.playerId) {
-                  pointsFor += game.player1Score;
-                  pointsAgainst += Math.max(game.player2Score, game.player3Score || 0);
-                } else if (match.player2Id === player.playerId) {
-                  pointsFor += game.player2Score;
-                  pointsAgainst += Math.max(game.player1Score, game.player3Score || 0);
-                } else if (match.player3Id === player.playerId) {
-                  pointsFor += game.player3Score || 0;
-                  pointsAgainst += Math.max(game.player1Score, game.player2Score);
-                }
-              } else {
-                // Singles or Doubles
-                if (match.player1Id === player.playerId) {
-                  pointsFor += game.player1Score;
-                  pointsAgainst += game.player2Score;
-                  if (game.player1Score > game.player2Score) {
-                    gamesWon++;
-                  } else {
-                    gamesLost++;
-                  }
-                } else if (match.player2Id === player.playerId) {
-                  pointsFor += game.player2Score;
-                  pointsAgainst += game.player1Score;
-                  if (game.player2Score > game.player1Score) {
-                    gamesWon++;
-                  } else {
-                    gamesLost++;
-                  }
-                }
+              const entries: { id: string; score: number }[] = [
+                { id: match.player1Id, score: game.player1Score ?? 0 },
+                { id: match.player2Id, score: game.player2Score ?? 0 },
+              ];
+
+              if (league.gameType === 'CUTTHROAT' && match.player3Id) {
+                entries.push({ id: match.player3Id, score: game.player3Score ?? 0 });
               }
+
+              const winningScore = Math.max(...entries.map(entry => entry.score));
+              if (winningScore < pointsToWin) {
+                return;
+              }
+
+              const winners = entries.filter(entry => entry.score === winningScore);
+              winners.forEach(winner => {
+                gameWinCounts.set(winner.id, (gameWinCounts.get(winner.id) ?? 0) + 1);
+              });
+
+              entries.forEach(entry => {
+                if (entry.id === player.playerId) {
+                  participatedInMatch = true;
+                  pointsFor += entry.score;
+                  if (winners.some(winner => winner.id === entry.id)) {
+                    gamesWon++;
+                  } else {
+                    gamesLost++;
+                  }
+                }
+              });
             });
+
+            if (!participatedInMatch || gameWinCounts.size === 0) {
+              return;
+            }
+
+            const maxGamesWon = Math.max(...Array.from(gameWinCounts.values()));
+            const topPerformers = Array.from(gameWinCounts.entries()).filter(([, count]) => count === maxGamesWon);
+
+            if (topPerformers.length === 1) {
+              if (topPerformers[0][0] === player.playerId) {
+                wins++;
+              } else {
+                losses++;
+              }
+            } else {
+              if (!topPerformers.some(([id]) => id === player.playerId)) {
+                losses++;
+              }
+            }
           });
 
           const matches = wins + losses;
@@ -126,29 +157,26 @@ export async function GET() {
             gamesWon,
             gamesLost,
             pointsFor,
-            pointsAgainst,
           };
         });
 
         // Sort standings based on league ranking method
         if (league.rankingMethod === 'BY_POINTS') {
-          // Sort by: 1) total points scored, 2) point differential, 3) wins, 4) name (for consistency)
+          // Sort by: 1) total points scored, 2) wins, 3) games won, 4) player name
           standings.sort((a, b) => {
             if (b.pointsFor !== a.pointsFor) {
               return b.pointsFor - a.pointsFor;
             }
-            const aDiff = a.pointsFor - a.pointsAgainst;
-            const bDiff = b.pointsFor - b.pointsAgainst;
-            if (bDiff !== aDiff) {
-              return bDiff - aDiff;
-            }
             if (b.wins !== a.wins) {
               return b.wins - a.wins;
+            }
+            if (b.gamesWon !== a.gamesWon) {
+              return b.gamesWon - a.gamesWon;
             }
             return a.playerName.localeCompare(b.playerName);
           });
         } else {
-          // BY_WINS: Sort by: 1) win percentage, 2) wins, 3) point differential, 4) points for, 5) name
+          // BY_WINS: Sort by: 1) win percentage, 2) wins, 3) games won, 4) points for, 5) player name
           standings.sort((a, b) => {
             if (b.winPercentage !== a.winPercentage) {
               return b.winPercentage - a.winPercentage;
@@ -156,10 +184,8 @@ export async function GET() {
             if (b.wins !== a.wins) {
               return b.wins - a.wins;
             }
-            const aDiff = a.pointsFor - a.pointsAgainst;
-            const bDiff = b.pointsFor - b.pointsAgainst;
-            if (bDiff !== aDiff) {
-              return bDiff - aDiff;
+            if (b.gamesWon !== a.gamesWon) {
+              return b.gamesWon - a.gamesWon;
             }
             if (b.pointsFor !== a.pointsFor) {
               return b.pointsFor - a.pointsFor;

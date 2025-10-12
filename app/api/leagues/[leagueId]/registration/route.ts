@@ -5,8 +5,9 @@ import { prisma } from "@/lib/prisma";
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { leagueId: string } }
+  context: { params: Promise<{ leagueId: string }> }
 ) {
+  const { leagueId } = await context.params;
   const session = await getServerSession(authOptions);
 
   if (!session) {
@@ -21,7 +22,7 @@ export async function DELETE(
       where: {
         userId_leagueId: {
           userId: session.user.id,
-          leagueId: params.leagueId
+          leagueId
         }
       }
     });

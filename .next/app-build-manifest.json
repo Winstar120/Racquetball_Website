@@ -36,45 +36,40 @@
       "static/chunks/main-app.js",
       "static/chunks/app/api/stats/route.js"
     ],
-    "/(authenticated)/leagues/page": [
+    "/(authenticated)/admin/matches/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/(authenticated)/leagues/page.js"
+      "static/chunks/app/(authenticated)/admin/matches/page.js"
+    ],
+    "/api/admin/matches/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/admin/matches/route.js"
+    ],
+    "/(authenticated)/admin/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(authenticated)/admin/page.js"
+    ],
+    "/(authenticated)/admin/emails/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(authenticated)/admin/emails/page.js"
     ],
     "/api/leagues/route": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/api/leagues/route.js"
     ],
-    "/api/leagues/register/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/leagues/register/route.js"
-    ],
-    "/(authenticated)/matches/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/(authenticated)/matches/page.js"
-    ],
     "/api/matches/route": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/api/matches/route.js"
     ],
-    "/(authenticated)/profile/page": [
+    "/api/email/send-reminder/route": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/(authenticated)/profile/page.js"
-    ],
-    "/api/profile/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/profile/route.js"
-    ],
-    "/(authenticated)/admin/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/(authenticated)/admin/page.js"
+      "static/chunks/app/api/email/send-reminder/route.js"
     ]
   }
 }

@@ -15,7 +15,6 @@ interface StandingsEntry {
   gamesWon: number;
   gamesLost: number;
   pointsFor: number;
-  pointsAgainst: number;
 }
 
 interface LeagueStandings {
@@ -181,9 +180,6 @@ export default function Standings() {
                               }`}>
                                 Total Points
                               </th>
-                              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Point Differential
-                              </th>
                             </tr>
                           </thead>
                           <tbody className="bg-white divide-y divide-gray-200">
@@ -221,10 +217,6 @@ export default function Standings() {
                                   currentLeague.rankingMethod === 'BY_POINTS' ? 'font-semibold text-gray-900' : 'text-gray-900'
                                 }`}>
                                   {player.pointsFor}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
-                                  {player.pointsFor - player.pointsAgainst > 0 ? '+' : ''}
-                                  {player.pointsFor - player.pointsAgainst}
                                 </td>
                               </tr>
                             ))}

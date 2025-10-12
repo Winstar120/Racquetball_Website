@@ -46,14 +46,19 @@ export async function getAvailableTimeSlots(startDate: Date, endDate: Date, matc
       const [startHour, startMin] = slot.startTime.split(':').map(Number);
       const [endHour, endMin] = slot.endTime.split(':').map(Number);
 
-      // Calculate total available minutes
-      const startMinutes = startHour * 60 + startMin;
-      const endMinutes = endHour * 60 + endMin;
+      // Calculate total available minutes and normalize to 5-minute increments
+      let startMinutes = startHour * 60 + startMin;
+      let endMinutes = endHour * 60 + endMin;
+
+      const normalize = (minutes: number) => Math.round(minutes / 5) * 5;
+      startMinutes = normalize(startMinutes);
+      endMinutes = normalize(endMinutes);
 
       // Generate hourly time slots within the availability window
       for (let minutes = startMinutes; minutes + matchDuration <= endMinutes; minutes += matchDuration) {
-        const slotHour = Math.floor(minutes / 60);
-        const slotMin = minutes % 60;
+        let currentMinutes = minutes;
+        const slotHour = Math.floor(currentMinutes / 60);
+        const slotMin = currentMinutes % 60;
         const slotEndMinutes = minutes + matchDuration;
         const slotEndHour = Math.floor(slotEndMinutes / 60);
         const slotEndMin = slotEndMinutes % 60;
@@ -327,6 +332,19 @@ export async function generateLeagueSchedule(
             const [hours, minutes] = slot.startTime.split(':').map(Number);
             matchTime.setHours(hours, minutes, 0, 0);
 
+            if (matchTime > league.endDate) {
+              makeupMatches.push({
+                player1Id: group[0].id,
+                player2Id: group[1].id,
+                player3Id: group[2].id,
+                courtNumber: slot.courtNumber,
+                scheduledTime: new Date(league.endDate),
+                weekNumber: week + 1,
+                divisionId: division.id
+              });
+              continue;
+            }
+
             // Mark this slot as used for conflict detection in the same scheduling run
             const slotKey = `${matchTime.toISOString()}_court${slot.courtNumber}`;
             occupiedSlots.add(slotKey);
@@ -417,6 +435,18 @@ export async function generateLeagueSchedule(
           const matchTime = new Date(slot.date);
           const [hours, minutes] = slot.startTime.split(':').map(Number);
           matchTime.setHours(hours, minutes, 0, 0);
+
+          if (matchTime > league.endDate) {
+            makeupMatches.push({
+              player1Id: player1.id,
+              player2Id: player2.id,
+              courtNumber: slot.courtNumber,
+              scheduledTime: new Date(league.endDate),
+              weekNumber,
+              divisionId: division.id
+            });
+            continue;
+          }
 
           // Mark this slot as used for conflict detection in the same scheduling run
           const slotKey = `${matchTime.toISOString()}_court${slot.courtNumber}`;

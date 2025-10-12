@@ -3,7 +3,7 @@ import { User, Match, League, Division } from '@prisma/client';
 
 // Create reusable transporter
 const transporter = process.env.SMTP_USER && process.env.SMTP_PASSWORD
-  ? nodemailer.createTransporter({
+  ? nodemailer.createTransport({
       host: process.env.SMTP_HOST || 'smtp.gmail.com',
       port: parseInt(process.env.SMTP_PORT || '587'),
       secure: false, // true for 465, false for other ports
@@ -251,6 +251,10 @@ export async function sendScoreConfirmationRequest(
   reporterId: string,
   scores: { gameNumber: number; player1Score: number; player2Score: number; player3Score?: number; player4Score?: number }[]
 ) {
+  if (!transporter) {
+    console.warn('Email transporter not configured - skipping score confirmation email');
+    return;
+  }
   const reporter = match.player1Id === reporterId ? match.player1 : match.player2;
   const otherPlayer = match.player1Id === reporterId ? match.player2 : match.player1;
 
@@ -348,6 +352,10 @@ export async function sendLeagueRegistrationConfirmation(
   league: League & { divisions: Division[] },
   divisionId: string
 ) {
+  if (!transporter) {
+    console.warn('Email transporter not configured - skipping league registration confirmation email');
+    return;
+  }
   const division = league.divisions.find(d => d.id === divisionId);
   const subject = `Registration Confirmed - ${league.name}`;
 
@@ -421,6 +429,10 @@ export async function sendLeagueAnnouncement(
   announcementSubject: string,
   message: string
 ) {
+  if (!transporter) {
+    console.warn('Email transporter not configured - skipping league announcement emails');
+    return [];
+  }
   const subject = `${league.name} - ${announcementSubject}`;
 
   const results = [];

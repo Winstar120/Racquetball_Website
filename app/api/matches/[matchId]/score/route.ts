@@ -58,6 +58,26 @@ export async function POST(
       );
     }
 
+    const winningScore = match.league.pointsToWin ?? 11;
+
+    for (let i = 0; i < games.length; i++) {
+      const game = games[i];
+      const scores = [
+        game.player1Score,
+        game.player2Score,
+        match.player3Id ? game.player3Score : undefined,
+      ].filter((score) => typeof score === 'number');
+
+      const playersAtWinningScore = scores.filter((score) => score === winningScore);
+
+      if (playersAtWinningScore.length > 1) {
+        return NextResponse.json(
+          { error: `Game ${i + 1}: Only one player can have ${winningScore} points.` },
+          { status: 400 }
+        );
+      }
+    }
+
     // Delete existing games if updating
     if (match.games.length > 0) {
       await prisma.game.deleteMany({
@@ -117,16 +137,21 @@ function determineGameWinner(game: any, match: any): string | null {
   const { pointsToWin, winByTwo } = match.league;
 
   if (match.league.gameType === 'CUTTHROAT') {
-    // In cut-throat, lowest score wins
+    // In cut-throat, highest score wins
     const scores = [
       { id: match.player1Id, score: player1Score },
       { id: match.player2Id, score: player2Score },
-      { id: match.player3Id, score: player3Score },
-    ].filter(s => s.score !== null);
+      match.player3Id ? { id: match.player3Id, score: player3Score ?? 0 } : null,
+    ].filter((s): s is { id: string; score: number } => !!s);
 
-    const minScore = Math.min(...scores.map(s => s.score));
-    const winner = scores.find(s => s.score === minScore);
-    return winner?.id || null;
+    const maxScore = Math.max(...scores.map(s => s.score));
+    const winners = scores.filter(s => s.score === maxScore);
+
+    if (winners.length === 1) {
+      return winners[0].id;
+    }
+
+    return null;
   }
 
   // Singles or Doubles - highest score wins

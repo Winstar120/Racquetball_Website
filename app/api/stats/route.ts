@@ -20,7 +20,9 @@ export async function GET() {
           { player2Id: userId },
           { player3Id: userId },
         ],
-        status: 'COMPLETED',
+        status: {
+          in: ['IN_PROGRESS', 'COMPLETED', 'DISPUTED'],
+        },
       },
       include: {
         games: true,

@@ -40,7 +40,7 @@ interface LeagueWithRegistrations extends League {
 }
 
 export default function LeagueMembers() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const router = useRouter();
   const [leagues, setLeagues] = useState<LeagueWithRegistrations[]>([]);
   const [selectedLeague, setSelectedLeague] = useState<string>('');
@@ -50,25 +50,35 @@ export default function LeagueMembers() {
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
-    if (session?.user?.role !== 'ADMIN') {
+    if (status === 'loading') return;
+    if (!session?.user?.isAdmin) {
       router.push('/dashboard');
       return;
     }
     fetchLeaguesWithMembers();
-  }, [session, router]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status, session?.user?.isAdmin, router]);
 
   async function fetchLeaguesWithMembers() {
     try {
-      const response = await fetch('/api/admin/league-members');
-      if (!response.ok) throw new Error('Failed to fetch data');
+      const response = await fetch('/api/admin/league-members', {
+        credentials: 'include',
+        cache: 'no-store',
+      });
+      if (!response.ok) {
+        const payload = await response.json().catch(() => ({}));
+        const message = (payload as any).error ?? `Request failed with status ${response.status}`;
+        throw new Error(message);
+      }
       const data = await response.json();
       setLeagues(data.leagues || []);
+      setMessage('');
       if (data.leagues?.length > 0 && !selectedLeague) {
         setSelectedLeague(data.leagues[0].id);
       }
     } catch (error) {
       console.error('Error fetching leagues:', error);
-      setMessage('Failed to load league members');
+      setMessage(error instanceof Error ? error.message : 'Failed to load league members');
     } finally {
       setLoading(false);
     }
@@ -85,6 +95,7 @@ export default function LeagueMembers() {
     try {
       const response = await fetch(`/api/admin/league-members/${registrationId}`, {
         method: 'DELETE',
+        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -92,10 +103,10 @@ export default function LeagueMembers() {
         throw new Error(data.error || 'Failed to remove member');
       }
 
-      setMessage(` Successfully removed ${userName} from the league`);
+      setMessage(`Successfully removed ${userName} from the league`);
       await fetchLeaguesWithMembers();
     } catch (error: any) {
-      setMessage(` Error: ${error.message}`);
+      setMessage(`Error: ${error.message}`);
     } finally {
       setDeleting(null);
     }
@@ -184,14 +195,16 @@ export default function LeagueMembers() {
         padding: '2rem 1rem'
       }}>
         {message && (
-          <div style={{
-            marginBottom: '1.5rem',
-            padding: '1rem',
-            backgroundColor: message.startsWith('') ? '#d1fae5' : '#fee2e2',
-            border: `1px solid ${message.startsWith('') ? '#86efac' : '#fecaca'}`,
-            color: message.startsWith('') ? '#065f46' : '#991b1b',
-            borderRadius: '0.375rem'
-          }}>
+          <div
+            style={{
+              marginBottom: '1.5rem',
+              padding: '1rem',
+              backgroundColor: message.toLowerCase().startsWith('successfully') ? '#d1fae5' : '#fee2e2',
+              border: `1px solid ${message.toLowerCase().startsWith('successfully') ? '#86efac' : '#fecaca'}`,
+              color: message.toLowerCase().startsWith('successfully') ? '#065f46' : '#991b1b',
+              borderRadius: '0.375rem',
+            }}
+          >
             {message}
           </div>
         )}

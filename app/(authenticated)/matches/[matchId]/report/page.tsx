@@ -118,6 +118,31 @@ export default function ReportScore({ params }: { params: Promise<{ matchId: str
     setIsSaving(true);
     setError('');
 
+    if (!match) {
+      setError('Match details not loaded yet.');
+      setIsSaving(false);
+      return;
+    }
+
+    const winningScore = match.league.pointsToWin ?? 11;
+    const isCutthroatMatch = match.league.gameType === 'CUTTHROAT';
+
+    for (let i = 0; i < games.length; i++) {
+      const game = games[i];
+      const scores = [
+        game.player1Score,
+        game.player2Score,
+        isCutthroatMatch ? game.player3Score : undefined,
+      ].filter((score): score is number => typeof score === 'number');
+
+      const playersAtWinningScore = scores.filter((score) => score === winningScore);
+      if (playersAtWinningScore.length > 1) {
+        window.alert(`Game ${i + 1}: Only one player can have ${winningScore} points.`);
+        setIsSaving(false);
+        return;
+      }
+    }
+
     try {
       const response = await fetch(`/api/matches/${matchId}/score`, {
         method: 'POST',
@@ -140,8 +165,13 @@ export default function ReportScore({ params }: { params: Promise<{ matchId: str
 
   if (isLoading || !match) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div>Loading match details...</div>
+      <div style={{
+        minHeight: 'calc(100vh - 64px)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <div style={{ color: 'white', fontSize: '1.125rem' }}>Loading match details...</div>
       </div>
     );
   }
@@ -149,142 +179,344 @@ export default function ReportScore({ params }: { params: Promise<{ matchId: str
   const isCutthroat = match.league.gameType === 'CUTTHROAT';
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="bg-white shadow">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="py-6">
-            <nav className="flex" aria-label="Breadcrumb">
-              <ol className="flex items-center">
-                <li>
-                  <Link href="/matches" className="text-gray-500 hover:text-gray-700">
-                    Matches<span className="mx-2 text-gray-400">/</span>
-                  </Link>
-                </li>
-                <li>
-                  <span className="text-gray-900 font-medium">Report Score</span>
-                </li>
-              </ol>
-            </nav>
-            <h1 className="mt-2 text-2xl font-bold text-gray-900">Report Match Score</h1>
-          </div>
+    <div style={{ minHeight: 'calc(100vh - 64px)' }}>
+      <div style={{
+        backgroundColor: 'white',
+        boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
+      }}>
+        <div style={{
+          maxWidth: '80rem',
+          margin: '0 auto',
+          padding: '1.5rem 1rem'
+        }}>
+          <nav style={{ display: 'flex' }} aria-label="Breadcrumb">
+            <ol style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem'
+            }}>
+              <li>
+                <Link href="/matches" style={{
+                  color: '#6b7280',
+                  textDecoration: 'none',
+                  fontSize: '0.875rem'
+                }}>
+                  Matches
+                </Link>
+                <span style={{
+                  margin: '0 0.5rem',
+                  color: '#9ca3af'
+                }}>/</span>
+              </li>
+              <li>
+                <span style={{
+                  color: '#111827',
+                  fontWeight: '500',
+                  fontSize: '0.875rem'
+                }}>Report Score</span>
+              </li>
+            </ol>
+          </nav>
+          <h1 style={{
+            marginTop: '0.75rem',
+            fontSize: '1.75rem',
+            fontWeight: 'bold',
+            color: '#111827',
+            fontFamily: 'var(--font-playfair), Georgia, serif'
+          }}>
+            Report Match Score
+          </h1>
+          <p style={{
+            marginTop: '0.25rem',
+            color: '#6b7280',
+            fontSize: '0.975rem'
+          }}>
+            Enter the results for each game below. Scores should reflect the final points earned by each player.
+          </p>
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white shadow rounded-lg p-6">
-          <div className="mb-6">
-            <h2 className="text-lg font-medium text-gray-900 mb-2">Match Details</h2>
-            <dl className="grid grid-cols-2 gap-4 text-sm">
+      <div style={{
+        maxWidth: '80rem',
+        margin: '0 auto',
+        padding: '2rem 1rem'
+      }}>
+        <div style={{
+          backgroundColor: 'white',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+          padding: '2rem',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '1.75rem'
+        }}>
+          <div>
+            <h2 style={{
+              fontSize: '1.25rem',
+              fontWeight: '600',
+              color: '#111827',
+              marginBottom: '1rem'
+            }}>
+              Match Details
+            </h2>
+            <dl style={{
+              display: 'grid',
+              gap: '1.25rem',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+              fontSize: '0.95rem'
+            }}>
               <div>
-                <dt className="font-medium text-gray-500">League</dt>
-                <dd className="text-gray-900">{match.league.name}</dd>
+                <dt style={{ color: '#6b7280', fontWeight: 500 }}>League</dt>
+                <dd style={{ color: '#111827', marginTop: '0.25rem' }}>{match.league.name}</dd>
               </div>
               <div>
-                <dt className="font-medium text-gray-500">Game Type</dt>
-                <dd className="text-gray-900">{formatGameType(match.league.gameType)}</dd>
+                <dt style={{ color: '#6b7280', fontWeight: 500 }}>Game Type</dt>
+                <dd style={{ color: '#111827', marginTop: '0.25rem' }}>{formatGameType(match.league.gameType)}</dd>
               </div>
               <div>
-                <dt className="font-medium text-gray-500">Players</dt>
-                <dd className="text-gray-900">
+                <dt style={{ color: '#6b7280', fontWeight: 500 }}>Players</dt>
+                <dd style={{ color: '#111827', marginTop: '0.25rem' }}>
                   {match.player1.name} vs {match.player2.name}
                   {match.player3 && ` vs ${match.player3.name}`}
                 </dd>
               </div>
               <div>
-                <dt className="font-medium text-gray-500">Game Rules</dt>
-                <dd className="text-gray-900">
-                  First to {match.league.pointsToWin} points
-                  {match.league.winByTwo && ', win by 2'}
+                <dt style={{ color: '#6b7280', fontWeight: 500 }}>Game Rules</dt>
+                <dd style={{ color: '#111827', marginTop: '0.25rem' }}>
+                  First to {match.league.pointsToWin} points{match.league.winByTwo && ', win by 2'}
                 </dd>
               </div>
             </dl>
           </div>
 
           {error && (
-            <div className="mb-4 rounded-md bg-red-50 p-4 text-red-800">
+            <div style={{
+              padding: '1rem',
+              backgroundColor: '#fef2f2',
+              border: '1px solid #fecaca',
+              color: '#991b1b'
+            }}>
               {error}
             </div>
           )}
 
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium text-gray-900">Game Scores</h3>
+          <div>
+            <h3 style={{
+              fontSize: '1.1rem',
+              fontWeight: '600',
+              color: '#111827',
+              marginBottom: '1rem'
+            }}>
+              Game Scores
+            </h3>
 
-            {games.map((game, index) => (
-              <div key={index} className="border rounded-lg p-4">
-                <div className="mb-3">
-                  <h4 className="font-medium">Game {index + 1}</h4>
-                </div>
-
-                <div className={`grid ${isCutthroat ? 'grid-cols-3' : 'grid-cols-2'} gap-4`}>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      {match.player1.name}
-                    </label>
-                    <input
-                      type="number"
-                      min="0"
-                      max={match.league.pointsToWin || 15}
-                      value={game.player1Score !== undefined ? game.player1Score : ''}
-                      onChange={(e) => updateScore(index, 'player1', e.target.value)}
-                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                    />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+              {games.map((game, index) => (
+                <div key={index} style={{
+                  border: '1px solid #e5e7eb',
+                  padding: '1.5rem'
+                }}>
+                  <div style={{ marginBottom: '1rem' }}>
+                    <h4 style={{
+                      fontSize: '1rem',
+                      fontWeight: '600',
+                      color: '#111827'
+                    }}>
+                      Game {index + 1}
+                    </h4>
+                    <p style={{
+                      marginTop: '0.25rem',
+                      fontSize: '0.875rem',
+                      color: '#6b7280'
+                    }}>
+                      Record the points for each player. Only one player can reach {match.league.pointsToWin} points.
+                    </p>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      {match.player2.name}
-                    </label>
-                    <input
-                      type="number"
-                      min="0"
-                      max={match.league.pointsToWin || 15}
-                      value={game.player2Score !== undefined ? game.player2Score : ''}
-                      onChange={(e) => updateScore(index, 'player2', e.target.value)}
-                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                    />
-                  </div>
-
-                  {isCutthroat && match.player3 && (
+                  <div style={{
+                    display: 'grid',
+                    gap: '1rem',
+                    gridTemplateColumns: `repeat(${isCutthroat ? 3 : 2}, minmax(0, 1fr))`
+                  }}>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        {match.player3.name}
+                      <label style={{
+                        display: 'block',
+                        fontSize: '0.9rem',
+                        fontWeight: 500,
+                        color: '#374151',
+                        marginBottom: '0.5rem'
+                      }}>
+                        {match.player1.name}
                       </label>
                       <input
                         type="number"
                         min="0"
                         max={match.league.pointsToWin || 15}
-                        value={game.player3Score !== undefined ? game.player3Score : ''}
-                        onChange={(e) => updateScore(index, 'player3', e.target.value)}
-                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                        value={game.player1Score !== undefined ? game.player1Score : ''}
+                        onChange={(e) => updateScore(index, 'player1', e.target.value)}
+                        style={{
+                          width: '100%',
+                          padding: '0.625rem 0.75rem',
+                          border: '1px solid #d1d5db',
+                          fontSize: '1rem',
+                          outline: 'none'
+                        }}
+                        onFocus={(e) => {
+                          e.currentTarget.style.borderColor = '#111827';
+                          e.currentTarget.style.boxShadow = '0 0 0 1px #111827';
+                        }}
+                        onBlur={(e) => {
+                          e.currentTarget.style.borderColor = '#d1d5db';
+                          e.currentTarget.style.boxShadow = 'none';
+                        }}
                       />
                     </div>
-                  )}
+
+                    <div>
+                      <label style={{
+                        display: 'block',
+                        fontSize: '0.9rem',
+                        fontWeight: 500,
+                        color: '#374151',
+                        marginBottom: '0.5rem'
+                      }}>
+                        {match.player2.name}
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        max={match.league.pointsToWin || 15}
+                        value={game.player2Score !== undefined ? game.player2Score : ''}
+                        onChange={(e) => updateScore(index, 'player2', e.target.value)}
+                        style={{
+                          width: '100%',
+                          padding: '0.625rem 0.75rem',
+                          border: '1px solid #d1d5db',
+                          fontSize: '1rem',
+                          outline: 'none'
+                        }}
+                        onFocus={(e) => {
+                          e.currentTarget.style.borderColor = '#111827';
+                          e.currentTarget.style.boxShadow = '0 0 0 1px #111827';
+                        }}
+                        onBlur={(e) => {
+                          e.currentTarget.style.borderColor = '#d1d5db';
+                          e.currentTarget.style.boxShadow = 'none';
+                        }}
+                      />
+                    </div>
+
+                    {isCutthroat && match.player3 && (
+                      <div>
+                        <label style={{
+                          display: 'block',
+                          fontSize: '0.9rem',
+                          fontWeight: 500,
+                          color: '#374151',
+                          marginBottom: '0.5rem'
+                        }}>
+                          {match.player3.name}
+                        </label>
+                        <input
+                          type="number"
+                          min="0"
+                          max={match.league.pointsToWin || 15}
+                          value={game.player3Score !== undefined ? game.player3Score : ''}
+                          onChange={(e) => updateScore(index, 'player3', e.target.value)}
+                          style={{
+                            width: '100%',
+                            padding: '0.625rem 0.75rem',
+                            border: '1px solid #d1d5db',
+                            fontSize: '1rem',
+                            outline: 'none'
+                          }}
+                          onFocus={(e) => {
+                            e.currentTarget.style.borderColor = '#111827';
+                            e.currentTarget.style.boxShadow = '0 0 0 1px #111827';
+                          }}
+                          onBlur={(e) => {
+                            e.currentTarget.style.borderColor = '#d1d5db';
+                            e.currentTarget.style.boxShadow = 'none';
+                          }}
+                        />
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
 
-          <div className="mt-6 flex justify-end space-x-3">
-            <Link
-              href="/matches"
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-            >
-              Cancel
-            </Link>
-            <button
-              onClick={submitScores}
-              disabled={isSaving}
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 disabled:opacity-50"
-            >
-              {isSaving ? 'Submitting...' : 'Submit Scores'}
-            </button>
-          </div>
-
-          <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
-            <p className="text-sm text-yellow-800">
-              <strong>Note:</strong> After submitting, your opponent will need to confirm the scores.
-              Both players must confirm for the match to be marked as complete.
-            </p>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            gap: '1rem'
+          }}>
+            <div style={{
+              padding: '0.75rem 1rem',
+              backgroundColor: '#fef3c7',
+              border: '1px solid #fde68a',
+              color: '#92400e',
+              fontSize: '0.85rem'
+            }}>
+              <strong>Reminder:</strong> Opponents must confirm the reported scores before the match is finalized.
+            </div>
+            <div style={{
+              display: 'flex',
+              gap: '0.75rem'
+            }}>
+              <Link
+                href="/matches"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '0.75rem 1.5rem',
+                  fontSize: '0.95rem',
+                  fontWeight: 500,
+                  color: '#1f2937',
+                  backgroundColor: 'white',
+                  border: '1px solid #d1d5db',
+                  textDecoration: 'none',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#f3f4f6';
+                  e.currentTarget.style.borderColor = '#9ca3af';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'white';
+                  e.currentTarget.style.borderColor = '#d1d5db';
+                }}
+              >
+                Cancel
+              </Link>
+              <button
+                onClick={submitScores}
+                disabled={isSaving}
+                style={{
+                  padding: '0.75rem 1.75rem',
+                  fontSize: '0.95rem',
+                  fontWeight: 600,
+                  color: 'white',
+                  backgroundColor: isSaving ? '#4b5563' : '#1f2937',
+                  border: '1px solid #1f2937',
+                  cursor: isSaving ? 'not-allowed' : 'pointer',
+                  opacity: isSaving ? 0.7 : 1,
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => {
+                  if (!isSaving) {
+                    e.currentTarget.style.backgroundColor = '#111827';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = isSaving ? '#4b5563' : '#1f2937';
+                }}
+              >
+                {isSaving ? 'Saving...' : 'Submit Scores'}
+              </button>
+            </div>
           </div>
         </div>
       </div>

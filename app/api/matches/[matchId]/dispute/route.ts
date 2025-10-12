@@ -25,6 +25,7 @@ export async function POST(
         player2: true,
         player3: true,
         games: true,
+        league: true,
       },
     });
 
@@ -40,6 +41,25 @@ export async function POST(
 
     if (!isParticipant) {
       return NextResponse.json({ error: 'You are not a participant in this match' }, { status: 403 });
+    }
+
+    const winningScore = match.league?.pointsToWin ?? 11;
+
+    for (let i = 0; i < games.length; i++) {
+      const game = games[i];
+      const scores = [
+        game.player1Score,
+        game.player2Score,
+        match.player3Id ? game.player3Score : undefined,
+      ].filter((score: unknown): score is number => typeof score === 'number');
+
+      const playersAtWinningScore = scores.filter((score) => score === winningScore);
+      if (playersAtWinningScore.length > 1) {
+        return NextResponse.json(
+          { error: `Game ${i + 1}: Only one player can have ${winningScore} points.` },
+          { status: 400 }
+        );
+      }
     }
 
     // Save the disputed scores

@@ -24,7 +24,7 @@ interface Match {
 }
 
 export default function AdminEmails() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const router = useRouter();
   const [leagues, setLeagues] = useState<League[]>([]);
   const [upcomingMatches, setUpcomingMatches] = useState<Match[]>([]);
@@ -32,26 +32,32 @@ export default function AdminEmails() {
   const [announcementSubject, setAnnouncementSubject] = useState('');
   const [announcementMessage, setAnnouncementMessage] = useState('');
   const [sending, setSending] = useState(false);
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState<string | null>(null);
+  const [messageType, setMessageType] = useState<'success' | 'error' | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (session?.user?.role !== 'ADMIN') {
+    if (status === 'loading') return;
+    if (!session?.user?.isAdmin) {
       router.push('/dashboard');
       return;
     }
     fetchData();
-  }, [session, router]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status, session?.user?.isAdmin, router]);
 
   async function fetchData() {
     try {
       // Fetch leagues
-      const leaguesRes = await fetch('/api/leagues');
+      const leaguesRes = await fetch('/api/leagues', { credentials: 'include', cache: 'no-store' });
       const leaguesData = await leaguesRes.json();
       setLeagues(leaguesData.leagues || []);
 
       // Fetch upcoming matches
-      const matchesRes = await fetch('/api/matches?status=SCHEDULED&limit=10');
+      const matchesRes = await fetch('/api/matches?status=SCHEDULED&limit=10', {
+        credentials: 'include',
+        cache: 'no-store',
+      });
       const matchesData = await matchesRes.json();
       setUpcomingMatches(matchesData.matches || []);
     } catch (error) {
@@ -63,24 +69,28 @@ export default function AdminEmails() {
 
   async function sendMatchReminder(matchId: string) {
     setSending(true);
-    setMessage('');
+    setMessage(null);
 
     try {
       const response = await fetch('/api/email/send-reminder', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ matchId })
+        credentials: 'include',
+        body: JSON.stringify({ matchId }),
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        setMessage(` Match reminders sent successfully`);
+        setMessage('Match reminders sent successfully.');
+        setMessageType('success');
       } else {
-        setMessage(` Failed to send reminders: ${data.error}`);
+        setMessage(`Failed to send reminders: ${data.error}`);
+        setMessageType('error');
       }
     } catch (error) {
-      setMessage(' Error sending reminders');
+      setMessage('Error sending reminders.');
+      setMessageType('error');
     } finally {
       setSending(false);
     }
@@ -88,36 +98,41 @@ export default function AdminEmails() {
 
   async function sendAnnouncement() {
     if (!selectedLeague || !announcementSubject || !announcementMessage) {
-      setMessage(' Please fill in all fields');
+      setMessage('Please fill in all fields.');
+      setMessageType('error');
       return;
     }
 
     setSending(true);
-    setMessage('');
+    setMessage(null);
 
     try {
       const response = await fetch('/api/email/send-announcement', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           leagueId: selectedLeague,
           subject: announcementSubject,
-          message: announcementMessage
-        })
+          message: announcementMessage,
+        }),
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        setMessage(` Announcement sent to ${data.successful} recipients`);
+        setMessage(`Announcement sent to ${data.successful} recipients.`);
+        setMessageType('success');
         setAnnouncementSubject('');
         setAnnouncementMessage('');
         setSelectedLeague('');
       } else {
-        setMessage(` Failed to send announcement: ${data.error}`);
+        setMessage(`Failed to send announcement: ${data.error}`);
+        setMessageType('error');
       }
     } catch (error) {
-      setMessage(' Error sending announcement');
+      setMessage('Error sending announcement.');
+      setMessageType('error');
     } finally {
       setSending(false);
     }
@@ -194,14 +209,16 @@ export default function AdminEmails() {
         padding: '2rem 1rem'
       }}>
         {message && (
-          <div style={{
-            marginBottom: '1.5rem',
-            padding: '1rem',
-            backgroundColor: message.startsWith('') ? '#d1fae5' : '#fee2e2',
-            border: `1px solid ${message.startsWith('') ? '#86efac' : '#fecaca'}`,
-            color: message.startsWith('') ? '#065f46' : '#991b1b',
-            borderRadius: '0.375rem'
-          }}>
+          <div
+            style={{
+              marginBottom: '1.5rem',
+              padding: '1rem',
+              backgroundColor: messageType === 'success' ? '#d1fae5' : '#fee2e2',
+              border: `1px solid ${messageType === 'success' ? '#86efac' : '#fecaca'}`,
+              color: messageType === 'success' ? '#065f46' : '#991b1b',
+              borderRadius: '0.375rem',
+            }}
+          >
             {message}
           </div>
         )}

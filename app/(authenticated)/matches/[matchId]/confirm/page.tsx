@@ -160,19 +160,52 @@ export default function ConfirmScore({ params }: { params: Promise<{ matchId: st
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <p className="text-gray-500">Loading match details...</p>
+      <div style={{
+        minHeight: 'calc(100vh - 64px)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <p style={{ color: 'white', fontSize: '1.125rem' }}>Loading match details...</p>
       </div>
     );
   }
 
   if (!match) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-4xl mx-auto px-4 py-8">
-          <div className="bg-white shadow rounded-lg p-6">
-            <p className="text-red-600">Match not found</p>
-            <Link href="/matches" className="mt-4 text-blue-600 hover:text-blue-800">
+      <div style={{ minHeight: 'calc(100vh - 64px)' }}>
+        <div style={{
+          maxWidth: '48rem',
+          margin: '0 auto',
+          padding: '2rem 1rem'
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+            padding: '1.75rem',
+            color: '#b91c1c'
+          }}>
+            <p style={{ fontWeight: 600 }}>Match not found.</p>
+            <Link
+              href="/matches"
+              style={{
+                display: 'inline-block',
+                marginTop: '1rem',
+                color: '#1f2937',
+                textDecoration: 'none',
+                border: '1px solid #d1d5db',
+                padding: '0.5rem 1rem',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#f3f4f6';
+                e.currentTarget.style.borderColor = '#9ca3af';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'white';
+                e.currentTarget.style.borderColor = '#d1d5db';
+              }}
+            >
               Back to Matches
             </Link>
           </div>
@@ -194,98 +227,247 @@ export default function ConfirmScore({ params }: { params: Promise<{ matchId: st
   const isCutthroat = match.league.gameType === 'CUTTHROAT';
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="bg-white shadow">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="py-6">
-            <nav className="flex" aria-label="Breadcrumb">
-              <ol className="flex items-center">
-                <li className="flex items-center">
-                  <Link href="/dashboard" className="text-gray-400 hover:text-gray-500">
-                    Dashboard
-                  </Link>
-                  <span className="mx-2 text-gray-400">/</span>
-                </li>
-                <li className="flex items-center">
-                  <Link href="/matches" className="text-gray-400 hover:text-gray-500">
-                    Matches
-                  </Link>
-                  <span className="mx-2 text-gray-400">/</span>
-                </li>
-                <li>
-                  <span className="text-gray-900">Confirm Score</span>
-                </li>
-              </ol>
-            </nav>
-            <h1 className="mt-2 text-2xl font-bold text-gray-900">Confirm Match Score</h1>
-          </div>
+    <div style={{ minHeight: 'calc(100vh - 64px)' }}>
+      <div style={{
+        backgroundColor: 'white',
+        boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
+      }}>
+        <div style={{
+          maxWidth: '80rem',
+          margin: '0 auto',
+          padding: '1.5rem 1rem'
+        }}>
+          <nav style={{ display: 'flex' }} aria-label="Breadcrumb">
+            <ol style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem'
+            }}>
+              <li>
+                <Link href="/dashboard" style={{
+                  color: '#6b7280',
+                  textDecoration: 'none',
+                  fontSize: '0.875rem'
+                }}>
+                  Dashboard
+                </Link>
+                <span style={{
+                  margin: '0 0.5rem',
+                  color: '#9ca3af'
+                }}>/</span>
+              </li>
+              <li>
+                <Link href="/matches" style={{
+                  color: '#6b7280',
+                  textDecoration: 'none',
+                  fontSize: '0.875rem'
+                }}>
+                  Matches
+                </Link>
+                <span style={{
+                  margin: '0 0.5rem',
+                  color: '#9ca3af'
+                }}>/</span>
+              </li>
+              <li>
+                <span style={{
+                  color: '#111827',
+                  fontWeight: '500',
+                  fontSize: '0.875rem'
+                }}>Confirm Score</span>
+              </li>
+            </ol>
+          </nav>
+          <h1 style={{
+            marginTop: '0.75rem',
+            fontSize: '1.75rem',
+            fontWeight: 'bold',
+            color: '#111827',
+            fontFamily: 'var(--font-playfair), Georgia, serif'
+          }}>
+            Confirm Match Score
+          </h1>
+          <p style={{
+            marginTop: '0.25rem',
+            color: '#6b7280',
+            fontSize: '0.975rem'
+          }}>
+            Review the reported scores and either confirm them or submit corrected values if there is an issue.
+          </p>
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white shadow rounded-lg p-6">
+      <div style={{
+        maxWidth: '80rem',
+        margin: '0 auto',
+        padding: '2rem 1rem'
+      }}>
+        <div style={{
+          backgroundColor: 'white',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+          padding: '2rem',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '1.75rem'
+        }}>
           {error && (
-            <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded">
+            <div style={{
+              padding: '1rem',
+              backgroundColor: '#fef2f2',
+              border: '1px solid #fecaca',
+              color: '#991b1b'
+            }}>
               {error}
             </div>
           )}
 
           {!isParticipant ? (
-            <div className="text-center py-8">
-              <p className="text-gray-600 mb-4">You are not a participant in this match.</p>
-              <Link href="/matches" className="text-blue-600 hover:text-blue-800">
+            <div style={{
+              textAlign: 'center',
+              padding: '3rem 1rem',
+              color: '#6b7280'
+            }}>
+              <p style={{ marginBottom: '1.5rem', fontSize: '1.05rem' }}>
+                You are not a participant in this match.
+              </p>
+              <Link
+                href="/matches"
+                style={{
+                  color: '#1f2937',
+                  textDecoration: 'none',
+                  border: '1px solid #d1d5db',
+                  padding: '0.75rem 1.5rem',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'all 0.2s',
+                  fontWeight: 500
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#f3f4f6';
+                  e.currentTarget.style.borderColor = '#9ca3af';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'white';
+                  e.currentTarget.style.borderColor = '#d1d5db';
+                }}
+              >
                 Back to Matches
               </Link>
             </div>
           ) : alreadyConfirmed ? (
-            <div className="text-center py-8">
-              <p className="text-green-600 mb-4">You have already confirmed this score.</p>
-              <Link href="/matches" className="text-blue-600 hover:text-blue-800">
+            <div style={{
+              textAlign: 'center',
+              padding: '3rem 1rem',
+              color: '#047857'
+            }}>
+              <p style={{ marginBottom: '1.5rem', fontSize: '1.05rem', fontWeight: 600 }}>
+                You have already confirmed this score.
+              </p>
+              <Link
+                href="/matches"
+                style={{
+                  color: '#1f2937',
+                  textDecoration: 'none',
+                  border: '1px solid #d1d5db',
+                  padding: '0.75rem 1.5rem',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'all 0.2s',
+                  fontWeight: 500
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#f3f4f6';
+                  e.currentTarget.style.borderColor = '#9ca3af';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'white';
+                  e.currentTarget.style.borderColor = '#d1d5db';
+                }}
+              >
                 Back to Matches
               </Link>
             </div>
           ) : (
             <>
-              <div className="mb-6">
-                <h2 className="text-lg font-medium text-gray-900 mb-4">Match Details</h2>
-                <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div>
+                <h2 style={{
+                  fontSize: '1.25rem',
+                  fontWeight: '600',
+                  color: '#111827',
+                  marginBottom: '1rem'
+                }}>
+                  Match Details
+                </h2>
+                <dl style={{
+                  display: 'grid',
+                  gap: '1.25rem',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+                  fontSize: '0.95rem'
+                }}>
                   <div>
-                    <dt className="font-medium text-gray-500">League</dt>
-                    <dd className="text-gray-900">{match.league.name}</dd>
+                    <dt style={{ color: '#6b7280', fontWeight: 500 }}>League</dt>
+                    <dd style={{ color: '#111827', marginTop: '0.25rem' }}>{match.league.name}</dd>
                   </div>
                   <div>
-                    <dt className="font-medium text-gray-500">Players</dt>
-                    <dd className="text-gray-900">
+                    <dt style={{ color: '#6b7280', fontWeight: 500 }}>Players</dt>
+                    <dd style={{ color: '#111827', marginTop: '0.25rem' }}>
                       {match.player1.name} vs {match.player2.name}
                       {match.player3 && ` vs ${match.player3.name}`}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt style={{ color: '#6b7280', fontWeight: 500 }}>Format</dt>
+                    <dd style={{ color: '#111827', marginTop: '0.25rem' }}>
+                      {match.league.gameType} · First to {match.league.pointsToWin}{match.league.winByTwo ? ', win by 2' : ''}
                     </dd>
                   </div>
                 </dl>
               </div>
 
-              <div className="mb-6">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Reported Scores</h3>
-                <div className="space-y-2">
+              <div>
+                <h3 style={{
+                  fontSize: '1.1rem',
+                  fontWeight: '600',
+                  color: '#111827',
+                  marginBottom: '1rem'
+                }}>
+                  Reported Scores
+                </h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                   {match.games.map((game, index) => (
-                    <div key={index} className="flex items-center space-x-4 p-3 bg-gray-50 rounded">
-                      <span className="font-medium">Game {index + 1}:</span>
-                      <span>
-                        {match.player1.name}: {game.player1Score}
+                    <div
+                      key={index}
+                      style={{
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        gap: '1rem',
+                        alignItems: 'center',
+                        padding: '1rem',
+                        backgroundColor: '#f9fafb',
+                        border: '1px solid #e5e7eb'
+                      }}
+                    >
+                      <span style={{ fontWeight: 600, color: '#111827' }}>Game {index + 1}</span>
+                      <span style={{ color: '#374151' }}>
+                        {match.player1.name}: <strong>{game.player1Score}</strong>
                       </span>
-                      <span>
-                        {match.player2.name}: {game.player2Score}
+                      <span style={{ color: '#374151' }}>
+                        {match.player2.name}: <strong>{game.player2Score}</strong>
                       </span>
                       {isCutthroat && match.player3 && (
-                        <span>
-                          {match.player3.name}: {game.player3Score || 0}
+                        <span style={{ color: '#374151' }}>
+                          {match.player3.name}: <strong>{game.player3Score || 0}</strong>
                         </span>
                       )}
                     </div>
                   ))}
                 </div>
                 {match.scoreReportedBy && (
-                  <p className="mt-4 text-sm text-gray-600">
-                    Reported by: {
+                  <p style={{ marginTop: '0.75rem', fontSize: '0.875rem', color: '#6b7280' }}>
+                    Reported by:{' '}
+                    {
                       match.scoreReportedBy === match.player1.id ? match.player1.name :
                       match.scoreReportedBy === match.player2.id ? match.player2.name :
                       match.player3?.id === match.scoreReportedBy ? match.player3.name :
@@ -296,48 +478,137 @@ export default function ConfirmScore({ params }: { params: Promise<{ matchId: st
               </div>
 
               {!showDispute ? (
-                <>
-                  <div className="flex justify-between items-center">
-                    <p className="text-sm text-gray-600">
-                      By confirming, you agree that these scores are accurate.
-                    </p>
-                    <div className="space-x-3">
-                      <Link
-                        href="/matches"
-                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-                      >
-                        Cancel
-                      </Link>
-                      <button
-                        onClick={() => setShowDispute(true)}
-                        className="px-4 py-2 text-sm font-medium text-white bg-yellow-600 rounded-md hover:bg-yellow-700"
-                      >
-                        Dispute Score
-                      </button>
-                      <button
-                        onClick={confirmScore}
-                        disabled={isConfirming}
-                        className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700 disabled:opacity-50"
-                      >
-                        {isConfirming ? 'Confirming...' : 'Confirm Score'}
-                      </button>
-                    </div>
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  gap: '1rem'
+                }}>
+                  <p style={{ color: '#6b7280', fontSize: '0.9rem' }}>
+                    By confirming, you acknowledge these scores are accurate to the best of your knowledge.
+                  </p>
+                  <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+                    <Link
+                      href="/matches"
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: '0.75rem 1.5rem',
+                        fontSize: '0.95rem',
+                        fontWeight: 500,
+                        color: '#1f2937',
+                        backgroundColor: 'white',
+                        border: '1px solid #d1d5db',
+                        textDecoration: 'none',
+                        transition: 'all 0.2s'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = '#f3f4f6';
+                        e.currentTarget.style.borderColor = '#9ca3af';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = 'white';
+                        e.currentTarget.style.borderColor = '#d1d5db';
+                      }}
+                    >
+                      Cancel
+                    </Link>
+                    <button
+                      onClick={() => setShowDispute(true)}
+                      style={{
+                        padding: '0.75rem 1.5rem',
+                        fontSize: '0.95rem',
+                        fontWeight: 600,
+                        color: 'white',
+                        backgroundColor: '#ca8a04',
+                        border: '1px solid #ca8a04',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = '#b45309';
+                        e.currentTarget.style.borderColor = '#b45309';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = '#ca8a04';
+                        e.currentTarget.style.borderColor = '#ca8a04';
+                      }}
+                    >
+                      Dispute Score
+                    </button>
+                    <button
+                      onClick={confirmScore}
+                      disabled={isConfirming}
+                      style={{
+                        padding: '0.75rem 1.75rem',
+                        fontSize: '0.95rem',
+                        fontWeight: 600,
+                        color: 'white',
+                        backgroundColor: isConfirming ? '#4b5563' : '#059669',
+                        border: '1px solid ' + (isConfirming ? '#4b5563' : '#059669'),
+                        cursor: isConfirming ? 'not-allowed' : 'pointer',
+                        opacity: isConfirming ? 0.75 : 1,
+                        transition: 'all 0.2s'
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!isConfirming) {
+                          e.currentTarget.style.backgroundColor = '#047857';
+                          e.currentTarget.style.borderColor = '#047857';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = isConfirming ? '#4b5563' : '#059669';
+                        e.currentTarget.style.borderColor = isConfirming ? '#4b5563' : '#059669';
+                      }}
+                    >
+                      {isConfirming ? 'Confirming...' : 'Confirm Score'}
+                    </button>
                   </div>
-                </>
+                </div>
               ) : (
                 <>
-                  <div className="border-t pt-6 mt-6">
-                    <h3 className="text-lg font-medium text-gray-900 mb-4">Enter Correct Scores</h3>
-                    <p className="text-sm text-gray-600 mb-4">
-                      Please enter what you believe are the correct scores. Both players will be notified of the discrepancy.
+                  <div style={{ borderTop: '1px solid #e5e7eb', paddingTop: '1.5rem' }}>
+                    <h3 style={{
+                      fontSize: '1.1rem',
+                      fontWeight: '600',
+                      color: '#111827',
+                      marginBottom: '0.75rem'
+                    }}>
+                      Enter Correct Scores
+                    </h3>
+                    <p style={{
+                      fontSize: '0.9rem',
+                      color: '#6b7280',
+                      marginBottom: '1rem'
+                    }}>
+                      Provide the correct score for each game. Everyone involved in the match will be notified of the dispute.
                     </p>
-                    <div className="space-y-4">
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                       {disputedGames.map((game, index) => (
-                        <div key={index} className="border rounded-lg p-4">
-                          <h4 className="font-medium mb-3">Game {index + 1}</h4>
-                          <div className={`grid ${isCutthroat ? 'grid-cols-3' : 'grid-cols-2'} gap-4`}>
+                        <div
+                          key={index}
+                          style={{
+                            border: '1px solid #e5e7eb',
+                            padding: '1.5rem'
+                          }}
+                        >
+                          <h4 style={{ fontWeight: 600, color: '#111827', marginBottom: '1rem' }}>
+                            Game {index + 1}
+                          </h4>
+                          <div style={{
+                            display: 'grid',
+                            gap: '1rem',
+                            gridTemplateColumns: `repeat(${isCutthroat ? 3 : 2}, minmax(0, 1fr))`
+                          }}>
                             <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                              <label style={{
+                                display: 'block',
+                                fontSize: '0.9rem',
+                                fontWeight: 500,
+                                color: '#374151',
+                                marginBottom: '0.5rem'
+                              }}>
                                 {match.player1.name}
                               </label>
                               <input
@@ -346,11 +617,31 @@ export default function ConfirmScore({ params }: { params: Promise<{ matchId: st
                                 max={match.league.pointsToWin || 15}
                                 value={game.player1Score !== undefined ? game.player1Score : ''}
                                 onChange={(e) => updateDisputedScore(index, 'player1', e.target.value)}
-                                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                style={{
+                                  width: '100%',
+                                  padding: '0.625rem 0.75rem',
+                                  border: '1px solid #d1d5db',
+                                  fontSize: '1rem',
+                                  outline: 'none'
+                                }}
+                                onFocus={(e) => {
+                                  e.currentTarget.style.borderColor = '#111827';
+                                  e.currentTarget.style.boxShadow = '0 0 0 1px #111827';
+                                }}
+                                onBlur={(e) => {
+                                  e.currentTarget.style.borderColor = '#d1d5db';
+                                  e.currentTarget.style.boxShadow = 'none';
+                                }}
                               />
                             </div>
                             <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                              <label style={{
+                                display: 'block',
+                                fontSize: '0.9rem',
+                                fontWeight: 500,
+                                color: '#374151',
+                                marginBottom: '0.5rem'
+                              }}>
                                 {match.player2.name}
                               </label>
                               <input
@@ -359,12 +650,32 @@ export default function ConfirmScore({ params }: { params: Promise<{ matchId: st
                                 max={match.league.pointsToWin || 15}
                                 value={game.player2Score !== undefined ? game.player2Score : ''}
                                 onChange={(e) => updateDisputedScore(index, 'player2', e.target.value)}
-                                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                style={{
+                                  width: '100%',
+                                  padding: '0.625rem 0.75rem',
+                                  border: '1px solid #d1d5db',
+                                  fontSize: '1rem',
+                                  outline: 'none'
+                                }}
+                                onFocus={(e) => {
+                                  e.currentTarget.style.borderColor = '#111827';
+                                  e.currentTarget.style.boxShadow = '0 0 0 1px #111827';
+                                }}
+                                onBlur={(e) => {
+                                  e.currentTarget.style.borderColor = '#d1d5db';
+                                  e.currentTarget.style.boxShadow = 'none';
+                                }}
                               />
                             </div>
                             {isCutthroat && match.player3 && (
                               <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label style={{
+                                  display: 'block',
+                                  fontSize: '0.9rem',
+                                  fontWeight: 500,
+                                  color: '#374151',
+                                  marginBottom: '0.5rem'
+                                }}>
                                   {match.player3.name}
                                 </label>
                                 <input
@@ -373,7 +684,21 @@ export default function ConfirmScore({ params }: { params: Promise<{ matchId: st
                                   max={match.league.pointsToWin || 15}
                                   value={game.player3Score !== undefined ? game.player3Score : ''}
                                   onChange={(e) => updateDisputedScore(index, 'player3', e.target.value)}
-                                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                  style={{
+                                    width: '100%',
+                                    padding: '0.625rem 0.75rem',
+                                    border: '1px solid #d1d5db',
+                                    fontSize: '1rem',
+                                    outline: 'none'
+                                  }}
+                                  onFocus={(e) => {
+                                    e.currentTarget.style.borderColor = '#111827';
+                                    e.currentTarget.style.boxShadow = '0 0 0 1px #111827';
+                                  }}
+                                  onBlur={(e) => {
+                                    e.currentTarget.style.borderColor = '#d1d5db';
+                                    e.currentTarget.style.boxShadow = 'none';
+                                  }}
                                 />
                               </div>
                             )}
@@ -382,24 +707,88 @@ export default function ConfirmScore({ params }: { params: Promise<{ matchId: st
                       ))}
                     </div>
                   </div>
-                  <div className="flex justify-between items-center mt-6">
+
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    gap: '1rem',
+                    flexWrap: 'wrap'
+                  }}>
                     <button
                       onClick={() => setShowDispute(false)}
-                      className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                      style={{
+                        padding: '0.75rem 1.5rem',
+                        fontSize: '0.95rem',
+                        fontWeight: 500,
+                        color: '#1f2937',
+                        backgroundColor: 'white',
+                        border: '1px solid #d1d5db',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = '#f3f4f6';
+                        e.currentTarget.style.borderColor = '#9ca3af';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = 'white';
+                        e.currentTarget.style.borderColor = '#d1d5db';
+                      }}
                     >
                       Back
                     </button>
-                    <div className="space-x-3">
+                    <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
                       <Link
                         href="/matches"
-                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          padding: '0.75rem 1.5rem',
+                          fontSize: '0.95rem',
+                          fontWeight: 500,
+                          color: '#1f2937',
+                          backgroundColor: 'white',
+                          border: '1px solid #d1d5db',
+                          textDecoration: 'none',
+                          transition: 'all 0.2s'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = '#f3f4f6';
+                          e.currentTarget.style.borderColor = '#9ca3af';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = 'white';
+                          e.currentTarget.style.borderColor = '#d1d5db';
+                        }}
                       >
                         Cancel
                       </Link>
                       <button
                         onClick={submitDispute}
                         disabled={isDisputing}
-                        className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 disabled:opacity-50"
+                        style={{
+                          padding: '0.75rem 1.75rem',
+                          fontSize: '0.95rem',
+                          fontWeight: 600,
+                          color: 'white',
+                          backgroundColor: isDisputing ? '#4b5563' : '#dc2626',
+                          border: '1px solid ' + (isDisputing ? '#4b5563' : '#dc2626'),
+                          cursor: isDisputing ? 'not-allowed' : 'pointer',
+                          opacity: isDisputing ? 0.75 : 1,
+                          transition: 'all 0.2s'
+                        }}
+                        onMouseEnter={(e) => {
+                          if (!isDisputing) {
+                            e.currentTarget.style.backgroundColor = '#b91c1c';
+                            e.currentTarget.style.borderColor = '#b91c1c';
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = isDisputing ? '#4b5563' : '#dc2626';
+                          e.currentTarget.style.borderColor = isDisputing ? '#4b5563' : '#dc2626';
+                        }}
                       >
                         {isDisputing ? 'Submitting...' : 'Submit Dispute'}
                       </button>
