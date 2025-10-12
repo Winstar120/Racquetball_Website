@@ -5,8 +5,9 @@ import { prisma } from "@/lib/prisma";
 
 export async function POST(
   request: Request,
-  { params }: { params: { matchId: string } }
+  { params }: { params: Promise<{ matchId: string }> }
 ) {
+  const { matchId } = await params;
   const session = await getServerSession(authOptions);
 
   if (!session) {
@@ -21,7 +22,7 @@ export async function POST(
 
     // Fetch the match to verify user is a player
     const match = await prisma.match.findUnique({
-      where: { id: params.matchId },
+      where: { id: matchId },
       include: {
         games: true,
         league: true,
@@ -81,13 +82,13 @@ export async function POST(
     // Delete existing games if updating
     if (match.games.length > 0) {
       await prisma.game.deleteMany({
-        where: { matchId: params.matchId },
+        where: { matchId },
       });
     }
 
     // Create new game records
     const gameData = games.map((game: any, index: number) => ({
-      matchId: params.matchId,
+      matchId,
       gameNumber: index + 1,
       player1Score: game.player1Score,
       player2Score: game.player2Score,
@@ -118,7 +119,7 @@ export async function POST(
     }
 
     await prisma.match.update({
-      where: { id: params.matchId },
+      where: { id: matchId },
       data: updateData,
     });
 
