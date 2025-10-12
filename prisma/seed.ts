@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
@@ -66,28 +66,39 @@ async function main() {
   console.log('Created courts:', court1.name, court2.name);
 
   // Add some sample global court availability
-  const availabilitySlots = [
+  type AvailabilitySlot = {
+    dayOfWeek: number;
+    startTime: string;
+    endTime: string;
+    courtId?: string | null;
+  };
+
+  const availabilitySlots: AvailabilitySlot[] = [
     { dayOfWeek: 1, startTime: '18:00', endTime: '22:00' }, // Monday 6-10pm
     { dayOfWeek: 3, startTime: '18:00', endTime: '22:00' }, // Wednesday 6-10pm
     { dayOfWeek: 5, startTime: '18:00', endTime: '21:00' }, // Friday 6-9pm
   ];
 
   for (const slot of availabilitySlots) {
-    await prisma.globalCourtAvailability.upsert({
-      where: {
-        dayOfWeek_startTime_courtId: {
+    try {
+      await prisma.globalCourtAvailability.create({
+        data: {
           dayOfWeek: slot.dayOfWeek,
           startTime: slot.startTime,
-          courtId: null,
+          endTime: slot.endTime,
+          isActive: true,
+          ...(slot.courtId ? { courtId: slot.courtId } : {}),
         },
-      },
-      update: {},
-      create: {
-        ...slot,
-        isActive: true,
-        courtId: null,
-      },
-    });
+      });
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
+        continue;
+      }
+      throw error;
+    }
   }
 
   console.log('Created court availability slots');

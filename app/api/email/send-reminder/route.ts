@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { sendMatchReminder } from '@/lib/email';
+import { sendMatchReminder, MatchWithPlayers, EmailSendResult } from '@/lib/email';
 
 export async function POST(request: NextRequest) {
   try {
@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
 
     // Check if user is part of the match or an admin
     const userId = session.user.id;
-    const isAdmin = session.user.role === 'ADMIN';
+    const isAdmin = session.user.isAdmin;
     const isParticipant =
       match.player1Id === userId ||
       match.player2Id === userId ||
@@ -48,25 +48,26 @@ export async function POST(request: NextRequest) {
     }
 
     // Send reminders to all players
-    const results = [];
+    const results: Array<{ player: string } & EmailSendResult> = [];
+    const matchWithPlayers = match as MatchWithPlayers;
 
     if (match.player1.emailNotifications) {
-      const result = await sendMatchReminder(match as any, match.player1Id);
+      const result = await sendMatchReminder(matchWithPlayers, match.player1Id);
       results.push({ player: match.player1.name, ...result });
     }
 
     if (match.player2.emailNotifications) {
-      const result = await sendMatchReminder(match as any, match.player2Id);
+      const result = await sendMatchReminder(matchWithPlayers, match.player2Id);
       results.push({ player: match.player2.name, ...result });
     }
 
     if (match.player3 && match.player3.emailNotifications) {
-      const result = await sendMatchReminder(match as any, match.player3Id!);
+      const result = await sendMatchReminder(matchWithPlayers, match.player3Id!);
       results.push({ player: match.player3.name, ...result });
     }
 
     if (match.player4 && match.player4.emailNotifications) {
-      const result = await sendMatchReminder(match as any, match.player4Id!);
+      const result = await sendMatchReminder(matchWithPlayers, match.player4Id!);
       results.push({ player: match.player4.name, ...result });
     }
 

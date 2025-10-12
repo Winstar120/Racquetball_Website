@@ -52,16 +52,15 @@ export default function Home() {
             Premier racquetball league in Durango, Colorado
           </p>
 
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '1rem',
-            alignItems: 'center',
-            '@media (min-width: 640px)': {
-              flexDirection: 'row',
-              justifyContent: 'center'
-            }
-          }}>
+          <div
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '1rem',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
             <Link
               href="/register"
               style={{

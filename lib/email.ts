@@ -14,16 +14,23 @@ const transporter = process.env.SMTP_USER && process.env.SMTP_PASSWORD
     })
   : null;
 
-interface MatchWithPlayers extends Match {
+export interface MatchWithPlayers extends Match {
   player1: User;
   player2: User;
+  player3?: User | null;
+  player4?: User | null;
   court?: { name: string; location?: string | null } | null;
 }
 
-export async function sendMatchReminder(match: MatchWithPlayers, recipientId: string) {
+export type EmailSendResult = { success: boolean; error?: unknown; skipped?: boolean };
+
+export async function sendMatchReminder(
+  match: MatchWithPlayers,
+  recipientId: string
+): Promise<EmailSendResult> {
   if (!transporter) {
     console.warn('Email transporter not configured - skipping email');
-    return;
+    return { success: false, skipped: true, error: 'Transporter not configured' };
   }
   const recipient = match.player1Id === recipientId ? match.player1 : match.player2;
   const opponent = match.player1Id === recipientId ? match.player2 : match.player1;
@@ -236,17 +243,21 @@ export async function sendBulkMatchReminders(matches: MatchWithPlayers[]) {
     return [];
   }
 
-  const results: Array<{ success: boolean; error?: unknown }> = [];
+  const results: EmailSendResult[] = [];
 
   for (const match of matches) {
     // Send to both players
     if (match.player1.emailNotifications) {
-      const result = await sendMatchReminder(match, match.player1Id);
-      if (result) results.push(result);
+      results.push(await sendMatchReminder(match, match.player1Id));
     }
     if (match.player2.emailNotifications) {
-      const result = await sendMatchReminder(match, match.player2Id);
-      if (result) results.push(result);
+      results.push(await sendMatchReminder(match, match.player2Id));
+    }
+    if (match.player3 && match.player3Id && match.player3.emailNotifications) {
+      results.push(await sendMatchReminder(match, match.player3Id));
+    }
+    if (match.player4 && match.player4Id && match.player4.emailNotifications) {
+      results.push(await sendMatchReminder(match, match.player4Id));
     }
   }
 
