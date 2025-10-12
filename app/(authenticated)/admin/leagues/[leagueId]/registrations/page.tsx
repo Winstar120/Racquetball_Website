@@ -76,7 +76,8 @@ function focusHandlers(disabled?: boolean) {
   };
 }
 
-export default function LeagueRegistrationsPage({ params }: { params: { leagueId: string } }) {
+export default function LeagueRegistrationsPage({ params }: { params: Promise<{ leagueId: string }> }) {
+  const [leagueId, setLeagueId] = useState<string | null>(null);
   const [state, setState] = useState<
     | { kind: 'loading' }
     | { kind: 'error'; message: string }
@@ -92,13 +93,24 @@ export default function LeagueRegistrationsPage({ params }: { params: { leagueId
   const [pendingUserId, setPendingUserId] = useState<string | null>(null);
   const [removingId, setRemovingId] = useState<string | null>(null);
 
-  async function fetchRegistrations() {
+  useEffect(() => {
+    let active = true;
+    params.then((value) => {
+      if (active) setLeagueId(value.leagueId);
+    });
+    return () => {
+      active = false;
+    };
+  }, [params]);
+
+  async function fetchRegistrations(currentLeagueId: string) {
     setState({ kind: 'loading' });
     setActionError(null);
     setActionMessage(null);
     try {
-      const response = await fetch(`/api/admin/leagues/${params.leagueId}/registrations`, {
+      const response = await fetch(`/api/admin/leagues/${currentLeagueId}/registrations`, {
         credentials: 'include',
+        cache: 'no-store',
       });
       if (!response.ok) throw new Error('Failed to load registrations');
       const data: FetchResponse = await response.json();
@@ -114,9 +126,9 @@ export default function LeagueRegistrationsPage({ params }: { params: { leagueId
   }
 
   useEffect(() => {
-    fetchRegistrations();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [params.leagueId]);
+    if (!leagueId) return;
+    fetchRegistrations(leagueId);
+  }, [leagueId]);
 
   const registeredUserIds = useMemo(() => {
     if (state.kind !== 'ready') return new Set<string>();
@@ -164,11 +176,12 @@ export default function LeagueRegistrationsPage({ params }: { params: { leagueId
       setActionError('Select a division before adding a player.');
       return;
     }
+    if (!leagueId) return;
     setPendingUserId(userId);
     setActionError(null);
     setActionMessage(null);
     try {
-      const response = await fetch(`/api/admin/leagues/${params.leagueId}/registrations`, {
+      const response = await fetch(`/api/admin/leagues/${leagueId}/registrations`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -201,12 +214,13 @@ export default function LeagueRegistrationsPage({ params }: { params: { leagueId
 
   async function removeRegistration(registrationId: string) {
     if (!confirm('Remove this player from the league?')) return;
+    if (!leagueId) return;
     setRemovingId(registrationId);
     setActionError(null);
     setActionMessage(null);
     try {
       const response = await fetch(
-        `/api/admin/leagues/${params.leagueId}/registrations?registrationId=${registrationId}`,
+        `/api/admin/leagues/${leagueId}/registrations?registrationId=${registrationId}`,
         {
           method: 'DELETE',
           credentials: 'include',
@@ -318,7 +332,7 @@ export default function LeagueRegistrationsPage({ params }: { params: { leagueId
       >
         <p style={{ color: '#b91c1c', marginBottom: '1rem' }}>{state.message}</p>
         <button
-          onClick={fetchRegistrations}
+          onClick={() => leagueId && fetchRegistrations(leagueId)}
           style={{
             padding: '0.75rem 1.5rem',
             fontSize: '0.95rem',
