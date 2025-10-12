@@ -5,8 +5,9 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET(
   request: Request,
-  { params }: { params: { matchId: string } }
+  { params }: { params: Promise<{ matchId: string }> }
 ) {
+  const { matchId } = await params;
   const session = await getServerSession(authOptions);
 
   if (!session) {
@@ -18,7 +19,7 @@ export async function GET(
 
   try {
     const match = await prisma.match.findUnique({
-      where: { id: params.matchId },
+      where: { id: matchId },
       include: {
         league: true,
         player1: {
