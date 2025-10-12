@@ -231,15 +231,22 @@ export async function sendWelcomeEmail(user: User) {
 }
 
 export async function sendBulkMatchReminders(matches: MatchWithPlayers[]) {
-  const results = [];
+  if (!transporter) {
+    console.warn('Email transporter not configured - skipping match reminders');
+    return [];
+  }
+
+  const results: Array<{ success: boolean; error?: unknown }> = [];
 
   for (const match of matches) {
     // Send to both players
     if (match.player1.emailNotifications) {
-      results.push(await sendMatchReminder(match, match.player1Id));
+      const result = await sendMatchReminder(match, match.player1Id);
+      if (result) results.push(result);
     }
     if (match.player2.emailNotifications) {
-      results.push(await sendMatchReminder(match, match.player2Id));
+      const result = await sendMatchReminder(match, match.player2Id);
+      if (result) results.push(result);
     }
   }
 
