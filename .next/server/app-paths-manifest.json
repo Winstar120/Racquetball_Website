@@ -1,7 +1,7 @@
 {
+  "/api/email/send-weekly-reminders/route": "app/api/email/send-weekly-reminders/route.js",
   "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
-  "/api/stats/route": "app/api/stats/route.js",
-  "/page": "app/page.js",
-  "/login/page": "app/login/page.js",
-  "/(authenticated)/dashboard/page": "app/(authenticated)/dashboard/page.js"
+  "/api/leagues/route": "app/api/leagues/route.js",
+  "/api/admin/matches/route": "app/api/admin/matches/route.js",
+  "/(authenticated)/admin/emails/page": "app/(authenticated)/admin/emails/page.js"
 }

@@ -34,6 +34,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Match not found' }, { status: 404 });
     }
 
+    if (match.reminderSentAt) {
+      return NextResponse.json(
+        { error: 'Reminder already sent for this match.', reminderSentAt: match.reminderSentAt },
+        { status: 400 }
+      );
+    }
+
     // Check if user is part of the match or an admin
     const userId = session.user.id;
     const isAdmin = session.user.isAdmin;
@@ -71,9 +78,22 @@ export async function POST(request: NextRequest) {
       results.push({ player: match.player4.name, ...result });
     }
 
+    const successCount = results.filter(result => result.success && !result.skipped).length;
+    let reminderSentAt: Date | null = null;
+
+    if (successCount > 0) {
+      const updated = await prisma.match.update({
+        where: { id: matchId },
+        data: { reminderSentAt: new Date() },
+        select: { reminderSentAt: true }
+      });
+      reminderSentAt = updated.reminderSentAt;
+    }
+
     return NextResponse.json({
       message: 'Match reminders sent',
-      results
+      results,
+      reminderSentAt
     });
   } catch (error) {
     console.error('Error sending match reminders:', error);

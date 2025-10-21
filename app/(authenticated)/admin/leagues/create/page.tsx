@@ -18,11 +18,11 @@ const baseInputStyle: CSSProperties = {
 function focusHandlers(disabled?: boolean) {
   if (disabled) return {};
   return {
-    onFocus: (e: FocusEvent<HTMLInputElement | HTMLSelectElement>) => {
+    onFocus: (e: FocusEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
       e.currentTarget.style.borderColor = '#111827';
       e.currentTarget.style.boxShadow = '0 0 0 1px #111827';
     },
-    onBlur: (e: FocusEvent<HTMLInputElement | HTMLSelectElement>) => {
+    onBlur: (e: FocusEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
       e.currentTarget.style.borderColor = '#d1d5db';
       e.currentTarget.style.boxShadow = 'none';
     },
@@ -42,6 +42,14 @@ export default function CreateLeague() {
     setError('');
 
     const formData = new FormData(event.currentTarget);
+    const blackoutDatesRaw = formData.get('blackoutDates');
+    const blackoutDates =
+      typeof blackoutDatesRaw === 'string'
+        ? blackoutDatesRaw
+            .split(/[\n\r,]+/)
+            .map((value) => value.trim())
+            .filter(Boolean)
+        : [];
 
     const leagueData = {
       name: formData.get('name'),
@@ -67,6 +75,7 @@ export default function CreateLeague() {
       registrationOpens: formData.get('registrationOpens'),
       registrationCloses: formData.get('registrationCloses'),
       divisions: formData.getAll('divisions'),
+      blackoutDates,
     };
 
     try {
@@ -580,6 +589,46 @@ export default function CreateLeague() {
                     </div>
                   )
                 )}
+              </div>
+            </section>
+
+            <section>
+              <h2
+                style={{
+                  fontSize: '1.2rem',
+                  fontWeight: 600,
+                  color: '#111827',
+                  marginBottom: '1rem',
+                  textAlign: 'center',
+                }}
+              >
+                Holiday Blackouts
+              </h2>
+              <div
+                style={{
+                  maxWidth: '28rem',
+                  margin: '0 auto',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.75rem',
+                }}
+              >
+                <p style={{ color: '#6b7280', fontSize: '0.9rem', textAlign: 'center' }}>
+                  List any dates to skip when generating the schedule. Enter one date per line or
+                  separate with commas.
+                </p>
+                <textarea
+                  name="blackoutDates"
+                  id="blackoutDates"
+                  placeholder={`2024-11-28\n2024-12-24`}
+                  rows={4}
+                  disabled={isLoading}
+                  style={{ ...baseInputStyle, resize: 'vertical', minHeight: '7rem' }}
+                  {...focusHandlers(isLoading)}
+                />
+                <p style={{ color: '#9ca3af', fontSize: '0.8rem', textAlign: 'center' }}>
+                  Use the YYYY-MM-DD format. Leave blank if no blackout dates are needed.
+                </p>
               </div>
             </section>
 

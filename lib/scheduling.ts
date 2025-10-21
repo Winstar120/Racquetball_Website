@@ -24,8 +24,19 @@ interface ScheduledMatch {
   divisionId?: string;
 }
 
+function toDateKey(date: Date) {
+  const normalized = new Date(date);
+  normalized.setHours(0, 0, 0, 0);
+  return normalized.toISOString().slice(0, 10);
+}
+
 // Helper function to get all available time slots for a date range
-export async function getAvailableTimeSlots(startDate: Date, endDate: Date, matchDuration: number = 60) {
+export async function getAvailableTimeSlots(
+  startDate: Date,
+  endDate: Date,
+  matchDuration: number = 60,
+  blackoutDates: Date[] = []
+) {
   const globalAvailability = await prisma.globalCourtAvailability.findMany({
     where: { isActive: true },
     orderBy: [
@@ -35,9 +46,18 @@ export async function getAvailableTimeSlots(startDate: Date, endDate: Date, matc
   });
 
   const timeSlots: { date: Date; courtNumber: number; startTime: string; endTime: string }[] = [];
+  const blackoutSet = new Set(blackoutDates.map(toDateKey));
   const currentDate = new Date(startDate);
+  currentDate.setHours(0, 0, 0, 0);
+  const endDateNormalized = new Date(endDate);
+  endDateNormalized.setHours(0, 0, 0, 0);
 
-  while (currentDate <= endDate) {
+  while (currentDate <= endDateNormalized) {
+    if (blackoutSet.has(toDateKey(currentDate))) {
+      currentDate.setDate(currentDate.getDate() + 1);
+      continue;
+    }
+
     const dayOfWeek = currentDate.getDay();
     const daySlots = globalAvailability.filter(slot => slot.dayOfWeek === dayOfWeek);
 
@@ -243,7 +263,12 @@ export async function generateLeagueSchedule(
   const makeupMatches: ScheduledMatch[] = [];
 
   // Get all available time slots
-  const allTimeSlots = await getAvailableTimeSlots(league.startDate, league.endDate, matchDuration);
+  const allTimeSlots = await getAvailableTimeSlots(
+    league.startDate,
+    league.endDate,
+    matchDuration,
+    league.blackoutDates || []
+  );
 
   // Get existing matches from ALL leagues that might conflict
   // IMPORTANT: Exclude matches from the current league to allow regenerating previews

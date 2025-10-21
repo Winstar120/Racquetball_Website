@@ -15,11 +15,21 @@ export async function POST(request: Request) {
 
   try {
     const data = await request.json();
-    const { name, gameType, rankingMethod, pointsToWin, winByTwo, isFree, leagueFee, playersPerMatch, matchDuration, weeksForCutthroat, startDate, endDate, registrationOpens, registrationCloses, divisions } = data;
+    const { name, description, gameType, rankingMethod, pointsToWin, winByTwo, isFree, leagueFee, playersPerMatch, matchDuration, weeksForCutthroat, startDate, endDate, registrationOpens, registrationCloses, divisions, blackoutDates } = data;
+
+    const blackoutDatesArray = Array.isArray(blackoutDates)
+      ? blackoutDates
+      : typeof blackoutDates === "string" && blackoutDates.length > 0
+      ? [blackoutDates]
+      : [];
+    const parsedBlackoutDates = blackoutDatesArray
+      .map((date: string) => new Date(date))
+      .filter((date) => !Number.isNaN(date.getTime()));
 
     const league = await prisma.league.create({
       data: {
         name,
+        description: typeof description === 'string' && description.trim().length > 0 ? description.trim() : null,
         gameType: gameType || 'SINGLES',
         rankingMethod: rankingMethod || 'BY_WINS',
         pointsToWin: pointsToWin || 15,
@@ -33,6 +43,7 @@ export async function POST(request: Request) {
         endDate: new Date(endDate),
         registrationOpens: new Date(registrationOpens),
         registrationCloses: new Date(registrationCloses),
+        blackoutDates: parsedBlackoutDates,
         status: 'UPCOMING',
       },
     });

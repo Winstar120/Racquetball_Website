@@ -21,6 +21,8 @@ interface Match {
   player3?: { name: string; email: string };
   player4?: { name: string; email: string };
   league: { name: string };
+  court?: { name: string | null } | null;
+  reminderSentAt?: string | null;
 }
 
 export default function AdminEmails() {
@@ -54,7 +56,7 @@ export default function AdminEmails() {
       setLeagues(leaguesData.leagues || []);
 
       // Fetch upcoming matches
-      const matchesRes = await fetch('/api/matches?status=SCHEDULED&limit=10', {
+      const matchesRes = await fetch('/api/admin/matches?status=SCHEDULED&limit=10', {
         credentials: 'include',
         cache: 'no-store',
       });
@@ -82,8 +84,16 @@ export default function AdminEmails() {
       const data = await response.json();
 
       if (response.ok) {
+        const { reminderSentAt: sentAt } = data;
         setMessage('Match reminders sent successfully.');
         setMessageType('success');
+        if (sentAt) {
+          setUpcomingMatches((prev) =>
+            prev.map((match) =>
+              match.id === matchId ? { ...match, reminderSentAt: sentAt } : match
+            )
+          );
+        }
       } else {
         setMessage(`Failed to send reminders: ${data.error}`);
         setMessageType('error');
@@ -404,21 +414,27 @@ export default function AdminEmails() {
                       {match.player3 && ` vs ${match.player3.name}`}
                       {match.player4 && ` & ${match.player4.name}`}
                     </div>
+                    <div style={{ fontSize: '0.75rem', color: '#047857', marginBottom: '0.5rem' }}>
+                      {match.reminderSentAt
+                        ? `Reminder sent on ${new Date(match.reminderSentAt).toLocaleString()}`
+                        : 'Reminder not sent yet'}
+                    </div>
                     <button
                       onClick={() => sendMatchReminder(match.id)}
-                      disabled={sending}
+                      disabled={sending || Boolean(match.reminderSentAt)}
                       style={{
                         padding: '0.5rem 1rem',
-                        backgroundColor: sending ? '#9ca3af' : '#10b981',
+                        backgroundColor:
+                          sending || match.reminderSentAt ? '#9ca3af' : '#10b981',
                         color: 'white',
                         borderRadius: '0.375rem',
                         fontSize: '0.75rem',
                         fontWeight: '500',
                         border: 'none',
-                        cursor: sending ? 'not-allowed' : 'pointer'
+                        cursor: sending || match.reminderSentAt ? 'not-allowed' : 'pointer'
                       }}
                     >
-                      Send Reminder
+                      {match.reminderSentAt ? 'Reminder Sent' : 'Send Reminder'}
                     </button>
                   </div>
                 ))
@@ -455,10 +471,11 @@ export default function AdminEmails() {
             fontSize: '0.875rem',
             color: '#1e40af'
           }}>
-            <li>EMAIL_HOST (e.g., smtp.gmail.com)</li>
-            <li>EMAIL_PORT (e.g., 587)</li>
-            <li>EMAIL_USER (your email address)</li>
-            <li>EMAIL_PASSWORD (your email password or app-specific password)</li>
+            <li>SMTP_HOST (e.g., smtp.gmail.com)</li>
+            <li>SMTP_PORT (e.g., 587)</li>
+            <li>SMTP_USER (email account username)</li>
+            <li>SMTP_PASSWORD (email password or app-specific password)</li>
+            <li>SMTP_FROM (optional friendly from address)</li>
           </ul>
         </div>
       </div>

@@ -533,6 +533,15 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
   type __Unused = __Check
 }
 
+// Validate ../../app/api/debug/reset-admin/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/debug/reset-admin">> = Specific
+  const handler = {} as typeof import("../../app/api/debug/reset-admin/route.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
 // Validate ../../app/api/email/send-announcement/route.ts
 {
   type __IsExpected<Specific extends RouteHandlerConfig<"/api/email/send-announcement">> = Specific
@@ -546,6 +555,15 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
 {
   type __IsExpected<Specific extends RouteHandlerConfig<"/api/email/send-reminder">> = Specific
   const handler = {} as typeof import("../../app/api/email/send-reminder/route.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../app/api/email/send-weekly-reminders/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/email/send-weekly-reminders">> = Specific
+  const handler = {} as typeof import("../../app/api/email/send-weekly-reminders/route.js")
   type __Check = __IsExpected<typeof handler>
   // @ts-ignore
   type __Unused = __Check

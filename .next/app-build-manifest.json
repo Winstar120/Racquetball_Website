@@ -1,40 +1,40 @@
 {
   "pages": {
-    "/layout": [
+    "/api/email/send-weekly-reminders/route": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/css/app/layout.css",
-      "static/chunks/app/layout.js"
-    ],
-    "/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/page.js"
+      "static/chunks/app/api/email/send-weekly-reminders/route.js"
     ],
     "/api/auth/[...nextauth]/route": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/api/auth/[...nextauth]/route.js"
     ],
-    "/login/page": [
+    "/layout": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/login/page.js"
+      "static/css/app/layout.css",
+      "static/chunks/app/layout.js"
     ],
     "/(authenticated)/layout": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/(authenticated)/layout.js"
     ],
-    "/(authenticated)/dashboard/page": [
+    "/(authenticated)/admin/emails/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/(authenticated)/dashboard/page.js"
+      "static/chunks/app/(authenticated)/admin/emails/page.js"
     ],
-    "/api/stats/route": [
+    "/api/leagues/route": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/api/stats/route.js"
+      "static/chunks/app/api/leagues/route.js"
+    ],
+    "/api/admin/matches/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/admin/matches/route.js"
     ]
   }
 }

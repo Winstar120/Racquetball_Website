@@ -169,7 +169,7 @@ export async function sendWelcomeEmail(user: User) {
     console.warn('Email transporter not configured - skipping email');
     return;
   }
-  const subject = 'Welcome to Racquetball League!';
+  const subject = 'Welcome to the Durango Racquetball League!';
 
   const htmlContent = `
     <!DOCTYPE html>
@@ -186,7 +186,7 @@ export async function sendWelcomeEmail(user: User) {
     <body>
       <div class="container">
         <div class="header">
-          <h1 style="margin: 0;">Welcome to Racquetball League!</h1>
+          <h1 style="margin: 0;">Welcome to the Durango Racquetball League!</h1>
         </div>
 
         <div class="content">
@@ -214,7 +214,7 @@ export async function sendWelcomeEmail(user: User) {
           <p style="margin-top: 30px;">If you have any questions, feel free to reach out to us.</p>
 
           <p>See you on the court!</p>
-          <p>- The Racquetball League Team</p>
+          <p>- The Durango Racquetball League Team</p>
         </div>
       </div>
     </body>

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
-// import { sendWelcomeEmail } from "@/lib/email";
+import { sendWelcomeEmail } from "@/lib/email";
 
 export async function POST(request: Request) {
   try {
@@ -38,11 +38,10 @@ export async function POST(request: Request) {
 
     const { password: _, ...userWithoutPassword } = user;
 
-    // Temporarily disabled email sending until SMTP is configured
-    // Send welcome email (don't wait for it to complete)
-    // sendWelcomeEmail(user).catch(error => {
-    //   console.error("Failed to send welcome email:", error);
-    // });
+    // Send welcome email (fire-and-forget so registration response is fast)
+    sendWelcomeEmail(user).catch(error => {
+      console.error("Failed to send welcome email:", error);
+    });
 
     return NextResponse.json({
       message: "User created successfully",

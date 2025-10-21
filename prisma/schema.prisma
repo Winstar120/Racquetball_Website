@@ -43,6 +43,7 @@ model Session {
 model League {
   id                String   @id @default(cuid())
   name              String
+  description       String?
   gameType          GameType @default(SINGLES)
   rankingMethod     RankingMethod @default(BY_WINS)
   startDate         DateTime
@@ -57,6 +58,7 @@ model League {
   playersPerMatch   Int      @default(2)  // 2 for singles, 3 for cut-throat, 4 for doubles
   matchDuration     Int      @default(45) // minutes per match including 5min warmup
   weeksForCutthroat Int?     // number of weeks for cut-throat leagues
+  blackoutDates     DateTime[] @default([])
   scheduleGenerated Boolean  @default(false)
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
@@ -150,6 +152,7 @@ model Match {
   actualTime    DateTime?
   isMakeup      Boolean  @default(false) // True if this is a makeup match
   status        MatchStatus @default(SCHEDULED)
+  reminderSentAt DateTime?
 
   // Score tracking - supports multiple games
   games         Game[]

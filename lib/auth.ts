@@ -4,6 +4,21 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 
+const resolvedDatabaseUrlPrefix = () => {
+  const value =
+    process.env.DATABASE_URL ??
+    process.env.POSTGRES_PRISMA_URL ??
+    process.env.POSTGRES_URL ??
+    process.env.POSTGRES_URL_NON_POOLING ??
+    process.env.PRISMA_DATABASE_URL
+
+  if (!value) return 'undefined'
+  if (value.startsWith('postgres')) return 'postgres'
+  if (value.startsWith('prisma+')) return 'prisma+'
+  if (value.startsWith('file:')) return 'file'
+  return value.slice(0, 10)
+}
+
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma) as any,
   session: {
@@ -22,21 +37,51 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
+        console.log('Auth authorize invoked', {
+          email: credentials?.email
+        })
+
         if (!credentials?.email || !credentials?.password) {
+          console.log('Auth authorize: missing credentials')
           return null;
         }
 
-        const user = await prisma.user.findUnique({
-          where: {
-            email: credentials.email
-          }
-        });
+        console.log('Auth authorize env snapshot', {
+          hasDatabaseUrl: !!process.env.DATABASE_URL,
+          hasPostgresPrisma: !!process.env.POSTGRES_PRISMA_URL,
+          resolvedDatabaseUrlPrefix: resolvedDatabaseUrlPrefix()
+        })
+
+        let user
+        try {
+          user = await prisma.user.findUnique({
+            where: {
+              email: credentials.email
+            }
+          })
+        } catch (error) {
+          console.error('Auth authorize: error fetching user', {
+            email: credentials.email,
+            message: (error as Error).message
+          })
+          throw error
+        }
 
         if (!user || !user.password) {
+          console.log('Auth authorize: user not found or missing password', {
+            email: credentials.email,
+            found: !!user,
+            hasPassword: !!user?.password
+          });
           return null;
         }
 
         const passwordMatch = await bcrypt.compare(credentials.password, user.password);
+
+        console.log('Auth authorize: password comparison result', {
+          email: user.email,
+          passwordMatch
+        });
 
         if (!passwordMatch) {
           return null;

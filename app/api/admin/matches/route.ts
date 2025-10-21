@@ -15,6 +15,9 @@ export async function GET(request: NextRequest) {
     const leagueId = searchParams.get('leagueId');
     const status = searchParams.get('status') || 'all';
     const search = searchParams.get('search') || '';
+    const limitParam = searchParams.get('limit');
+    const limit = limitParam ? parseInt(limitParam, 10) : undefined;
+    const effectiveLimit = Number.isFinite(limit) && limit! > 0 ? limit : undefined;
 
     // Build where clause
     const where: any = {};
@@ -25,6 +28,9 @@ export async function GET(request: NextRequest) {
 
     if (status !== 'all') {
       where.status = status;
+      if (status === 'SCHEDULED') {
+        where.scheduledTime = { gte: new Date() };
+      }
     }
 
     if (search) {
@@ -60,8 +66,9 @@ export async function GET(request: NextRequest) {
         }
       },
       orderBy: {
-        scheduledTime: 'desc'
-      }
+        scheduledTime: status === 'SCHEDULED' ? 'asc' : 'desc'
+      },
+      take: effectiveLimit
     });
 
     // Get all leagues for filter dropdown
