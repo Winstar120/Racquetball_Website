@@ -57,6 +57,8 @@ export async function GET(
       registrations: division.registrations.length,
     }));
 
+    const numberOfGames = (league as any).numberOfGames ?? 3;
+
     return NextResponse.json({
       league: {
         id: league.id,
@@ -65,7 +67,7 @@ export async function GET(
         gameType: league.gameType,
         rankingMethod: league.rankingMethod,
         pointsToWin: league.pointsToWin,
-        numberOfGames: league.numberOfGames,
+        numberOfGames,
         matchDuration: league.matchDuration,
         weeksForCutthroat: league.weeksForCutthroat,
         startDate: league.startDate,
