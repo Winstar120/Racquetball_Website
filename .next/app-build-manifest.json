@@ -1,15 +1,5 @@
 {
   "pages": {
-    "/api/email/send-weekly-reminders/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/email/send-weekly-reminders/route.js"
-    ],
-    "/api/auth/[...nextauth]/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/auth/[...nextauth]/route.js"
-    ],
     "/layout": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
@@ -21,20 +11,20 @@
       "static/chunks/main-app.js",
       "static/chunks/app/(authenticated)/layout.js"
     ],
-    "/(authenticated)/admin/emails/page": [
+    "/(authenticated)/leagues/[leagueId]/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/(authenticated)/admin/emails/page.js"
+      "static/chunks/app/(authenticated)/leagues/[leagueId]/page.js"
     ],
-    "/api/leagues/route": [
+    "/api/auth/[...nextauth]/route": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/api/leagues/route.js"
+      "static/chunks/app/api/auth/[...nextauth]/route.js"
     ],
-    "/api/admin/matches/route": [
+    "/api/leagues/[leagueId]/route": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/api/admin/matches/route.js"
+      "static/chunks/app/api/leagues/[leagueId]/route.js"
     ]
   }
 }

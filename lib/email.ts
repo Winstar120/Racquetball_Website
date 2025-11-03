@@ -1,5 +1,6 @@
 import nodemailer from 'nodemailer';
-import { User, Match, League, Division } from '@prisma/client';
+import { User, Match, League, Division, EmailType, EmailStatus } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 
 // Create reusable transporter
 const transporter = process.env.SMTP_USER && process.env.SMTP_PASSWORD
@@ -20,16 +21,146 @@ export interface MatchWithPlayers extends Match {
   player3?: User | null;
   player4?: User | null;
   court?: { name: string; location?: string | null } | null;
+  league?: League | null;
 }
 
 export type EmailSendResult = { success: boolean; error?: unknown; skipped?: boolean };
+
+async function recordEmailLog(params: {
+  matchId?: string | null;
+  recipientId: string;
+  type: EmailType;
+  status: EmailStatus;
+  error?: unknown;
+}) {
+  try {
+    await prisma.emailLog.create({
+      data: {
+        matchId: params.matchId ?? null,
+        recipientId: params.recipientId,
+        type: params.type,
+        status: params.status,
+        error: params.error ? (params.error instanceof Error ? params.error.message : String(params.error)) : null,
+      },
+    });
+  } catch (logError) {
+    console.error('Failed to record email log', logError);
+  }
+}
+
+export async function sendPasswordResetEmail(
+  user: User,
+  resetUrl: string
+): Promise<EmailSendResult> {
+  const logBase = {
+    matchId: null,
+    recipientId: user.id,
+    type: EmailType.PASSWORD_RESET,
+  };
+
+  if (!transporter) {
+    console.warn('Email transporter not configured - skipping password reset email');
+    await recordEmailLog({
+      ...logBase,
+      status: EmailStatus.SKIPPED,
+      error: 'Transporter not configured',
+    });
+    return { success: false, skipped: true, error: 'Transporter not configured' };
+  }
+
+  const subject = 'Reset Your Racquetball League Password';
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #111827; background-color: #f9fafb; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 0 auto; padding: 24px; background-color: #ffffff; }
+        .header { text-align: center; padding-bottom: 16px; border-bottom: 1px solid #e5e7eb; }
+        .header h1 { margin: 0; font-size: 24px; color: #111827; }
+        .content { padding: 24px 0; }
+        .button { display: inline-block; padding: 12px 24px; margin: 16px 0; background-color: #2563eb; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600; }
+        .footer { font-size: 12px; color: #6b7280; margin-top: 24px; border-top: 1px solid #e5e7eb; padding-top: 16px; }
+        .reset-link { word-break: break-all; color: #2563eb; text-decoration: none; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1>Password Reset Requested</h1>
+        </div>
+        <div class="content">
+          <p>Hi ${user.name || 'there'},</p>
+          <p>We received a request to reset the password for your Racquetball League account. If you made this request, click the button below to choose a new password:</p>
+          <p style="text-align: center;">
+            <a class="button" href="${resetUrl}">Reset Password</a>
+          </p>
+          <p>If the button doesn't work, copy and paste this link into your browser:</p>
+          <p><a class="reset-link" href="${resetUrl}">${resetUrl}</a></p>
+          <p>This link will expire in 1 hour. If you did not request a password reset, you can safely ignore this email.</p>
+        </div>
+        <div class="footer">
+          <p>You are receiving this email because a password reset was requested for your account.</p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  const textContent = `
+Password Reset Requested
+
+Hi ${user.name || 'there'},
+
+We received a request to reset the password for your Racquetball League account. If you made this request, use the link below to choose a new password:
+${resetUrl}
+
+This link will expire in 1 hour. If you did not request a password reset, you can safely ignore this email.
+  `;
+
+  try {
+    await transporter.sendMail({
+      from: `"Racquetball League" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
+      to: user.email,
+      subject,
+      text: textContent,
+      html: htmlContent,
+    });
+
+    await recordEmailLog({
+      ...logBase,
+      status: EmailStatus.SENT,
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to send password reset email:', error);
+    await recordEmailLog({
+      ...logBase,
+      status: EmailStatus.FAILED,
+      error,
+    });
+    return { success: false, error };
+  }
+}
 
 export async function sendMatchReminder(
   match: MatchWithPlayers,
   recipientId: string
 ): Promise<EmailSendResult> {
+  const logBase = {
+    matchId: match.id,
+    recipientId,
+    type: EmailType.MATCH_REMINDER,
+  };
+
   if (!transporter) {
     console.warn('Email transporter not configured - skipping email');
+    await recordEmailLog({
+      ...logBase,
+      status: EmailStatus.SKIPPED,
+      error: 'Transporter not configured',
+    });
     return { success: false, skipped: true, error: 'Transporter not configured' };
   }
   const recipient = match.player1Id === recipientId ? match.player1 : match.player2;
@@ -157,11 +288,156 @@ If you need to cancel or reschedule, please contact your opponent directly and n
     });
 
     console.log(`Match reminder sent to ${recipient.email}`);
+    await recordEmailLog({
+      ...logBase,
+      status: EmailStatus.SENT,
+    });
     return { success: true };
   } catch (error) {
     console.error('Error sending email:', error);
+    await recordEmailLog({
+      ...logBase,
+      status: EmailStatus.FAILED,
+      error,
+    });
     return { success: false, error };
   }
+}
+
+export async function sendMakeupMatchNotification(
+  match: MatchWithPlayers
+): Promise<EmailSendResult[]> {
+  const participants: User[] = [
+    match.player1,
+    match.player2,
+    match.player3 ?? undefined,
+    match.player4 ?? undefined,
+  ].filter(Boolean) as User[];
+
+  const recipients = participants.filter((player) => player.emailNotifications);
+
+  if (recipients.length === 0) {
+    return [];
+  }
+
+  if (!transporter) {
+    await Promise.all(
+      recipients.map((recipient) =>
+        recordEmailLog({
+          matchId: match.id,
+          recipientId: recipient.id,
+          type: EmailType.MAKEUP_NOTICE,
+          status: EmailStatus.SKIPPED,
+          error: 'Transporter not configured',
+        })
+      )
+    );
+    return recipients.map(() => ({
+      success: false,
+      skipped: true,
+      error: 'Transporter not configured',
+    }));
+  }
+
+  const results: EmailSendResult[] = [];
+
+  for (const recipient of recipients) {
+    const opponents = participants.filter((player) => player.id !== recipient.id);
+    const opponentNames = opponents.map((player) => player.name).join(', ');
+
+    const subject = `Action Needed: Schedule your match vs ${opponentNames}`;
+
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background-color: #f59e0b; color: white; padding: 20px; border-radius: 8px 8px 0 0; }
+          .content { background-color: #f9fafb; padding: 20px; border: 1px solid #e5e7eb; border-radius: 0 0 8px 8px; }
+          .match-details { background-color: white; padding: 15px; border-radius: 8px; margin: 20px 0; border: 1px solid #fbbf24; }
+          .footer { margin-top: 20px; padding-top: 20px; border-top: 1px solid #e5e7eb; font-size: 14px; color: #6b7280; }
+          .button { display: inline-block; padding: 12px 24px; background-color: #2563eb; color: white; text-decoration: none; border-radius: 5px; margin-top: 15px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1 style="margin: 0;">Court Availability Update</h1>
+          </div>
+          <div class="content">
+            <p>Hi ${recipient.name},</p>
+            <p>We couldn’t automatically reserve a court for your upcoming match in the ${match.league?.name ?? 'league'}.</p>
+            <div class="match-details">
+              <p><strong>Your Opponent(s):</strong> ${opponentNames}</p>
+              <p><strong>Next Steps:</strong></p>
+              <ul>
+                <li>Coordinate directly with your opponent(s) to pick a day and time.</li>
+                <li>Reserve an available court through the front desk.</li>
+                <li>Update the league administrator once you’ve agreed on a time.</li>
+              </ul>
+            </div>
+            <p>If you need assistance or a suggested time slot, reply to this email or contact the league administrator.</p>
+            <div class="footer">
+              <p>Thank you for being flexible—we appreciate your help in keeping the league running smoothly.</p>
+            </div>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    const textContent = `
+Court Availability Update
+
+Hi ${recipient.name},
+
+We couldn’t automatically reserve a court for your upcoming match in the ${match.league?.name ?? 'league'}.
+
+Opponent(s): ${opponentNames}
+
+Next Steps:
+- Coordinate directly with your opponent(s) to pick a day and time.
+- Reserve an available court through the front desk.
+- Let the league administrator know once the match is scheduled.
+
+If you need assistance, reply to this email or contact the league administrator.
+`;
+
+    const logBase = {
+      matchId: match.id,
+      recipientId: recipient.id,
+      type: EmailType.MAKEUP_NOTICE,
+    };
+
+    try {
+      await transporter.sendMail({
+        from: `"Racquetball League" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
+        to: recipient.email,
+        subject,
+        text: textContent,
+        html: htmlContent,
+      });
+
+      console.log(`Makeup match notification sent to ${recipient.email}`);
+      await recordEmailLog({
+        ...logBase,
+        status: EmailStatus.SENT,
+      });
+      results.push({ success: true });
+    } catch (error) {
+      console.error('Error sending makeup match notification:', error);
+      await recordEmailLog({
+        ...logBase,
+        status: EmailStatus.FAILED,
+        error,
+      });
+      results.push({ success: false, error });
+    }
+  }
+
+  return results;
 }
 
 export async function sendWelcomeEmail(user: User) {
@@ -376,6 +652,11 @@ export async function sendLeagueRegistrationConfirmation(
   }
   const division = league.divisions.find(d => d.id === divisionId);
   const subject = `Registration Confirmed - ${league.name}`;
+  const formatLeagueDate = (value: Date | string | null | undefined) => {
+    if (!value) return 'Pending';
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? 'Pending' : parsed.toLocaleDateString();
+  };
 
   const htmlContent = `
     <!DOCTYPE html>
@@ -405,8 +686,8 @@ export async function sendLeagueRegistrationConfirmation(
             <h3 style="margin-top: 0; color: #10b981;">League Details</h3>
             <p><strong>League:</strong> ${league.name}</p>
             <p><strong>Division:</strong> ${division?.name || 'TBD'}</p>
-            <p><strong>Start Date:</strong> ${new Date(league.startDate).toLocaleDateString()}</p>
-            <p><strong>End Date:</strong> ${new Date(league.endDate).toLocaleDateString()}</p>
+            <p><strong>Start Date:</strong> ${formatLeagueDate(league.startDate)}</p>
+            <p><strong>End Date:</strong> ${formatLeagueDate(league.endDate)}</p>
             <p><strong>Game Type:</strong> ${league.gameType}</p>
             <p><strong>League Fee:</strong> ${league.isFree ? 'FREE' : `$${league.leagueFee?.toFixed(2) || '0.00'}`}</p>
           </div>

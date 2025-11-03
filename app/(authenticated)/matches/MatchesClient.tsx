@@ -14,7 +14,6 @@ interface Match {
     name: string;
     gameType: string;
     pointsToWin: number;
-    winByTwo: boolean;
   };
   player1: {
     id: string;
@@ -439,8 +438,7 @@ export default function MatchesClient({ initialFilter }: MatchesClientProps) {
                           color: '#374151',
                         }}
                       >
-                        First to {match.league.pointsToWin}{' '}
-                        {match.league.winByTwo ? '(Win by 2)' : ''}
+                        First to {match.league.pointsToWin}
                       </p>
                     </div>
 

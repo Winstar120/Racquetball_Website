@@ -20,18 +20,18 @@ export async function POST() {
       let newStatus = league.status;
       const regOpens = new Date(league.registrationOpens);
       const regCloses = new Date(league.registrationCloses);
-      const startDate = new Date(league.startDate);
-      const endDate = new Date(league.endDate);
+      const startDate = league.startDate ? new Date(league.startDate) : null;
+      const endDate = league.endDate ? new Date(league.endDate) : null;
 
       if (now < regOpens) {
         newStatus = 'UPCOMING';
       } else if (now >= regOpens && now <= regCloses) {
         newStatus = 'REGISTRATION_OPEN';
-      } else if (now > regCloses && now < startDate) {
+      } else if (now > regCloses && (!startDate || now < startDate)) {
         newStatus = 'REGISTRATION_CLOSED';
-      } else if (now >= startDate && now <= endDate) {
+      } else if (startDate && endDate && now >= startDate && now <= endDate) {
         newStatus = 'IN_PROGRESS';
-      } else if (now > endDate) {
+      } else if (endDate && now > endDate) {
         newStatus = 'COMPLETED';
       }
 

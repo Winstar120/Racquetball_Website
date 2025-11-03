@@ -15,7 +15,63 @@ export async function POST(request: Request) {
 
   try {
     const data = await request.json();
-    const { name, description, gameType, rankingMethod, pointsToWin, winByTwo, isFree, leagueFee, playersPerMatch, matchDuration, weeksForCutthroat, startDate, endDate, registrationOpens, registrationCloses, divisions, blackoutDates } = data;
+    const {
+      name,
+      description,
+      gameType,
+      rankingMethod,
+      pointsToWin,
+      isFree,
+      leagueFee,
+      playersPerMatch,
+      matchDuration,
+      weeksForCutthroat,
+      startDate,
+      endDate,
+      registrationOpens,
+      registrationCloses,
+      divisions,
+      blackoutDates
+    } = data;
+
+    const parseOptionalDate = (value: unknown, fieldName: string) => {
+      if (value === null || value === undefined || value === '') return null;
+      const parsed = new Date(value as string);
+      if (Number.isNaN(parsed.getTime())) {
+        throw new Error(`Invalid date provided for ${fieldName}.`);
+      }
+      return parsed;
+    };
+
+    const parseRequiredDate = (value: unknown, fieldName: string) => {
+      const parsed = parseOptionalDate(value, fieldName);
+      if (!parsed) {
+        throw new Error(`${fieldName} is required.`);
+      }
+      return parsed;
+    };
+
+    let parsedStartDate: Date | null = null;
+    let parsedEndDate: Date | null = null;
+
+    try {
+      parsedStartDate = parseOptionalDate(startDate, 'startDate');
+      parsedEndDate = parseOptionalDate(endDate, 'endDate');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Invalid date provided.';
+      return NextResponse.json({ error: message }, { status: 400 });
+    }
+
+    let parsedRegistrationOpens: Date;
+    let parsedRegistrationCloses: Date;
+
+    try {
+      parsedRegistrationOpens = parseRequiredDate(registrationOpens, 'registrationOpens');
+      parsedRegistrationCloses = parseRequiredDate(registrationCloses, 'registrationCloses');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Invalid registration date provided.';
+      return NextResponse.json({ error: message }, { status: 400 });
+    }
 
     const blackoutDatesArray = Array.isArray(blackoutDates)
       ? blackoutDates
@@ -33,16 +89,15 @@ export async function POST(request: Request) {
         gameType: gameType || 'SINGLES',
         rankingMethod: rankingMethod || 'BY_WINS',
         pointsToWin: pointsToWin || 15,
-        winByTwo: winByTwo !== false,
         isFree: isFree !== false,
         leagueFee: isFree === false ? (leagueFee || 0) : 0,
         playersPerMatch: playersPerMatch || 2,
         matchDuration: matchDuration || 45,
         weeksForCutthroat: weeksForCutthroat || null,
-        startDate: new Date(startDate),
-        endDate: new Date(endDate),
-        registrationOpens: new Date(registrationOpens),
-        registrationCloses: new Date(registrationCloses),
+        startDate: parsedStartDate,
+        endDate: parsedEndDate,
+        registrationOpens: parsedRegistrationOpens,
+        registrationCloses: parsedRegistrationCloses,
         blackoutDates: parsedBlackoutDates,
         status: 'UPCOMING',
       },

@@ -21,7 +21,6 @@ interface League {
   name: string;
   gameType: string;
   pointsToWin: number;
-  winByTwo: boolean;
 }
 
 interface Game {
@@ -303,7 +302,6 @@ export default function MatchDetailPage({ params }: { params: Promise<{ matchId:
               </div>
               <div style={{ fontSize: '1rem', color: '#111827' }}>
                 First to {match.league.pointsToWin} points
-                {match.league.winByTwo && ', win by 2'}
               </div>
             </div>
           </div>

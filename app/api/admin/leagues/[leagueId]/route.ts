@@ -87,7 +87,6 @@ export async function PATCH(
       gameType,
       rankingMethod,
       pointsToWin,
-      winByTwo,
       matchDuration,
       startDate,
       endDate,
@@ -138,10 +137,6 @@ export async function PATCH(
       updateData.matchDuration = parsed;
     }
 
-    if (winByTwo !== undefined) {
-      updateData.winByTwo = Boolean(winByTwo);
-    }
-
     if (isFree !== undefined) {
       updateData.isFree = Boolean(isFree);
       if (updateData.isFree) {
@@ -167,24 +162,33 @@ export async function PATCH(
       updateData.leagueFee = parsedFee;
     }
 
-    const dateFields: Array<[keyof typeof updateData, any]> = [
-      ['startDate', startDate],
-      ['endDate', endDate],
-      ['registrationOpens', registrationOpens],
-      ['registrationCloses', registrationCloses],
+    const dateFields: Array<{ key: keyof typeof updateData; value: any; nullable: boolean }> = [
+      { key: 'startDate', value: startDate, nullable: true },
+      { key: 'endDate', value: endDate, nullable: true },
+      { key: 'registrationOpens', value: registrationOpens, nullable: false },
+      { key: 'registrationCloses', value: registrationCloses, nullable: false },
     ];
 
-    for (const [fieldKey, value] of dateFields) {
-      if (value !== undefined && value !== null && value !== '') {
-        const parsedDate = new Date(value);
-        if (Number.isNaN(parsedDate.getTime())) {
-          return NextResponse.json(
-            { error: `Invalid date provided for ${fieldKey}.` },
-            { status: 400 }
-          );
-        }
-        updateData[fieldKey] = parsedDate;
+    for (const { key, value, nullable } of dateFields) {
+      if (value === undefined) continue;
+
+      if ((value === null || value === '') && nullable) {
+        updateData[key] = null;
+        continue;
       }
+
+      if (value === null || value === '') {
+        continue;
+      }
+
+      const parsedDate = new Date(value);
+      if (Number.isNaN(parsedDate.getTime())) {
+        return NextResponse.json(
+          { error: `Invalid date provided for ${key}.` },
+          { status: 400 }
+        );
+      }
+      updateData[key] = parsedDate;
     }
 
     if (Object.keys(updateData).length === 0) {

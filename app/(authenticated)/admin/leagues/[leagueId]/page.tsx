@@ -17,10 +17,9 @@ type League = {
   gameType: string;
   rankingMethod: string;
   pointsToWin: number;
-  winByTwo: boolean;
   matchDuration: number;
-  startDate: string;
-  endDate: string;
+  startDate: string | null;
+  endDate: string | null;
   registrationOpens: string;
   registrationCloses: string;
   isFree: boolean;
@@ -74,7 +73,6 @@ export default function EditLeaguePage({ params }: { params: Promise<{ leagueId:
     gameType: 'SINGLES',
     rankingMethod: 'BY_WINS',
     pointsToWin: '11',
-    winByTwo: 'true',
     matchDuration: '45',
     startDate: '',
     endDate: '',
@@ -117,7 +115,6 @@ export default function EditLeaguePage({ params }: { params: Promise<{ leagueId:
         gameType: league.gameType,
         rankingMethod: league.rankingMethod,
         pointsToWin: String(league.pointsToWin ?? 11),
-        winByTwo: league.winByTwo ? 'true' : 'false',
         matchDuration: String(league.matchDuration ?? 45),
         startDate: formatDateInput(league.startDate),
         endDate: formatDateInput(league.endDate),
@@ -167,7 +164,6 @@ export default function EditLeaguePage({ params }: { params: Promise<{ leagueId:
         rankingMethod: form.rankingMethod,
         gameType: form.gameType,
         pointsToWin: Number(form.pointsToWin),
-        winByTwo: form.winByTwo === 'true',
         matchDuration: Number(form.matchDuration),
         startDate: form.startDate,
         endDate: form.endDate,
@@ -199,7 +195,6 @@ export default function EditLeaguePage({ params }: { params: Promise<{ leagueId:
         gameType: updated.gameType,
         rankingMethod: updated.rankingMethod,
         pointsToWin: String(updated.pointsToWin ?? 11),
-        winByTwo: updated.winByTwo ? 'true' : 'false',
         matchDuration: String(updated.matchDuration ?? 45),
         startDate: formatDateInput(updated.startDate),
         endDate: formatDateInput(updated.endDate),
@@ -531,30 +526,12 @@ export default function EditLeaguePage({ params }: { params: Promise<{ leagueId:
                 style={baseInputStyle}
                 {...focusHandlers(false)}
               />
-              <p style={{ marginTop: '0.35rem', fontSize: '0.85rem', color: '#6b7280' }}>
-                Includes any built-in warmup time.
-              </p>
-            </div>
-            <div>
-              <label
-                htmlFor="winByTwo"
-                style={{ display: 'block', fontSize: '0.95rem', fontWeight: 500, color: '#374151', marginBottom: '0.5rem' }}
-              >
-                Win by Two
-              </label>
-              <select
-                id="winByTwo"
-                value={form.winByTwo}
-                onChange={(e) => handleChange('winByTwo', e.target.value)}
-                style={baseInputStyle}
-                {...focusHandlers(false)}
-              >
-                <option value="true">Yes</option>
-                <option value="false">No</option>
-              </select>
-            </div>
+            <p style={{ marginTop: '0.35rem', fontSize: '0.85rem', color: '#6b7280' }}>
+              Includes any built-in warmup time.
+            </p>
           </div>
-        </section>
+        </div>
+      </section>
 
         <section
           style={{
@@ -566,6 +543,9 @@ export default function EditLeaguePage({ params }: { params: Promise<{ leagueId:
           <h2 style={{ fontSize: '1.1rem', fontWeight: 600, color: '#111827', marginBottom: '1rem' }}>
             Season Dates
           </h2>
+          <p style={{ color: '#6b7280', fontSize: '0.85rem', marginBottom: '1.25rem' }}>
+            Clear a date to mark it as pending until you are ready to schedule.
+          </p>
           <div
             style={{
               display: 'grid',

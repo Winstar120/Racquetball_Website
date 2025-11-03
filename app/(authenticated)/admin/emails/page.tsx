@@ -25,6 +25,27 @@ interface Match {
   reminderSentAt?: string | null;
 }
 
+interface EmailLogEntry {
+  id: string;
+  type: 'MATCH_REMINDER' | 'MAKEUP_NOTICE';
+  status: 'SENT' | 'SKIPPED' | 'FAILED';
+  error?: string | null;
+  sentAt: string;
+  match?: {
+    id: string;
+    scheduledTime: string | null;
+    isMakeup: boolean;
+    league?: { name: string | null } | null;
+  } | null;
+  recipient: { id: string; name: string; email: string };
+}
+
+interface EmailLogSummary {
+  pendingUpcomingWeek: number;
+  overdue: number;
+  sentThisWeek: number;
+}
+
 export default function AdminEmails() {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -37,6 +58,9 @@ export default function AdminEmails() {
   const [message, setMessage] = useState<string | null>(null);
   const [messageType, setMessageType] = useState<'success' | 'error' | null>(null);
   const [loading, setLoading] = useState(true);
+  const [emailLogs, setEmailLogs] = useState<EmailLogEntry[]>([]);
+  const [logSummary, setLogSummary] = useState<EmailLogSummary | null>(null);
+  const [logsLoading, setLogsLoading] = useState(false);
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -62,6 +86,7 @@ export default function AdminEmails() {
       });
       const matchesData = await matchesRes.json();
       setUpcomingMatches(matchesData.matches || []);
+      await refreshLogs();
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -69,7 +94,29 @@ export default function AdminEmails() {
     }
   }
 
-  async function sendMatchReminder(matchId: string) {
+  async function refreshLogs() {
+    try {
+      setLogsLoading(true);
+      const response = await fetch('/api/email/logs', {
+        credentials: 'include',
+        cache: 'no-store',
+      });
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        console.error('Failed to fetch email logs:', data?.error || response.statusText);
+        return;
+      }
+      const data = await response.json();
+      setEmailLogs(data.recentLogs || []);
+      setLogSummary(data.summary || null);
+    } catch (error) {
+      console.error('Error fetching email logs:', error);
+    } finally {
+      setLogsLoading(false);
+    }
+  }
+
+  async function sendMatchReminder(matchId: string, force = false) {
     setSending(true);
     setMessage(null);
 
@@ -78,7 +125,7 @@ export default function AdminEmails() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ matchId }),
+        body: JSON.stringify({ matchId, force }),
       });
 
       const data = await response.json();
@@ -94,6 +141,7 @@ export default function AdminEmails() {
             )
           );
         }
+        await refreshLogs();
       } else {
         setMessage(`Failed to send reminders: ${data.error}`);
         setMessageType('error');
@@ -419,27 +467,199 @@ export default function AdminEmails() {
                         ? `Reminder sent on ${new Date(match.reminderSentAt).toLocaleString()}`
                         : 'Reminder not sent yet'}
                     </div>
-                    <button
-                      onClick={() => sendMatchReminder(match.id)}
-                      disabled={sending || Boolean(match.reminderSentAt)}
-                      style={{
-                        padding: '0.5rem 1rem',
-                        backgroundColor:
-                          sending || match.reminderSentAt ? '#9ca3af' : '#10b981',
-                        color: 'white',
-                        borderRadius: '0.375rem',
-                        fontSize: '0.75rem',
-                        fontWeight: '500',
-                        border: 'none',
-                        cursor: sending || match.reminderSentAt ? 'not-allowed' : 'pointer'
-                      }}
-                    >
-                      {match.reminderSentAt ? 'Reminder Sent' : 'Send Reminder'}
-                    </button>
+                    {match.reminderSentAt ? (
+                      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                        <button
+                          type="button"
+                          disabled
+                          style={{
+                            padding: '0.5rem 1rem',
+                            backgroundColor: '#9ca3af',
+                            color: 'white',
+                            borderRadius: '0.375rem',
+                            fontSize: '0.75rem',
+                            fontWeight: '500',
+                            border: 'none',
+                            cursor: 'not-allowed'
+                          }}
+                        >
+                          Reminder Sent
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => sendMatchReminder(match.id, true)}
+                          disabled={sending}
+                          style={{
+                            padding: '0.5rem 1rem',
+                            backgroundColor: sending ? '#9ca3af' : '#2563eb',
+                            color: 'white',
+                            borderRadius: '0.375rem',
+                            fontSize: '0.75rem',
+                            fontWeight: '500',
+                            border: 'none',
+                            cursor: sending ? 'not-allowed' : 'pointer'
+                          }}
+                        >
+                          Resend Anyway
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => sendMatchReminder(match.id)}
+                        disabled={sending}
+                        style={{
+                          padding: '0.5rem 1rem',
+                          backgroundColor: sending ? '#9ca3af' : '#10b981',
+                          color: 'white',
+                          borderRadius: '0.375rem',
+                          fontSize: '0.75rem',
+                          fontWeight: '500',
+                          border: 'none',
+                          cursor: sending ? 'not-allowed' : 'pointer'
+                        }}
+                      >
+                        Send Reminder
+                      </button>
+                    )}
                   </div>
                 ))
               )}
             </div>
+          </div>
+        </div>
+
+        <div style={{
+          marginTop: '2rem',
+          backgroundColor: 'white',
+          boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
+          borderRadius: '0.5rem',
+          padding: '1.5rem'
+        }}>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '1.5rem'
+          }}>
+            <div>
+              <h2 style={{
+                fontSize: '1.25rem',
+                fontWeight: '600',
+                marginBottom: '0.25rem',
+                color: '#111827'
+              }}>
+                Reminder Activity
+              </h2>
+              <p style={{ fontSize: '0.875rem', color: '#6b7280' }}>
+                Track reminder deliveries and outstanding matches.
+              </p>
+            </div>
+            <button
+              onClick={refreshLogs}
+              disabled={logsLoading}
+              style={{
+                padding: '0.5rem 1rem',
+                backgroundColor: logsLoading ? '#9ca3af' : '#1f2937',
+                color: 'white',
+                borderRadius: '0.375rem',
+                fontSize: '0.75rem',
+                fontWeight: '500',
+                border: 'none',
+                cursor: logsLoading ? 'not-allowed' : 'pointer'
+              }}
+            >
+              {logsLoading ? 'Refreshing...' : 'Refresh Logs'}
+            </button>
+          </div>
+
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+            gap: '1rem',
+            marginBottom: '1.5rem'
+          }}>
+            {[
+              { label: 'Pending (This Week)', value: logSummary?.pendingUpcomingWeek ?? 0 },
+              { label: 'Overdue Reminders', value: logSummary?.overdue ?? 0 },
+              { label: 'Reminders Sent (This Week)', value: logSummary?.sentThisWeek ?? 0 },
+            ].map((item) => (
+              <div key={item.label} style={{
+                padding: '1rem',
+                borderRadius: '0.5rem',
+                border: '1px solid #e5e7eb',
+                backgroundColor: '#f9fafb'
+              }}>
+                <p style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.25rem' }}>
+                  {item.label}
+                </p>
+                <p style={{ fontSize: '1.5rem', fontWeight: 600, color: '#111827' }}>
+                  {item.value}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ overflowX: 'auto' }}>
+            {logsLoading ? (
+              <p style={{ color: '#6b7280' }}>Loading activity...</p>
+            ) : emailLogs.length === 0 ? (
+              <p style={{ color: '#6b7280' }}>No reminder activity recorded yet.</p>
+            ) : (
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr style={{ backgroundColor: '#f9fafb', textAlign: 'left' }}>
+                    {['Sent', 'Recipient', 'Type', 'Status', 'Match', 'Notes'].map((heading) => (
+                      <th key={heading} style={{ padding: '0.75rem', fontSize: '0.75rem', fontWeight: 600, color: '#6b7280', borderBottom: '1px solid #e5e7eb' }}>
+                        {heading}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {emailLogs.map((log) => {
+                    const matchInfo = log.match
+                      ? `${log.match.league?.name ?? 'League'} • ${log.match.isMakeup ? 'Makeup' : 'Scheduled'} • ${
+                          log.match.scheduledTime ? new Date(log.match.scheduledTime).toLocaleDateString() : 'TBD'
+                        }`
+                      : '—';
+                    return (
+                      <tr key={log.id} style={{ borderBottom: '1px solid #f3f4f6' }}>
+                        <td style={{ padding: '0.75rem', fontSize: '0.75rem', color: '#111827' }}>
+                          {new Date(log.sentAt).toLocaleString()}
+                        </td>
+                        <td style={{ padding: '0.75rem', fontSize: '0.75rem', color: '#111827' }}>
+                          <div>{log.recipient.name}</div>
+                          <div style={{ color: '#6b7280' }}>{log.recipient.email}</div>
+                        </td>
+                        <td style={{ padding: '0.75rem', fontSize: '0.75rem', color: '#111827' }}>
+                          {log.type === 'MATCH_REMINDER' ? 'Match Reminder' : 'Makeup Notice'}
+                        </td>
+                        <td style={{ padding: '0.75rem', fontSize: '0.75rem' }}>
+                          <span style={{
+                            display: 'inline-block',
+                            padding: '0.25rem 0.5rem',
+                            borderRadius: '9999px',
+                            fontWeight: 600,
+                            backgroundColor:
+                              log.status === 'SENT' ? '#dcfce7' : log.status === 'FAILED' ? '#fee2e2' : '#e5e7eb',
+                            color:
+                              log.status === 'SENT' ? '#166534' : log.status === 'FAILED' ? '#991b1b' : '#374151'
+                          }}>
+                            {log.status}
+                          </span>
+                        </td>
+                        <td style={{ padding: '0.75rem', fontSize: '0.75rem', color: '#111827' }}>
+                          {matchInfo}
+                        </td>
+                        <td style={{ padding: '0.75rem', fontSize: '0.75rem', color: '#6b7280' }}>
+                          {log.error ? `Error: ${log.error}` : '—'}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            )}
           </div>
         </div>
 

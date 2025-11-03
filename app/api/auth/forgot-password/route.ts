@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { sendPasswordResetEmail } from '@/lib/email';
 import crypto from 'crypto';
 
 export async function POST(request: NextRequest) {
@@ -39,9 +40,16 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    // For now, we'll just log the reset token (in production, send email)
-    console.log(`Password reset token for ${email}: ${resetToken}`);
-    console.log(`Reset link: ${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}`);
+    const baseUrl = (process.env.NEXTAUTH_URL || request.nextUrl.origin || '').replace(/\/$/, '');
+    const resetLink = `${baseUrl || 'http://localhost:3000'}/reset-password?token=${resetToken}`;
+
+    const emailResult = await sendPasswordResetEmail(user, resetLink);
+
+    if (!emailResult.success) {
+      console.error('Password reset email failed to send', emailResult.error);
+      // Log link as fallback for operators
+      console.log(`Password reset link for ${email}: ${resetLink}`);
+    }
 
     return NextResponse.json(
       { message: 'If an account with that email exists, we have sent a password reset link.' },

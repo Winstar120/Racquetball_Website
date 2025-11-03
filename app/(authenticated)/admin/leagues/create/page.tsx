@@ -50,13 +50,19 @@ export default function CreateLeague() {
             .map((value) => value.trim())
             .filter(Boolean)
         : [];
+    const getDateValue = (key: string) => {
+      const value = formData.get(key);
+      if (typeof value !== 'string' || value.trim() === '') {
+        return null;
+      }
+      return value;
+    };
 
     const leagueData = {
       name: formData.get('name'),
       gameType: formData.get('gameType'),
       rankingMethod: formData.get('rankingMethod'),
       pointsToWin: parseInt(formData.get('pointsToWin') as string),
-      winByTwo: formData.get('winByTwo') === 'true',
       isFree: formData.get('isFree') === 'true',
       leagueFee: formData.get('isFree') === 'true' ? 0 : parseFloat(formData.get('leagueFee') as string),
       playersPerMatch:
@@ -70,8 +76,8 @@ export default function CreateLeague() {
         formData.get('gameType') === 'CUTTHROAT'
           ? parseInt(formData.get('weeksForCutthroat') as string)
           : null,
-      startDate: formData.get('startDate'),
-      endDate: formData.get('endDate'),
+      startDate: getDateValue('startDate'),
+      endDate: getDateValue('endDate'),
       registrationOpens: formData.get('registrationOpens'),
       registrationCloses: formData.get('registrationCloses'),
       divisions: formData.getAll('divisions'),
@@ -361,31 +367,6 @@ export default function CreateLeague() {
                       {...focusHandlers(isLoading)}
                     />
                   </div>
-                  <div>
-                    <label
-                      htmlFor="winByTwo"
-                      style={{
-                        display: 'block',
-                        fontSize: '0.95rem',
-                        fontWeight: 500,
-                        color: '#374151',
-                        marginBottom: '0.5rem',
-                      }}
-                    >
-                      Win by Two
-                    </label>
-                    <select
-                      name="winByTwo"
-                      id="winByTwo"
-                      required
-                      disabled={isLoading}
-                      style={baseInputStyle}
-                      {...focusHandlers(isLoading)}
-                    >
-                      <option value="true">Yes</option>
-                      <option value="false">No</option>
-                    </select>
-                  </div>
                 </div>
 
                 <div
@@ -550,6 +531,9 @@ export default function CreateLeague() {
               >
                 Season Timeline
               </h2>
+              <p style={{ textAlign: 'center', color: '#6b7280', fontSize: '0.85rem', marginBottom: '1.25rem' }}>
+                Leave the season start or end blank to keep the date pending for now.
+              </p>
               <div
                 style={{
                   display: 'grid',
@@ -581,7 +565,7 @@ export default function CreateLeague() {
                         type="date"
                         name={field}
                         id={field}
-                        required
+                        required={field === 'registrationOpens' || field === 'registrationCloses'}
                         disabled={isLoading}
                         style={baseInputStyle}
                         {...focusHandlers(isLoading)}

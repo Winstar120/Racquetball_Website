@@ -135,7 +135,7 @@ export async function POST(
 
 function determineGameWinner(game: any, match: any): string | null {
   const { player1Score, player2Score, player3Score } = game;
-  const { pointsToWin, winByTwo } = match.league;
+  const { pointsToWin } = match.league;
 
   if (match.league.gameType === 'CUTTHROAT') {
     // In cut-throat, highest score wins
@@ -156,19 +156,11 @@ function determineGameWinner(game: any, match: any): string | null {
   }
 
   // Singles or Doubles - highest score wins
-  if (winByTwo) {
-    const scoreDiff = Math.abs(player1Score - player2Score);
-    if (scoreDiff >= 2) {
-      if (player1Score >= pointsToWin && player1Score > player2Score) {
-        return match.player1Id;
-      }
-      if (player2Score >= pointsToWin && player2Score > player1Score) {
-        return match.player2Id;
-      }
-    }
-  } else {
-    if (player1Score >= pointsToWin) return match.player1Id;
-    if (player2Score >= pointsToWin) return match.player2Id;
+  if (player1Score >= pointsToWin && player1Score > player2Score) {
+    return match.player1Id;
+  }
+  if (player2Score >= pointsToWin && player2Score > player1Score) {
+    return match.player2Id;
   }
 
   return null;

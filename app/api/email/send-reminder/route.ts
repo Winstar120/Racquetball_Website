@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { matchId } = await request.json();
+    const { matchId, force = false } = await request.json();
 
     if (!matchId) {
       return NextResponse.json({ error: 'Match ID is required' }, { status: 400 });
@@ -34,7 +34,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Match not found' }, { status: 404 });
     }
 
-    if (match.reminderSentAt) {
+    if (force && !session.user.isAdmin) {
+      return NextResponse.json({ error: 'Only administrators can force a resend.' }, { status: 403 });
+    }
+
+    if (match.reminderSentAt && !force) {
       return NextResponse.json(
         { error: 'Reminder already sent for this match.', reminderSentAt: match.reminderSentAt },
         { status: 400 }

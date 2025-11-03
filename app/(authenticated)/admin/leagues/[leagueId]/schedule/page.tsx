@@ -108,7 +108,18 @@ export default function LeagueSchedulePage({ params }: { params: Promise<{ leagu
       const response = await fetch(`/api/admin/leagues/${targetLeagueId}/schedule`, {
         credentials: 'include',
       });
-      if (!response.ok) throw new Error('Failed to load schedule');
+      if (!response.ok) {
+        let message = 'Failed to load schedule';
+        try {
+          const payload = await response.json();
+          if (payload?.error) {
+            message = payload.error;
+          }
+        } catch {
+          // ignore JSON parsing errors
+        }
+        throw new Error(message);
+      }
       const payload: ScheduleResponse = await response.json();
 
       // Attempt to derive league name from matches/preview data

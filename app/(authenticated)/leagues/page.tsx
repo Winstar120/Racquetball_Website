@@ -11,14 +11,15 @@ interface League {
   name: string;
   gameType: string;
   rankingMethod: string;
-  startDate: string;
-  endDate: string;
+  startDate: string | null;
+  endDate: string | null;
   registrationOpens: string;
   registrationCloses: string;
   status: string;
   isFree: boolean;
   leagueFee?: number;
   divisions: Division[];
+  blackoutDates?: string[];
   _count: {
     registrations: number;
   };
@@ -109,12 +110,30 @@ export default function Leagues() {
     }
   }
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+  const formatDate = (dateString: string | null | undefined) => {
+    if (!dateString) return 'Pending';
+    const parsed = new Date(dateString);
+    if (Number.isNaN(parsed.getTime())) return 'Pending';
+    return parsed.toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
       year: 'numeric',
     });
+  };
+
+  const formatBlackoutDates = (dates: string[] | null | undefined) => {
+    if (!dates || dates.length === 0) return 'None';
+    return dates
+      .map((date) => {
+        const parsed = new Date(date);
+        if (Number.isNaN(parsed.getTime())) return null;
+        return parsed.toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+        });
+      })
+      .filter(Boolean)
+      .join(', ') || 'None';
   };
 
   const isRegistrationOpen = (league: League) => {
@@ -315,6 +334,9 @@ export default function Leagues() {
                         <span style={{ fontWeight: '600' }}>${league.leagueFee?.toFixed(2) || '0.00'}</span>
                       )}
                     </div>
+                    <div>
+                      <strong>Blackout Dates:</strong> {formatBlackoutDates(league.blackoutDates)}
+                    </div>
                     {league.userRegistration?.division && (
                       <div>
                         <strong>Your Division:</strong> {league.userRegistration.division.name}
@@ -324,11 +346,13 @@ export default function Leagues() {
 
                   {league.userRegistration ? (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                      <div style={{
-                        fontSize: '0.875rem',
-                        color: '#059669',
-                        fontWeight: '500'
-                      }}>
+                      <div
+                        style={{
+                          fontSize: '0.875rem',
+                          color: '#059669',
+                          fontWeight: '500',
+                        }}
+                      >
                         ✓ You are registered for this league
                       </div>
                       <button
@@ -342,7 +366,7 @@ export default function Leagues() {
                           backgroundColor: '#fef2f2',
                           border: '1px solid #fecaca',
                           cursor: 'pointer',
-                          transition: 'all 0.2s'
+                          transition: 'all 0.2s',
                         }}
                         onMouseOver={(e) => {
                           e.currentTarget.style.backgroundColor = '#fee2e2';
@@ -430,35 +454,60 @@ export default function Leagues() {
                     </div>
                   )}
 
-                  {/* View Standings Button */}
-                  <Link
-                    href={`/standings?leagueId=${league.id}`}
-                    style={{
-                      display: 'block',
-                      width: '100%',
-                      marginTop: '1rem',
-                      padding: '0.5rem 1rem',
-                      fontSize: '0.875rem',
-                      fontWeight: '500',
-                      color: '#1f2937',
-                      backgroundColor: 'white',
-                      border: '1px solid #d1d5db',
-                      textAlign: 'center',
-                      textDecoration: 'none',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = '#f3f4f6';
-                      e.currentTarget.style.borderColor = '#9ca3af';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = 'white';
-                      e.currentTarget.style.borderColor = '#d1d5db';
-                    }}
-                  >
-                    View Standings
-                  </Link>
+                  <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem', flexWrap: 'wrap' }}>
+                    <Link
+                      href={`/leagues/${league.id}`}
+                      style={{
+                        flex: '1 1 140px',
+                        minWidth: '140px',
+                        padding: '0.5rem 1rem',
+                        fontSize: '0.875rem',
+                        fontWeight: '500',
+                        color: 'white',
+                        backgroundColor: '#2563eb',
+                        border: '1px solid #2563eb',
+                        textAlign: 'center',
+                        textDecoration: 'none',
+                        transition: 'all 0.2s',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = '#1d4ed8';
+                        e.currentTarget.style.borderColor = '#1d4ed8';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = '#2563eb';
+                        e.currentTarget.style.borderColor = '#2563eb';
+                      }}
+                    >
+                      View League
+                    </Link>
+                    <Link
+                      href={`/standings?leagueId=${league.id}`}
+                      style={{
+                        flex: '1 1 140px',
+                        minWidth: '140px',
+                        padding: '0.5rem 1rem',
+                        fontSize: '0.875rem',
+                        fontWeight: '500',
+                        color: '#1f2937',
+                        backgroundColor: 'white',
+                        border: '1px solid #d1d5db',
+                        textAlign: 'center',
+                        textDecoration: 'none',
+                        transition: 'all 0.2s',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = '#f3f4f6';
+                        e.currentTarget.style.borderColor = '#9ca3af';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = 'white';
+                        e.currentTarget.style.borderColor = '#d1d5db';
+                      }}
+                    >
+                      View Standings
+                    </Link>
+                  </div>
                 </div>
               </div>
             ))}

@@ -258,14 +258,19 @@ export async function generateLeagueSchedule(
   });
 
   if (!league) throw new Error('League not found');
+  if (!league.startDate || !league.endDate) {
+    throw new Error('Cannot generate schedule until league start and end dates are set.');
+  }
 
   const scheduledMatches: ScheduledMatch[] = [];
   const makeupMatches: ScheduledMatch[] = [];
+  const seasonStart = new Date(league.startDate);
+  const seasonEnd = new Date(league.endDate);
 
   // Get all available time slots
   const allTimeSlots = await getAvailableTimeSlots(
-    league.startDate,
-    league.endDate,
+    seasonStart,
+    seasonEnd,
     matchDuration,
     league.blackoutDates || []
   );
@@ -275,8 +280,8 @@ export async function generateLeagueSchedule(
   const existingMatches = await prisma.match.findMany({
     where: {
       scheduledTime: {
-        gte: league.startDate,
-        lte: league.endDate
+        gte: seasonStart,
+        lte: seasonEnd
       },
       status: {
         not: 'CANCELLED'
@@ -313,8 +318,8 @@ export async function generateLeagueSchedule(
   // Calculate slots per week
   const weeklySlots = timeSlots.filter(slot => {
     const slotDate = new Date(slot.date);
-    const weekStart = new Date(league.startDate);
-    const weekEnd = new Date(league.startDate);
+    const weekStart = new Date(seasonStart);
+    const weekEnd = new Date(seasonStart);
     weekEnd.setDate(weekEnd.getDate() + 7);
     return slotDate >= weekStart && slotDate < weekEnd;
   }).length;
@@ -347,7 +352,7 @@ export async function generateLeagueSchedule(
               player2Id: group[1].id,
               player3Id: group[2].id,
               courtNumber: 1,
-              scheduledTime: new Date(league.endDate),
+              scheduledTime: new Date(seasonEnd),
               weekNumber: week + 1,
               divisionId: division.id
             });
@@ -357,13 +362,13 @@ export async function generateLeagueSchedule(
             const [hours, minutes] = slot.startTime.split(':').map(Number);
             matchTime.setHours(hours, minutes, 0, 0);
 
-            if (matchTime > league.endDate) {
+            if (matchTime > seasonEnd) {
               makeupMatches.push({
                 player1Id: group[0].id,
                 player2Id: group[1].id,
                 player3Id: group[2].id,
                 courtNumber: slot.courtNumber,
-                scheduledTime: new Date(league.endDate),
+                scheduledTime: new Date(seasonEnd),
                 weekNumber: week + 1,
                 divisionId: division.id
               });
@@ -403,7 +408,7 @@ export async function generateLeagueSchedule(
 
       for (let week = 0; week < totalWeeks; week++) {
         const weekSlots: typeof timeSlots = [];
-        const weekStart = new Date(league.startDate);
+        const weekStart = new Date(seasonStart);
         weekStart.setDate(weekStart.getDate() + (week * 7));
         const weekEnd = new Date(weekStart);
         weekEnd.setDate(weekEnd.getDate() + 7);
@@ -461,12 +466,12 @@ export async function generateLeagueSchedule(
           const [hours, minutes] = slot.startTime.split(':').map(Number);
           matchTime.setHours(hours, minutes, 0, 0);
 
-          if (matchTime > league.endDate) {
+          if (matchTime > seasonEnd) {
             makeupMatches.push({
               player1Id: player1.id,
               player2Id: player2.id,
               courtNumber: slot.courtNumber,
-              scheduledTime: new Date(league.endDate),
+              scheduledTime: new Date(seasonEnd),
               weekNumber,
               divisionId: division.id
             });
@@ -491,7 +496,7 @@ export async function generateLeagueSchedule(
             player1Id: player1.id,
             player2Id: player2.id,
             courtNumber: 1,
-            scheduledTime: new Date(league.endDate),
+            scheduledTime: new Date(seasonEnd),
             weekNumber,
             divisionId: division.id
           });

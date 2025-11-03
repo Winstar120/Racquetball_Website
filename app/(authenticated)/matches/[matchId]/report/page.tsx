@@ -13,7 +13,6 @@ interface Match {
     name: string;
     gameType: string;
     pointsToWin: number;
-    winByTwo: boolean;
   };
   player1: {
     id: string;
@@ -282,7 +281,7 @@ export default function ReportScore({ params }: { params: Promise<{ matchId: str
               <div>
                 <dt style={{ color: '#6b7280', fontWeight: 500 }}>Game Rules</dt>
                 <dd style={{ color: '#111827', marginTop: '0.25rem' }}>
-                  First to {match.league.pointsToWin} points{match.league.winByTwo && ', win by 2'}
+                  First to {match.league.pointsToWin} points
                 </dd>
               </div>
             </dl>

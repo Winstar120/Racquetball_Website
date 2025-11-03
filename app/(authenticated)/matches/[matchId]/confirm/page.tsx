@@ -12,7 +12,6 @@ interface Match {
     name: string;
     gameType: string;
     pointsToWin: number;
-    winByTwo: boolean;
   };
   player1: {
     id: string;
@@ -420,7 +419,7 @@ export default function ConfirmScore({ params }: { params: Promise<{ matchId: st
                   <div>
                     <dt style={{ color: '#6b7280', fontWeight: 500 }}>Format</dt>
                     <dd style={{ color: '#111827', marginTop: '0.25rem' }}>
-                      {match.league.gameType} · First to {match.league.pointsToWin}{match.league.winByTwo ? ', win by 2' : ''}
+                      {match.league.gameType} · First to {match.league.pointsToWin}
                     </dd>
                   </div>
                 </dl>

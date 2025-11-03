@@ -10,8 +10,8 @@ interface League {
   name: string;
   gameType: string;
   status: string;
-  startDate: string;
-  endDate: string;
+  startDate: string | null;
+  endDate: string | null;
   registrationOpens: string;
   registrationCloses: string;
   divisions: { id: string; level: string; name: string }[];
@@ -55,6 +55,12 @@ export default function ManageLeaguesPage() {
         {status.replace('_', ' ')}
       </span>
     );
+  };
+
+  const formatDateOrPending = (value: string | null) => {
+    if (!value) return 'Pending';
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? 'Pending' : parsed.toLocaleDateString();
   };
 
   return (
@@ -217,7 +223,7 @@ export default function ManageLeaguesPage() {
                         {league._count.registrations}
                       </td>
                       <td style={{ padding: '1rem 1.5rem', color: '#374151', fontSize: '0.9rem' }}>
-                        {new Date(league.startDate).toLocaleDateString()} – {new Date(league.endDate).toLocaleDateString()}
+                        {formatDateOrPending(league.startDate)} – {formatDateOrPending(league.endDate)}
                       </td>
                       <td style={{ padding: '1rem 1.5rem' }}>
                         <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', fontSize: '0.9rem' }}>

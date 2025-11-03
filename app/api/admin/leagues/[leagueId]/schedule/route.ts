@@ -3,6 +3,8 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { generateLeagueSchedule } from "@/lib/scheduling";
+import { sendMakeupMatchNotification } from "@/lib/email";
+import type { MatchWithPlayers } from "@/lib/email";
 
 export async function GET(
   request: Request,
@@ -54,6 +56,13 @@ export async function GET(
       return NextResponse.json(
         { error: "League not found" },
         { status: 404 }
+      );
+    }
+
+    if (!league.startDate || !league.endDate) {
+      return NextResponse.json(
+        { error: "Set start and end dates before generating a schedule." },
+        { status: 400 }
       );
     }
 
@@ -147,6 +156,13 @@ export async function POST(
       );
     }
 
+    if (!league.startDate || !league.endDate) {
+      return NextResponse.json(
+        { error: "Set start and end dates before generating a schedule." },
+        { status: 400 }
+      );
+    }
+
     // Generate schedule
     const { scheduledMatches, makeupMatches } = await generateLeagueSchedule(leagueId, league.matchDuration);
 
@@ -205,15 +221,40 @@ export async function POST(
       status: 'SCHEDULED' as const
     }));
 
-    const allMatches = await prisma.match.createMany({
-      data: [...matchData, ...makeupData]
+    const createdMakeupMatches: MatchWithPlayers[] = [];
+
+    await prisma.$transaction(async (tx) => {
+      if (matchData.length > 0) {
+        await tx.match.createMany({
+          data: matchData,
+        });
+      }
+
+      if (makeupData.length > 0) {
+        for (const makeup of makeupData) {
+          const created = await tx.match.create({
+            data: makeup,
+            include: {
+              player1: true,
+              player2: true,
+              player3: true,
+              player4: true,
+              league: true,
+            },
+          });
+          createdMakeupMatches.push(created as MatchWithPlayers);
+        }
+      }
+
+      await tx.league.update({
+        where: { id: leagueId },
+        data: { scheduleGenerated: true },
+      });
     });
 
-    // Mark league as scheduled
-    await prisma.league.update({
-      where: { id: leagueId },
-      data: { scheduleGenerated: true }
-    });
+    for (const makeup of createdMakeupMatches) {
+      await sendMakeupMatchNotification(makeup);
+    }
 
     return NextResponse.json({
       success: true,
