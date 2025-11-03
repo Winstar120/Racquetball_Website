@@ -1,6 +1,3 @@
 {
-  "/api/admin/leagues/route": "app/api/admin/leagues/route.js",
-  "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
-  "/(authenticated)/admin/leagues/page": "app/(authenticated)/admin/leagues/page.js",
   "/(authenticated)/admin/leagues/create/page": "app/(authenticated)/admin/leagues/create/page.js"
 }
