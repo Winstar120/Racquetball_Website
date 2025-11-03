@@ -17,6 +17,7 @@ type League = {
   gameType: string;
   rankingMethod: string;
   pointsToWin: number;
+  numberOfGames: number;
   matchDuration: number;
   startDate: string | null;
   endDate: string | null;
@@ -74,6 +75,7 @@ export default function EditLeaguePage({ params }: { params: Promise<{ leagueId:
     rankingMethod: 'BY_WINS',
     pointsToWin: '11',
     matchDuration: '45',
+    numberOfGames: '3',
     startDate: '',
     endDate: '',
     registrationOpens: '',
@@ -115,6 +117,7 @@ export default function EditLeaguePage({ params }: { params: Promise<{ leagueId:
         gameType: league.gameType,
         rankingMethod: league.rankingMethod,
         pointsToWin: String(league.pointsToWin ?? 11),
+        numberOfGames: String(league.numberOfGames ?? 3),
         matchDuration: String(league.matchDuration ?? 45),
         startDate: formatDateInput(league.startDate),
         endDate: formatDateInput(league.endDate),
@@ -164,6 +167,7 @@ export default function EditLeaguePage({ params }: { params: Promise<{ leagueId:
         rankingMethod: form.rankingMethod,
         gameType: form.gameType,
         pointsToWin: Number(form.pointsToWin),
+        numberOfGames: Number(form.numberOfGames),
         matchDuration: Number(form.matchDuration),
         startDate: form.startDate,
         endDate: form.endDate,
@@ -195,6 +199,7 @@ export default function EditLeaguePage({ params }: { params: Promise<{ leagueId:
         gameType: updated.gameType,
         rankingMethod: updated.rankingMethod,
         pointsToWin: String(updated.pointsToWin ?? 11),
+        numberOfGames: String(updated.numberOfGames ?? 3),
         matchDuration: String(updated.matchDuration ?? 45),
         startDate: formatDateInput(updated.startDate),
         endDate: formatDateInput(updated.endDate),
@@ -492,40 +497,60 @@ export default function EditLeaguePage({ params }: { params: Promise<{ leagueId:
               gap: '1.5rem',
               gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
             }}
-          >
-            <div>
-              <label
-                htmlFor="pointsToWin"
-                style={{ display: 'block', fontSize: '0.95rem', fontWeight: 500, color: '#374151', marginBottom: '0.5rem' }}
-              >
-                Points to Win
-              </label>
-              <input
-                id="pointsToWin"
-                type="number"
-                min="1"
-                value={form.pointsToWin}
-                onChange={(e) => handleChange('pointsToWin', e.target.value)}
-                style={baseInputStyle}
-                {...focusHandlers(false)}
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="matchDuration"
-                style={{ display: 'block', fontSize: '0.95rem', fontWeight: 500, color: '#374151', marginBottom: '0.5rem' }}
-              >
-                Match Duration (minutes)
-              </label>
-              <input
-                id="matchDuration"
-                type="number"
-                min="1"
-                value={form.matchDuration}
-                onChange={(e) => handleChange('matchDuration', e.target.value)}
-                style={baseInputStyle}
-                {...focusHandlers(false)}
-              />
+        >
+          <div>
+            <label
+              htmlFor="pointsToWin"
+              style={{ display: 'block', fontSize: '0.95rem', fontWeight: 500, color: '#374151', marginBottom: '0.5rem' }}
+            >
+              Points to Win
+            </label>
+            <input
+              id="pointsToWin"
+              type="number"
+              min="1"
+              value={form.pointsToWin}
+              onChange={(e) => handleChange('pointsToWin', e.target.value)}
+              style={baseInputStyle}
+              {...focusHandlers(false)}
+            />
+          </div>
+          <div>
+            <label
+              htmlFor="numberOfGames"
+              style={{ display: 'block', fontSize: '0.95rem', fontWeight: 500, color: '#374151', marginBottom: '0.5rem' }}
+            >
+              Number of Games
+            </label>
+            <input
+              id="numberOfGames"
+              type="number"
+              min="1"
+              value={form.numberOfGames}
+              onChange={(e) => handleChange('numberOfGames', e.target.value)}
+              style={baseInputStyle}
+              {...focusHandlers(false)}
+            />
+            <p style={{ marginTop: '0.35rem', fontSize: '0.85rem', color: '#6b7280' }}>
+              Controls how many games each matchup should include.
+            </p>
+          </div>
+          <div>
+            <label
+              htmlFor="matchDuration"
+              style={{ display: 'block', fontSize: '0.95rem', fontWeight: 500, color: '#374151', marginBottom: '0.5rem' }}
+            >
+              Match Duration (minutes)
+            </label>
+            <input
+              id="matchDuration"
+              type="number"
+              min="1"
+              value={form.matchDuration}
+              onChange={(e) => handleChange('matchDuration', e.target.value)}
+              style={baseInputStyle}
+              {...focusHandlers(false)}
+            />
             <p style={{ marginTop: '0.35rem', fontSize: '0.85rem', color: '#6b7280' }}>
               Includes any built-in warmup time.
             </p>

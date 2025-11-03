@@ -1,0 +1,2 @@
+ALTER TABLE "League"
+  ADD COLUMN "numberOfGames" INTEGER NOT NULL DEFAULT 3;

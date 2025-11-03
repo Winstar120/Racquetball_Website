@@ -18,6 +18,7 @@ type LeagueDetails = {
   gameType: string;
   rankingMethod: string;
   pointsToWin: number;
+  numberOfGames: number;
   matchDuration: number;
   weeksForCutthroat?: number | null;
   startDate?: string | null;
@@ -280,6 +281,10 @@ export default function LeagueDetailsPage({
             <div>
               <strong>Points to Win:</strong>
               <div>{league.pointsToWin}</div>
+            </div>
+            <div>
+              <strong>Number of Games:</strong>
+              <div>{league.numberOfGames}</div>
             </div>
             <div>
               <strong>Match Duration:</strong>

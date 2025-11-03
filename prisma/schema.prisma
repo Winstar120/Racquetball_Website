@@ -53,6 +53,7 @@ model League {
   registrationCloses DateTime
   status            LeagueStatus @default(UPCOMING)
   pointsToWin       Int      @default(15)
+  numberOfGames     Int      @default(3)
   isFree            Boolean  @default(true)
   leagueFee         Float?   @default(0)
   playersPerMatch   Int      @default(2)  // 2 for singles, 3 for cut-throat, 4 for doubles

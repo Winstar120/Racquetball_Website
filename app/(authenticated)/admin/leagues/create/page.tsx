@@ -63,6 +63,7 @@ export default function CreateLeague() {
       gameType: formData.get('gameType'),
       rankingMethod: formData.get('rankingMethod'),
       pointsToWin: parseInt(formData.get('pointsToWin') as string),
+      numberOfGames: parseInt(formData.get('numberOfGames') as string),
       isFree: formData.get('isFree') === 'true',
       leagueFee: formData.get('isFree') === 'true' ? 0 : parseFloat(formData.get('leagueFee') as string),
       playersPerMatch:
@@ -366,6 +367,34 @@ export default function CreateLeague() {
                       style={baseInputStyle}
                       {...focusHandlers(isLoading)}
                     />
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="numberOfGames"
+                      style={{
+                        display: 'block',
+                        fontSize: '0.95rem',
+                        fontWeight: 500,
+                        color: '#374151',
+                        marginBottom: '0.5rem',
+                      }}
+                    >
+                      Number of Games
+                    </label>
+                    <input
+                      type="number"
+                      name="numberOfGames"
+                      id="numberOfGames"
+                      defaultValue="3"
+                      min="1"
+                      required
+                      disabled={isLoading}
+                      style={baseInputStyle}
+                      {...focusHandlers(isLoading)}
+                    />
+                    <p style={{ marginTop: '0.35rem', fontSize: '0.85rem', color: '#6b7280' }}>
+                      Sets how many games each matchup should include.
+                    </p>
                   </div>
                 </div>
 

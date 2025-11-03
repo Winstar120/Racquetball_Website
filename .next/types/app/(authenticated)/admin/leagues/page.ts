@@ -1,8 +1,8 @@
-// File: /home/winwi/my-projects/racquetball_website/app/(authenticated)/leagues/[leagueId]/page.tsx
-import * as entry from '../../../../../../app/(authenticated)/leagues/[leagueId]/page.js'
+// File: /home/winwi/my-projects/racquetball_website/app/(authenticated)/admin/leagues/page.tsx
+import * as entry from '../../../../../../app/(authenticated)/admin/leagues/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
-type TEntry = typeof import('../../../../../../app/(authenticated)/leagues/[leagueId]/page.js')
+type TEntry = typeof import('../../../../../../app/(authenticated)/admin/leagues/page.js')
 
 type SegmentParams<T extends Object = any> = T extends Record<string, any>
   ? { [K in keyof T]: T[K] extends string ? string | string[] | undefined : never }

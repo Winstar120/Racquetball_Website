@@ -14,6 +14,7 @@ interface Match {
     name: string;
     gameType: string;
     pointsToWin: number;
+    numberOfGames: number;
   };
   player1: {
     id: string;
@@ -438,7 +439,7 @@ export default function MatchesClient({ initialFilter }: MatchesClientProps) {
                           color: '#374151',
                         }}
                       >
-                        First to {match.league.pointsToWin}
+                        Best of {match.league.numberOfGames} · First to {match.league.pointsToWin}
                       </p>
                     </div>
 

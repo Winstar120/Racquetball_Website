@@ -21,6 +21,7 @@ export async function POST(request: Request) {
       gameType,
       rankingMethod,
       pointsToWin,
+      numberOfGames,
       isFree,
       leagueFee,
       playersPerMatch,
@@ -82,6 +83,13 @@ export async function POST(request: Request) {
       .map((date: string) => new Date(date))
       .filter((date) => !Number.isNaN(date.getTime()));
 
+    let parsedNumberOfGames = Number(numberOfGames ?? 3);
+    if (!Number.isFinite(parsedNumberOfGames) || parsedNumberOfGames <= 0) {
+      parsedNumberOfGames = 3;
+    } else {
+      parsedNumberOfGames = Math.round(parsedNumberOfGames);
+    }
+
     const league = await prisma.league.create({
       data: {
         name,
@@ -89,6 +97,7 @@ export async function POST(request: Request) {
         gameType: gameType || 'SINGLES',
         rankingMethod: rankingMethod || 'BY_WINS',
         pointsToWin: pointsToWin || 15,
+        numberOfGames: parsedNumberOfGames,
         isFree: isFree !== false,
         leagueFee: isFree === false ? (leagueFee || 0) : 0,
         playersPerMatch: playersPerMatch || 2,

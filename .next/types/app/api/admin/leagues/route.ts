@@ -1,8 +1,8 @@
-// File: /home/winwi/my-projects/racquetball_website/app/api/leagues/[leagueId]/route.ts
-import * as entry from '../../../../../../app/api/leagues/[leagueId]/route.js'
+// File: /home/winwi/my-projects/racquetball_website/app/api/admin/leagues/route.ts
+import * as entry from '../../../../../../app/api/admin/leagues/route.js'
 import type { NextRequest } from 'next/server.js'
 
-type TEntry = typeof import('../../../../../../app/api/leagues/[leagueId]/route.js')
+type TEntry = typeof import('../../../../../../app/api/admin/leagues/route.js')
 
 type SegmentParams<T extends Object = any> = T extends Record<string, any>
   ? { [K in keyof T]: T[K] extends string ? string | string[] | undefined : never }

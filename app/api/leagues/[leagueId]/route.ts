@@ -65,6 +65,7 @@ export async function GET(
         gameType: league.gameType,
         rankingMethod: league.rankingMethod,
         pointsToWin: league.pointsToWin,
+        numberOfGames: league.numberOfGames,
         matchDuration: league.matchDuration,
         weeksForCutthroat: league.weeksForCutthroat,
         startDate: league.startDate,

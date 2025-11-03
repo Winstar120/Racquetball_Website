@@ -88,6 +88,7 @@ export async function PATCH(
       rankingMethod,
       pointsToWin,
       matchDuration,
+    numberOfGames,
       startDate,
       endDate,
       registrationOpens,
@@ -124,6 +125,17 @@ export async function PATCH(
         );
       }
       updateData.pointsToWin = parsed;
+    }
+
+    if (numberOfGames !== undefined) {
+      const parsedGames = Number(numberOfGames);
+      if (!Number.isFinite(parsedGames) || parsedGames <= 0) {
+        return NextResponse.json(
+          { error: "Number of games must be a positive number." },
+          { status: 400 }
+        );
+      }
+      updateData.numberOfGames = Math.round(parsedGames);
     }
 
     if (matchDuration !== undefined) {

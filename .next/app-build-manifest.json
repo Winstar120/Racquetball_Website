@@ -11,20 +11,25 @@
       "static/chunks/main-app.js",
       "static/chunks/app/(authenticated)/layout.js"
     ],
-    "/(authenticated)/leagues/[leagueId]/page": [
+    "/(authenticated)/admin/leagues/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/(authenticated)/leagues/[leagueId]/page.js"
+      "static/chunks/app/(authenticated)/admin/leagues/page.js"
+    ],
+    "/api/admin/leagues/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/admin/leagues/route.js"
     ],
     "/api/auth/[...nextauth]/route": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/api/auth/[...nextauth]/route.js"
     ],
-    "/api/leagues/[leagueId]/route": [
+    "/(authenticated)/admin/leagues/create/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/api/leagues/[leagueId]/route.js"
+      "static/chunks/app/(authenticated)/admin/leagues/create/page.js"
     ]
   }
 }

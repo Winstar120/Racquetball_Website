@@ -21,6 +21,7 @@ interface League {
   name: string;
   gameType: string;
   pointsToWin: number;
+  numberOfGames: number;
 }
 
 interface Game {
@@ -301,7 +302,7 @@ export default function MatchDetailPage({ params }: { params: Promise<{ matchId:
                 Game Rules
               </div>
               <div style={{ fontSize: '1rem', color: '#111827' }}>
-                First to {match.league.pointsToWin} points
+                Best of {match.league.numberOfGames} · First to {match.league.pointsToWin} points
               </div>
             </div>
           </div>
