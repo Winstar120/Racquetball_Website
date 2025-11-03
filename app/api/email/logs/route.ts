@@ -25,6 +25,8 @@ export async function GET(request: NextRequest) {
     const weekEnd = new Date(weekStart);
     weekEnd.setDate(weekEnd.getDate() + 7);
 
+    const emailLogClient = (prisma as any).emailLog;
+
     const [pendingUpcomingWeek, overdue, sentThisWeek, recentLogs] = await Promise.all([
       prisma.match.count({
         where: {
@@ -45,7 +47,7 @@ export async function GET(request: NextRequest) {
           },
         },
       }),
-      prisma.emailLog.count({
+      emailLogClient.count({
         where: {
           type: 'MATCH_REMINDER',
           status: 'SENT',
@@ -54,7 +56,7 @@ export async function GET(request: NextRequest) {
           },
         },
       }),
-      prisma.emailLog.findMany({
+      emailLogClient.findMany({
         orderBy: { sentAt: 'desc' },
         take: 25,
         include: {
