@@ -1,25 +1,26 @@
 import nodemailer from 'nodemailer';
-import type { Prisma } from '@prisma/client';
-import {
-  type User,
-  type Match,
-  type League,
-  type Division,
+import type {
+  EmailType,
+  EmailStatus,
+  User,
+  Match,
+  League,
+  Division,
 } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 
 // Create reusable transporter
 const EMAIL_TYPE = {
-  MATCH_REMINDER: 'MATCH_REMINDER',
-  MAKEUP_NOTICE: 'MAKEUP_NOTICE',
-  PASSWORD_RESET: 'PASSWORD_RESET',
-} as const satisfies Record<string, Prisma.EmailType>;
+  MATCH_REMINDER: 'MATCH_REMINDER' as EmailType,
+  MAKEUP_NOTICE: 'MAKEUP_NOTICE' as EmailType,
+  PASSWORD_RESET: 'PASSWORD_RESET' as EmailType,
+} as const;
 
 const EMAIL_STATUS = {
-  SENT: 'SENT',
-  SKIPPED: 'SKIPPED',
-  FAILED: 'FAILED',
-} as const satisfies Record<string, Prisma.EmailStatus>;
+  SENT: 'SENT' as EmailStatus,
+  SKIPPED: 'SKIPPED' as EmailStatus,
+  FAILED: 'FAILED' as EmailStatus,
+} as const;
 
 const transporter = process.env.SMTP_USER && process.env.SMTP_PASSWORD
   ? nodemailer.createTransport({
@@ -47,8 +48,8 @@ export type EmailSendResult = { success: boolean; error?: unknown; skipped?: boo
 async function recordEmailLog(params: {
   matchId?: string | null;
   recipientId: string;
-  type: Prisma.EmailType;
-  status: Prisma.EmailStatus;
+  type: EmailType;
+  status: EmailStatus;
   error?: unknown;
 }) {
   try {
@@ -315,7 +316,7 @@ If you need to cancel or reschedule, please contact your opponent directly and n
     console.error('Error sending email:', error);
     await recordEmailLog({
       ...logBase,
-      status: EmailStatus.FAILED,
+      status: EMAIL_STATUS.FAILED,
       error,
     });
     return { success: false, error };
@@ -344,8 +345,8 @@ export async function sendMakeupMatchNotification(
         recordEmailLog({
           matchId: match.id,
           recipientId: recipient.id,
-          type: EmailType.MAKEUP_NOTICE,
-          status: EmailStatus.SKIPPED,
+          type: EMAIL_TYPE.MAKEUP_NOTICE,
+          status: EMAIL_STATUS.SKIPPED,
           error: 'Transporter not configured',
         })
       )
@@ -426,7 +427,7 @@ If you need assistance, reply to this email or contact the league administrator.
     const logBase = {
       matchId: match.id,
       recipientId: recipient.id,
-      type: EmailType.MAKEUP_NOTICE,
+      type: EMAIL_TYPE.MAKEUP_NOTICE,
     };
 
     try {
@@ -441,14 +442,14 @@ If you need assistance, reply to this email or contact the league administrator.
       console.log(`Makeup match notification sent to ${recipient.email}`);
       await recordEmailLog({
         ...logBase,
-        status: EmailStatus.SENT,
+        status: EMAIL_STATUS.SENT,
       });
       results.push({ success: true });
     } catch (error) {
       console.error('Error sending makeup match notification:', error);
       await recordEmailLog({
         ...logBase,
-        status: EmailStatus.FAILED,
+        status: EMAIL_STATUS.FAILED,
         error,
       });
       results.push({ success: false, error });
