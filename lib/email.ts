@@ -1,15 +1,13 @@
 import nodemailer from 'nodemailer';
 import {
-  $Enums,
+  EmailType,
+  EmailStatus,
   type User,
   type Match,
   type League,
   type Division,
 } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
-
-const EmailType = $Enums.EmailType;
-const EmailStatus = $Enums.EmailStatus;
 
 // Create reusable transporter
 const transporter = process.env.SMTP_USER && process.env.SMTP_PASSWORD
