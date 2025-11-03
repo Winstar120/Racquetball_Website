@@ -1,7 +1,6 @@
 import nodemailer from 'nodemailer';
+import type { Prisma } from '@prisma/client';
 import {
-  EmailType,
-  EmailStatus,
   type User,
   type Match,
   type League,
@@ -10,6 +9,18 @@ import {
 import { prisma } from '@/lib/prisma';
 
 // Create reusable transporter
+const EMAIL_TYPE = {
+  MATCH_REMINDER: 'MATCH_REMINDER',
+  MAKEUP_NOTICE: 'MAKEUP_NOTICE',
+  PASSWORD_RESET: 'PASSWORD_RESET',
+} as const satisfies Record<string, Prisma.EmailType>;
+
+const EMAIL_STATUS = {
+  SENT: 'SENT',
+  SKIPPED: 'SKIPPED',
+  FAILED: 'FAILED',
+} as const satisfies Record<string, Prisma.EmailStatus>;
+
 const transporter = process.env.SMTP_USER && process.env.SMTP_PASSWORD
   ? nodemailer.createTransport({
       host: process.env.SMTP_HOST || 'smtp.gmail.com',
@@ -36,8 +47,8 @@ export type EmailSendResult = { success: boolean; error?: unknown; skipped?: boo
 async function recordEmailLog(params: {
   matchId?: string | null;
   recipientId: string;
-  type: typeof EmailType[keyof typeof EmailType];
-  status: typeof EmailStatus[keyof typeof EmailStatus];
+  type: Prisma.EmailType;
+  status: Prisma.EmailStatus;
   error?: unknown;
 }) {
   try {
@@ -62,14 +73,14 @@ export async function sendPasswordResetEmail(
   const logBase = {
     matchId: null,
     recipientId: user.id,
-    type: EmailType.PASSWORD_RESET,
+    type: EMAIL_TYPE.PASSWORD_RESET,
   };
 
   if (!transporter) {
     console.warn('Email transporter not configured - skipping password reset email');
     await recordEmailLog({
       ...logBase,
-      status: EmailStatus.SKIPPED,
+      status: EMAIL_STATUS.SKIPPED,
       error: 'Transporter not configured',
     });
     return { success: false, skipped: true, error: 'Transporter not configured' };
@@ -136,7 +147,7 @@ This link will expire in 1 hour. If you did not request a password reset, you ca
 
     await recordEmailLog({
       ...logBase,
-      status: EmailStatus.SENT,
+      status: EMAIL_STATUS.SENT,
     });
 
     return { success: true };
@@ -144,7 +155,7 @@ This link will expire in 1 hour. If you did not request a password reset, you ca
     console.error('Failed to send password reset email:', error);
     await recordEmailLog({
       ...logBase,
-      status: EmailStatus.FAILED,
+      status: EMAIL_STATUS.FAILED,
       error,
     });
     return { success: false, error };
@@ -158,14 +169,14 @@ export async function sendMatchReminder(
   const logBase = {
     matchId: match.id,
     recipientId,
-    type: EmailType.MATCH_REMINDER,
+    type: EMAIL_TYPE.MATCH_REMINDER,
   };
 
   if (!transporter) {
     console.warn('Email transporter not configured - skipping email');
     await recordEmailLog({
       ...logBase,
-      status: EmailStatus.SKIPPED,
+      status: EMAIL_STATUS.SKIPPED,
       error: 'Transporter not configured',
     });
     return { success: false, skipped: true, error: 'Transporter not configured' };
@@ -297,7 +308,7 @@ If you need to cancel or reschedule, please contact your opponent directly and n
     console.log(`Match reminder sent to ${recipient.email}`);
     await recordEmailLog({
       ...logBase,
-      status: EmailStatus.SENT,
+      status: EMAIL_STATUS.SENT,
     });
     return { success: true };
   } catch (error) {
