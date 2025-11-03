@@ -1,21 +1,21 @@
 import nodemailer from 'nodemailer';
-import {
-  EmailType as PrismaEmailType,
-  EmailStatus as PrismaEmailStatus,
-  type EmailType as PrismaEmailTypeEnum,
-  type EmailStatus as PrismaEmailStatusEnum,
-  type User,
-  type Match,
-  type League,
-  type Division,
-} from '@prisma/client';
+import type { User, Match, League, Division } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 
-const EMAIL_TYPE = PrismaEmailType;
-const EMAIL_STATUS = PrismaEmailStatus;
+type EmailTypeEnum = 'MATCH_REMINDER' | 'MAKEUP_NOTICE' | 'PASSWORD_RESET';
+type EmailStatusEnum = 'SENT' | 'SKIPPED' | 'FAILED';
 
-type EmailTypeEnum = PrismaEmailTypeEnum;
-type EmailStatusEnum = PrismaEmailStatusEnum;
+const EMAIL_TYPE = {
+  MATCH_REMINDER: 'MATCH_REMINDER',
+  MAKEUP_NOTICE: 'MAKEUP_NOTICE',
+  PASSWORD_RESET: 'PASSWORD_RESET',
+} as const satisfies Record<string, EmailTypeEnum>;
+
+const EMAIL_STATUS = {
+  SENT: 'SENT',
+  SKIPPED: 'SKIPPED',
+  FAILED: 'FAILED',
+} as const satisfies Record<string, EmailStatusEnum>;
 
 const transporter = process.env.SMTP_USER && process.env.SMTP_PASSWORD
   ? nodemailer.createTransport({
