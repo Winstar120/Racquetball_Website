@@ -90,33 +90,26 @@ export async function POST(request: Request) {
       parsedNumberOfGames = Math.round(parsedNumberOfGames);
     }
 
-    const leagueData: Record<string, any> = {
-      name,
-      description: typeof description === 'string' && description.trim().length > 0 ? description.trim() : null,
-      gameType: gameType || 'SINGLES',
-      rankingMethod: rankingMethod || 'BY_WINS',
-      pointsToWin: pointsToWin || 15,
-      numberOfGames: parsedNumberOfGames,
-      isFree: isFree !== false,
-      leagueFee: isFree === false ? (leagueFee || 0) : 0,
-      playersPerMatch: playersPerMatch || 2,
-      matchDuration: matchDuration || 45,
-      weeksForCutthroat: weeksForCutthroat || null,
-      registrationOpens: parsedRegistrationOpens,
-      registrationCloses: parsedRegistrationCloses,
-      blackoutDates: parsedBlackoutDates,
-      status: 'UPCOMING',
-    };
-
-    if (parsedStartDate) {
-      leagueData.startDate = parsedStartDate;
-    }
-    if (parsedEndDate) {
-      leagueData.endDate = parsedEndDate;
-    }
-
     const league = await prisma.league.create({
-      data: leagueData,
+      data: {
+        name,
+        description: typeof description === 'string' && description.trim().length > 0 ? description.trim() : null,
+        gameType: gameType || 'SINGLES',
+        rankingMethod: rankingMethod || 'BY_WINS',
+        pointsToWin: pointsToWin || 15,
+        numberOfGames: parsedNumberOfGames,
+        isFree: isFree !== false,
+        leagueFee: isFree === false ? (leagueFee || 0) : 0,
+        playersPerMatch: playersPerMatch || 2,
+        matchDuration: matchDuration || 45,
+        weeksForCutthroat: weeksForCutthroat || null,
+        ...(parsedStartDate ? { startDate: parsedStartDate } : {}),
+        ...(parsedEndDate ? { endDate: parsedEndDate } : {}),
+        registrationOpens: parsedRegistrationOpens,
+        registrationCloses: parsedRegistrationCloses,
+        blackoutDates: parsedBlackoutDates,
+        status: 'UPCOMING',
+      },
     });
 
     if (divisions && divisions.length > 0) {
