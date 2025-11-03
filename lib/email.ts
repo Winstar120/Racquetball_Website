@@ -1,25 +1,18 @@
 import nodemailer from 'nodemailer';
-import type {
-  EmailType,
-  EmailStatus,
-  User,
-  Match,
-  League,
-  Division,
-} from '@prisma/client';
+import type { $Enums, User, Match, League, Division } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 
 // Create reusable transporter
 const EMAIL_TYPE = {
-  MATCH_REMINDER: 'MATCH_REMINDER' as EmailType,
-  MAKEUP_NOTICE: 'MAKEUP_NOTICE' as EmailType,
-  PASSWORD_RESET: 'PASSWORD_RESET' as EmailType,
+  MATCH_REMINDER: 'MATCH_REMINDER' as $Enums.EmailType,
+  MAKEUP_NOTICE: 'MAKEUP_NOTICE' as $Enums.EmailType,
+  PASSWORD_RESET: 'PASSWORD_RESET' as $Enums.EmailType,
 } as const;
 
 const EMAIL_STATUS = {
-  SENT: 'SENT' as EmailStatus,
-  SKIPPED: 'SKIPPED' as EmailStatus,
-  FAILED: 'FAILED' as EmailStatus,
+  SENT: 'SENT' as $Enums.EmailStatus,
+  SKIPPED: 'SKIPPED' as $Enums.EmailStatus,
+  FAILED: 'FAILED' as $Enums.EmailStatus,
 } as const;
 
 const transporter = process.env.SMTP_USER && process.env.SMTP_PASSWORD
