@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
+import type { MatchStatus } from '@prisma/client';
 import type { Prisma } from '@prisma/client';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
@@ -27,9 +28,12 @@ export async function GET(request: NextRequest) {
       where.leagueId = leagueId;
     }
 
-    if (status !== 'all') {
-      where.status = status;
-      if (status === 'SCHEDULED') {
+    const allowedStatuses: MatchStatus[] = ['SCHEDULED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED', 'DISPUTED'];
+
+    if (status !== 'all' && allowedStatuses.includes(status as MatchStatus)) {
+      const typedStatus = status as MatchStatus;
+      where.status = typedStatus;
+      if (typedStatus === 'SCHEDULED') {
         where.scheduledTime = { gte: new Date() };
       }
     }
