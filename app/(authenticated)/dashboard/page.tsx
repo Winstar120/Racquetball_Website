@@ -1,13 +1,46 @@
 'use client';
 
-import { useSession } from "next-auth/react";
-import { redirect } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useSession } from 'next-auth/react';
+import { redirect } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
+
+type DashboardMetrics = {
+  wins?: number;
+  losses?: number;
+  winRate?: number;
+  totalPointsScored?: number;
+  avgPointsPerGame?: number;
+  totalGamesWon?: number;
+  totalGamesPlayed?: number;
+  gameWinRate?: number;
+};
+
+type DashboardMatchPlayer = {
+  id: string;
+  name: string;
+};
+
+type UpcomingMatch = {
+  id: string;
+  scheduledTime: string;
+  player1Id: string;
+  player2Id: string;
+  player1: DashboardMatchPlayer;
+  player2: DashboardMatchPlayer;
+  league: {
+    name: string;
+  };
+};
+
+type DashboardData = {
+  stats?: DashboardMetrics;
+  upcomingMatches?: UpcomingMatch[];
+};
 
 export default function Dashboard() {
   const { data: session, status } = useSession();
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<DashboardData | null>(null);
   const [isLoadingStats, setIsLoadingStats] = useState(true);
 
   useEffect(() => {
@@ -22,7 +55,7 @@ export default function Dashboard() {
     try {
       const response = await fetch('/api/stats');
       if (response.ok) {
-        const data = await response.json();
+        const data = (await response.json()) as DashboardData;
         setStats(data);
       }
     } catch (error) {
@@ -235,7 +268,7 @@ export default function Dashboard() {
             gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
             gap: '1rem'
           }}>
-            <a
+            <Link
               href="/leagues"
               style={{
                 display: 'inline-flex',
@@ -250,16 +283,16 @@ export default function Dashboard() {
                 textDecoration: 'none',
                 transition: 'all 0.2s'
               }}
-              onMouseOver={(e) => {
+              onMouseEnter={(e) => {
                 e.currentTarget.style.backgroundColor = '#111827';
               }}
-              onMouseOut={(e) => {
+              onMouseLeave={(e) => {
                 e.currentTarget.style.backgroundColor = '#1f2937';
               }}
             >
               View Leagues
-            </a>
-            <a
+            </Link>
+            <Link
               href="/matches?filter=upcoming"
               style={{
                 display: 'inline-flex',
@@ -274,16 +307,16 @@ export default function Dashboard() {
                 textDecoration: 'none',
                 transition: 'all 0.2s'
               }}
-              onMouseOver={(e) => {
+              onMouseEnter={(e) => {
                 e.currentTarget.style.backgroundColor = '#047857';
               }}
-              onMouseOut={(e) => {
+              onMouseLeave={(e) => {
                 e.currentTarget.style.backgroundColor = '#059669';
               }}
             >
               Record Score
-            </a>
-            <a
+            </Link>
+            <Link
               href="/matches"
               style={{
                 display: 'inline-flex',
@@ -298,16 +331,16 @@ export default function Dashboard() {
                 textDecoration: 'none',
                 transition: 'all 0.2s'
               }}
-              onMouseOver={(e) => {
+              onMouseEnter={(e) => {
                 e.currentTarget.style.backgroundColor = '#f9fafb';
               }}
-              onMouseOut={(e) => {
+              onMouseLeave={(e) => {
                 e.currentTarget.style.backgroundColor = 'white';
               }}
             >
               View Schedule
-            </a>
-            <a
+            </Link>
+            <Link
               href="/profile"
               style={{
                 display: 'inline-flex',
@@ -322,17 +355,17 @@ export default function Dashboard() {
                 textDecoration: 'none',
                 transition: 'all 0.2s'
               }}
-              onMouseOver={(e) => {
+              onMouseEnter={(e) => {
                 e.currentTarget.style.backgroundColor = '#f9fafb';
               }}
-              onMouseOut={(e) => {
+              onMouseLeave={(e) => {
                 e.currentTarget.style.backgroundColor = 'white';
               }}
             >
               Edit Profile
-            </a>
+            </Link>
             {session?.user?.isAdmin && (
-              <a
+              <Link
                 href="/admin"
                 style={{
                   display: 'inline-flex',
@@ -347,15 +380,15 @@ export default function Dashboard() {
                   textDecoration: 'none',
                   transition: 'all 0.2s'
                 }}
-                onMouseOver={(e) => {
+                onMouseEnter={(e) => {
                   e.currentTarget.style.backgroundColor = '#6d28d9';
                 }}
-                onMouseOut={(e) => {
+                onMouseLeave={(e) => {
                   e.currentTarget.style.backgroundColor = '#7c3aed';
                 }}
               >
                 Admin Panel
-              </a>
+              </Link>
             )}
           </div>
         </div>
@@ -375,7 +408,7 @@ export default function Dashboard() {
               boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
               padding: '1rem'
             }}>
-              {stats.upcomingMatches.slice(0, 3).map((match: any) => {
+              {stats.upcomingMatches.slice(0, 3).map((match) => {
                 const matchDate = new Date(match.scheduledTime);
                 const isPlayer1 = match.player1Id === session?.user?.id;
                 const opponent = isPlayer1 ? match.player2.name : match.player1.name;

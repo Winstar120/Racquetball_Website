@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
+import type { Prisma } from '@prisma/client';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
@@ -48,7 +49,7 @@ export async function POST(
     }
 
     // Update the confirmation status
-    const updateData: any = {};
+    const updateData: Prisma.MatchUpdateInput = {};
     if (isPlayer1) {
       updateData.player1Confirmed = true;
     } else if (isPlayer2) {

@@ -66,15 +66,18 @@ export default function LeagueMembers() {
         cache: 'no-store',
       });
       if (!response.ok) {
-        const payload = await response.json().catch(() => ({}));
-        const message = (payload as any).error ?? `Request failed with status ${response.status}`;
+        const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+        const message = payload?.error ?? `Request failed with status ${response.status}`;
         throw new Error(message);
       }
-      const data = await response.json();
-      setLeagues(data.leagues || []);
+      const data = (await response.json()) as { leagues?: LeagueWithRegistrations[] };
+      setLeagues(data.leagues ?? []);
       setMessage('');
-      if (data.leagues?.length > 0 && !selectedLeague) {
-        setSelectedLeague(data.leagues[0].id);
+      if (!selectedLeague) {
+        const firstLeague = data.leagues?.[0];
+        if (firstLeague) {
+          setSelectedLeague(firstLeague.id);
+        }
       }
     } catch (error) {
       console.error('Error fetching leagues:', error);
@@ -99,14 +102,15 @@ export default function LeagueMembers() {
       });
 
       if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Failed to remove member');
+        const data = (await response.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(data?.error || 'Failed to remove member');
       }
 
       setMessage(`Successfully removed ${userName} from the league`);
       await fetchLeaguesWithMembers();
-    } catch (error: any) {
-      setMessage(`Error: ${error.message}`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to remove member';
+      setMessage(`Error: ${message}`);
     } finally {
       setDeleting(null);
     }

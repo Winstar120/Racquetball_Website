@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
@@ -12,7 +12,7 @@ function startOfWeek(date: Date) {
   return monday;
 }
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const session = await getServerSession(authOptions);
 
@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
     const weekEnd = new Date(weekStart);
     weekEnd.setDate(weekEnd.getDate() + 7);
 
-    const emailLogClient = (prisma as any).emailLog;
+    const emailLogClient = prisma.emailLog;
 
     const [pendingUpcomingWeek, overdue, sentThisWeek, recentLogs] = await Promise.all([
       prisma.match.count({

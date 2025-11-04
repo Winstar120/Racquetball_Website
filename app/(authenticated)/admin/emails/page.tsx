@@ -147,6 +147,7 @@ export default function AdminEmails() {
         setMessageType('error');
       }
     } catch (error) {
+      console.error('Error sending reminders:', error);
       setMessage('Error sending reminders.');
       setMessageType('error');
     } finally {
@@ -189,6 +190,7 @@ export default function AdminEmails() {
         setMessageType('error');
       }
     } catch (error) {
+      console.error('Error sending announcement:', error);
       setMessage('Error sending announcement.');
       setMessageType('error');
     } finally {

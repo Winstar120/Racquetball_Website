@@ -69,9 +69,14 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json({ availability });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Create availability error:", error);
-    if (error.code === 'P2002') {
+    if (
+      typeof error === 'object' &&
+      error !== null &&
+      'code' in error &&
+      (error as { code?: string }).code === 'P2002'
+    ) {
       return NextResponse.json(
         { error: "This time slot already exists" },
         { status: 400 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 
 interface Match {
@@ -47,7 +47,8 @@ export default function NotificationsAdmin() {
       if (data.matches.length === 0) {
         setMessage('No matches scheduled in the selected time range.');
       }
-    } catch (err) {
+    } catch (error) {
+      console.error('Failed to load matches:', error);
       setError('Failed to load matches');
     } finally {
       setIsLoading(false);
@@ -75,7 +76,8 @@ export default function NotificationsAdmin() {
       const data = await response.json();
       setMessage(`${data.message}. ${data.successCount} emails sent successfully, ${data.failureCount} failed.`);
       setMatches([]);
-    } catch (err) {
+    } catch (error) {
+      console.error('Failed to send notifications:', error);
       setError('Failed to send notifications');
     } finally {
       setIsSending(false);
@@ -259,7 +261,7 @@ export default function NotificationsAdmin() {
                   * Reminders will only be sent to players who have email notifications enabled.
                 </p>
                 <p>
-                  * Each player receives their opponent's contact information (name, email, and phone number).
+                  * Each player receives their opponent&rsquo;s contact information (name, email, and phone number).
                 </p>
               </div>
             </div>

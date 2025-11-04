@@ -228,12 +228,12 @@ export default function EditLeaguePage({ params }: { params: Promise<{ leagueId:
       });
 
       if (!response.ok) {
-        const data = await response.json().catch(() => ({}));
-        const message = (data as any).error ?? 'Failed to update league';
+        const data = (await response.json().catch(() => null)) as { error?: string } | null;
+        const message = data?.error ?? 'Failed to update league';
         throw new Error(message);
       }
 
-      const data = await response.json();
+      const data = (await response.json()) as { league: League };
       setMessage('League updated successfully.');
       const updated: League = data.league;
       setForm({
@@ -285,8 +285,8 @@ export default function EditLeaguePage({ params }: { params: Promise<{ leagueId:
         credentials: 'include',
       });
       if (!response.ok) {
-        const data = await response.json().catch(() => ({}));
-        const message = (data as any).error ?? 'Failed to delete league';
+        const data = (await response.json().catch(() => null)) as { error?: string } | null;
+        const message = data?.error ?? 'Failed to delete league';
         throw new Error(message);
       }
       router.push('/admin/leagues');

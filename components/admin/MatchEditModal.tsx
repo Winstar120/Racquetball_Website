@@ -29,7 +29,16 @@ interface Match {
   scheduledTime: string;
   weekNumber: number;
   status: string;
-  games: any[];
+  games: MatchGame[];
+}
+
+interface MatchGame {
+  id: string;
+  gameNumber: number;
+  player1Score: number;
+  player2Score: number;
+  player3Score?: number | null;
+  player4Score?: number | null;
 }
 
 interface MatchEditModalProps {

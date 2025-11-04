@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
+import type { Prisma } from "@prisma/client";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { sendBulkMatchReminders } from "@/lib/email";
@@ -24,7 +25,7 @@ export async function POST(request: Request) {
     endDate.setDate(endDate.getDate() + daysAhead);
 
     // Build the query
-    const whereClause: any = {
+    const whereClause: Prisma.MatchWhereInput = {
       scheduledTime: {
         gte: startDate,
         lte: endDate,
@@ -97,7 +98,7 @@ export async function GET(request: Request) {
     const endDate = new Date(now);
     endDate.setDate(endDate.getDate() + daysAhead);
 
-    const whereClause: any = {
+    const whereClause: Prisma.MatchWhereInput = {
       scheduledTime: {
         gte: startDate,
         lte: endDate,

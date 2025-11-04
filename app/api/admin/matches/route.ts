@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
+import type { Prisma } from '@prisma/client';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
@@ -20,7 +21,7 @@ export async function GET(request: NextRequest) {
     const effectiveLimit = Number.isFinite(limit) && limit! > 0 ? limit : undefined;
 
     // Build where clause
-    const where: any = {};
+    const where: Prisma.MatchWhereInput = {};
 
     if (leagueId && leagueId !== 'all') {
       where.leagueId = leagueId;

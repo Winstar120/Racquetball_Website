@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -63,35 +63,40 @@ export default function ConfirmScore({ params }: { params: Promise<{ matchId: st
     params.then(p => setMatchId(p.matchId));
   }, [params]);
 
-  useEffect(() => {
-    if (matchId) {
-      fetchMatch();
-    }
-  }, [matchId]);
-
-  async function fetchMatch() {
+  const fetchMatch = useCallback(async () => {
+    if (!matchId) return;
+    setIsLoading(true);
     try {
       const response = await fetch(`/api/matches/${matchId}`);
       if (!response.ok) throw new Error('Failed to fetch match');
 
-      const data = await response.json();
+      const data = (await response.json()) as { match: Match };
       setMatch(data.match);
 
       // Initialize disputed games with the reported scores
       if (data.match.games) {
-        setDisputedGames(data.match.games.map((game: any) => ({
-          gameNumber: game.gameNumber,
-          player1Score: game.player1Score,
-          player2Score: game.player2Score,
-          player3Score: game.player3Score
-        })));
+        setDisputedGames(
+          data.match.games.map((game) => ({
+            gameNumber: game.gameNumber,
+            player1Score: game.player1Score,
+            player2Score: game.player2Score,
+            player3Score: game.player3Score,
+          }))
+        );
       }
-    } catch (err) {
+    } catch (error) {
+      console.error('Failed to load match details:', error);
       setError('Failed to load match details');
     } finally {
       setIsLoading(false);
     }
-  }
+  }, [matchId]);
+
+  useEffect(() => {
+    if (matchId) {
+      void fetchMatch();
+    }
+  }, [fetchMatch, matchId]);
 
   async function confirmScore() {
     setIsConfirming(true);
@@ -106,14 +111,15 @@ export default function ConfirmScore({ params }: { params: Promise<{ matchId: st
       });
 
       if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Failed to confirm score');
+        const data = (await response.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(data?.error || 'Failed to confirm score');
       }
 
       // Redirect back to matches
       router.push('/matches');
-    } catch (err: any) {
-      setError(err.message || 'Failed to confirm score');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to confirm score';
+      setError(message);
       setIsConfirming(false);
     }
   }
@@ -148,14 +154,15 @@ export default function ConfirmScore({ params }: { params: Promise<{ matchId: st
       });
 
       if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Failed to submit dispute');
+        const data = (await response.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(data?.error || 'Failed to submit dispute');
       }
 
       // Redirect back to matches
       router.push('/matches');
-    } catch (err: any) {
-      setError(err.message || 'Failed to submit dispute');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to submit dispute';
+      setError(message);
       setIsDisputing(false);
     }
   }

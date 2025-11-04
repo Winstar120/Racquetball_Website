@@ -7,6 +7,9 @@ type PlayerSummary = {
   id: string;
   name: string;
   email?: string | null;
+  league?: {
+    name?: string | null;
+  } | null;
 };
 
 type ScheduleMatchBase = {
@@ -31,6 +34,9 @@ type ScheduleMatch = ScheduleMatchBase & {
   court?: {
     name: string;
     location?: string | null;
+  } | null;
+  league?: {
+    name?: string | null;
   } | null;
 };
 
@@ -131,8 +137,8 @@ export default function LeagueSchedulePage({ params }: { params: Promise<{ leagu
           : undefined;
 
       const leagueName =
-        (sampleMatch as any)?.league?.name ??
-        (sampleMatch as any)?.player1?.league?.name ??
+        sampleMatch?.league?.name ??
+        sampleMatch?.player1?.league?.name ??
         'League';
 
       if (payload.isGenerated) {
@@ -197,8 +203,8 @@ export default function LeagueSchedulePage({ params }: { params: Promise<{ leagu
         credentials: 'include',
       });
       if (!response.ok) {
-        const payload = await response.json().catch(() => ({}));
-        const message = (payload as any)?.error ?? 'Failed to generate schedule';
+        const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+        const message = payload?.error ?? 'Failed to generate schedule';
         throw new Error(message);
       }
       await fetchSchedule();

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
+import type { Prisma } from "@prisma/client";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
@@ -123,7 +124,7 @@ export async function PATCH(
       }
     };
 
-    const updateData: Record<string, any> = {};
+    const updateData: Record<string, unknown> = {};
 
     if (typeof name === 'string') updateData.name = name.trim();
     if (typeof rankingMethod === 'string') updateData.rankingMethod = rankingMethod;
@@ -210,7 +211,7 @@ export async function PATCH(
       updateData.leagueFee = parsedFee;
     }
 
-    const dateFields: Array<{ key: keyof typeof updateData; value: any; nullable: boolean }> = [
+    const dateFields: Array<{ key: keyof typeof updateData; value: unknown; nullable: boolean }> = [
       { key: 'startDate', value: startDate, nullable: true },
       { key: 'endDate', value: endDate, nullable: true },
       { key: 'registrationOpens', value: registrationOpens, nullable: false },
@@ -229,13 +230,23 @@ export async function PATCH(
         continue;
       }
 
-      const parsedDate = new Date(value);
-      if (Number.isNaN(parsedDate.getTime())) {
+      let parsedDate: Date | null = null;
+      if (value instanceof Date) {
+        parsedDate = value;
+      } else if (typeof value === 'string' || typeof value === 'number') {
+        const candidate = new Date(value);
+        if (!Number.isNaN(candidate.getTime())) {
+          parsedDate = candidate;
+        }
+      }
+
+      if (!parsedDate) {
         return NextResponse.json(
           { error: `Invalid date provided for ${key}.` },
           { status: 400 }
         );
       }
+
       updateData[key] = parsedDate;
     }
 
@@ -258,7 +269,7 @@ export async function PATCH(
     let divisionsUpdated = false;
     if (divisions !== undefined) {
       divisionsUpdated = true;
-      const rawLevels = Array.isArray(divisions)
+      const rawLevels: unknown[] = Array.isArray(divisions)
         ? divisions
         : typeof divisions === 'string'
         ? divisions.split(',')
@@ -266,7 +277,7 @@ export async function PATCH(
 
       const normalizedLevels = Array.from(
         new Set(
-          [...rawLevels.map((level: any) => String(level).trim()).filter(Boolean), 'N/A']
+          [...rawLevels.map((level) => String(level).trim()).filter(Boolean), 'N/A']
         )
       );
 
@@ -281,7 +292,7 @@ export async function PATCH(
         .map((division) => division.id);
       const toAddLevels = normalizedLevels.filter((level) => !existingLevels.has(level));
 
-      const divisionTransactions: any[] = [];
+      const divisionTransactions: Prisma.PrismaPromise<unknown>[] = [];
 
       if (toDeleteIds.length > 0) {
         divisionTransactions.push(
@@ -347,7 +358,7 @@ export async function PATCH(
     const updatedLeague = Object.keys(updateData).length > 0
       ? await prisma.league.update({
           where: { id: leagueId },
-          data: updateData,
+          data: updateData as Prisma.LeagueUpdateInput,
           include: includeConfig,
         })
       : await prisma.league.findUnique({

@@ -3,6 +3,13 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
+type DisputeGame = {
+  gameNumber: number;
+  player1Score: number;
+  player2Score: number;
+  player3Score?: number | null;
+};
+
 export async function POST(
   request: Request,
   context: { params: Promise<{ matchId: string }> }
@@ -15,7 +22,15 @@ export async function POST(
 
     const params = await context.params;
     const { matchId } = params;
-    const { games } = await request.json();
+    const body = (await request.json()) as { games?: DisputeGame[] };
+    const games = body.games;
+
+    if (!Array.isArray(games) || games.length === 0) {
+      return NextResponse.json(
+        { error: 'No disputed scores provided' },
+        { status: 400 }
+      );
+    }
 
     // Get the match details
     const match = await prisma.match.findUnique({
@@ -64,14 +79,14 @@ export async function POST(
 
     // Save the disputed scores
     const disputedScores = await Promise.all(
-      games.map((game: any) =>
+      games.map((game) =>
         prisma.disputedScore.create({
           data: {
             matchId: matchId,
             gameNumber: game.gameNumber,
             player1Score: game.player1Score,
             player2Score: game.player2Score,
-            player3Score: game.player3Score || null,
+            player3Score: game.player3Score ?? null,
             reportedBy: session.user.id,
           },
         })

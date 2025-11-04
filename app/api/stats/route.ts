@@ -34,7 +34,7 @@ export async function GET() {
     });
 
     // Calculate statistics
-    let totalMatches = matches.length;
+    const totalMatches = matches.length;
     let wins = 0;
     let losses = 0;
     let totalGamesWon = 0;

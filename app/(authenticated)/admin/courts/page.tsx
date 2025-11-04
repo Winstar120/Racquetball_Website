@@ -51,8 +51,9 @@ export default function CourtsAdmin() {
       if (!response.ok) throw new Error('Failed to fetch courts');
       const data = await response.json();
       setCourts(data.courts || []);
-    } catch (err) {
-      setError('Failed to load courts');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to load courts';
+      setError(message);
     } finally {
       setIsLoading(false);
     }
@@ -96,8 +97,9 @@ export default function CourtsAdmin() {
       await fetchCourts();
       setShowAddCourt(false);
       (event.target as HTMLFormElement).reset();
-    } catch (err) {
-      setError('Failed to add court');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to add court';
+      setError(message);
     }
   }
 
@@ -120,8 +122,9 @@ export default function CourtsAdmin() {
 
       await fetchCourts();
       (event.target as HTMLFormElement).reset();
-    } catch (err) {
-      setError('Failed to add availability');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to add availability';
+      setError(message);
     }
   }
 
@@ -136,8 +139,9 @@ export default function CourtsAdmin() {
       if (!response.ok) throw new Error('Failed to delete availability');
 
       await fetchCourts();
-    } catch (err) {
-      setError('Failed to delete availability');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to delete availability';
+      setError(message);
     }
   }
 

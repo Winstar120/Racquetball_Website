@@ -7,6 +7,10 @@ import Link from 'next/link';
 import { formatGameType } from '@/lib/utils';
 import { useIsMobile } from '@/lib/hooks/useIsMobile';
 
+type MatchesResponse = {
+  matches?: Match[];
+};
+
 interface Match {
   id: string;
   scheduledTime: string;
@@ -77,8 +81,8 @@ export default function MatchesClient({ initialFilter }: MatchesClientProps) {
     try {
       const response = await fetch(`/api/matches?filter=${filter}`);
       if (!response.ok) throw new Error('Failed to fetch matches');
-      const data = await response.json();
-      let fetchedMatches = data.matches || [];
+      const data = (await response.json()) as MatchesResponse;
+      const fetchedMatches = [...(data.matches ?? [])];
 
       if (filter === 'past') {
         fetchedMatches.sort((a: Match, b: Match) => {
@@ -93,7 +97,8 @@ export default function MatchesClient({ initialFilter }: MatchesClientProps) {
       }
 
       setMatches(fetchedMatches);
-    } catch (err) {
+    } catch (error) {
+      console.error('Failed to load matches:', error);
       setError('Failed to load matches');
     } finally {
       setIsLoading(false);

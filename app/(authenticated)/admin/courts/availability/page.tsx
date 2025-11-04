@@ -83,15 +83,21 @@ export default function GlobalAvailabilityPage() {
       if (!availabilityRes.ok) throw new Error('Failed to load availability');
       if (!courtsRes.ok) throw new Error('Failed to load courts');
 
-      const availabilityData = await availabilityRes.json();
-      const courtsData = await courtsRes.json();
+      const availabilityData = (await availabilityRes.json()) as {
+        availability?: AvailabilityItem[];
+      };
+      const courtsData = (await courtsRes.json()) as {
+        courts?: CourtOption[];
+      };
 
       setAvailability(availabilityData.availability ?? []);
-      setCourts((courtsData.courts ?? []).map((court: any) => ({
-        id: court.id,
-        name: court.name,
-        location: court.location,
-      })));
+      setCourts(
+        (courtsData.courts ?? []).map((court) => ({
+          id: court.id,
+          name: court.name,
+          location: court.location ?? null,
+        }))
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load availability');
     } finally {
@@ -135,8 +141,8 @@ export default function GlobalAvailabilityPage() {
       });
 
       if (!response.ok) {
-        const data = await response.json().catch(() => ({}));
-        throw new Error((data as any).error ?? 'Failed to create availability');
+        const data = (await response.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(data?.error ?? 'Failed to create availability');
       }
 
       await loadData();
@@ -158,8 +164,8 @@ export default function GlobalAvailabilityPage() {
       });
 
       if (!response.ok) {
-        const data = await response.json().catch(() => ({}));
-        throw new Error((data as any).error ?? 'Failed to update slot');
+        const data = (await response.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(data?.error ?? 'Failed to update slot');
       }
 
       setAvailability((prev) =>
@@ -180,8 +186,8 @@ export default function GlobalAvailabilityPage() {
       });
 
       if (!response.ok) {
-        const data = await response.json().catch(() => ({}));
-        throw new Error((data as any).error ?? 'Failed to delete slot');
+        const data = (await response.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(data?.error ?? 'Failed to delete slot');
       }
 
       setAvailability((prev) => prev.filter((slot) => slot.id !== id));

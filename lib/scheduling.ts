@@ -6,12 +6,12 @@ interface Player {
   divisionId?: string;
 }
 
-interface TimeSlot {
-  dayOfWeek: number;
+type AvailableSlot = {
+  date: Date;
+  courtNumber: number;
   startTime: string;
   endTime: string;
-  date?: Date;
-}
+};
 
 interface ScheduledMatch {
   player1Id: string;
@@ -36,7 +36,7 @@ export async function getAvailableTimeSlots(
   endDate: Date,
   matchDuration: number = 60,
   blackoutDates: Date[] = []
-) {
+): Promise<AvailableSlot[]> {
   const globalAvailability = await prisma.globalCourtAvailability.findMany({
     where: { isActive: true },
     orderBy: [
@@ -45,7 +45,7 @@ export async function getAvailableTimeSlots(
     ]
   });
 
-  const timeSlots: { date: Date; courtNumber: number; startTime: string; endTime: string }[] = [];
+  const timeSlots: AvailableSlot[] = [];
   const blackoutSet = new Set(blackoutDates.map(toDateKey));
   const currentDate = new Date(startDate);
   currentDate.setHours(0, 0, 0, 0);
@@ -76,9 +76,8 @@ export async function getAvailableTimeSlots(
 
       // Generate hourly time slots within the availability window
       for (let minutes = startMinutes; minutes + matchDuration <= endMinutes; minutes += matchDuration) {
-        let currentMinutes = minutes;
-        const slotHour = Math.floor(currentMinutes / 60);
-        const slotMin = currentMinutes % 60;
+        const slotHour = Math.floor(minutes / 60);
+        const slotMin = minutes % 60;
         const slotEndMinutes = minutes + matchDuration;
         const slotEndHour = Math.floor(slotEndMinutes / 60);
         const slotEndMin = slotEndMinutes % 60;
@@ -315,15 +314,6 @@ export async function generateLeagueSchedule(
     return !occupiedSlots.has(slotKey);
   });
 
-  // Calculate slots per week
-  const weeklySlots = timeSlots.filter(slot => {
-    const slotDate = new Date(slot.date);
-    const weekStart = new Date(seasonStart);
-    const weekEnd = new Date(seasonStart);
-    weekEnd.setDate(weekEnd.getDate() + 7);
-    return slotDate >= weekStart && slotDate < weekEnd;
-  }).length;
-
   let slotIndex = 0;
 
   // Process each division
@@ -403,11 +393,10 @@ export async function generateLeagueSchedule(
       const totalWeeks = Math.ceil(shuffledPairings.length / matchesPerWeek);
 
       // Group time slots by week
-      const slotsByWeek: typeof timeSlots[] = [];
-      const slotsPerWeek = 7; // Assuming daily slots
+      const slotsByWeek: AvailableSlot[][] = [];
 
       for (let week = 0; week < totalWeeks; week++) {
-        const weekSlots: typeof timeSlots = [];
+        const weekSlots: AvailableSlot[] = [];
         const weekStart = new Date(seasonStart);
         weekStart.setDate(weekStart.getDate() + (week * 7));
         const weekEnd = new Date(weekStart);
@@ -428,8 +417,6 @@ export async function generateLeagueSchedule(
         const [player1, player2] = shuffledPairings[i];
         const weekNumber = Math.floor(i / matchesPerWeek) + 1;
         const weekIndex = weekNumber - 1;
-        const matchInWeek = i % matchesPerWeek;
-
         // Get available slots for this week
         const weekSlots = slotsByWeek[weekIndex] || [];
 

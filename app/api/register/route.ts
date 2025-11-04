@@ -36,7 +36,8 @@ export async function POST(request: Request) {
       }
     });
 
-    const { password: _, ...userWithoutPassword } = user;
+    const { password: _password, ...userWithoutPassword } = user;
+    void _password;
 
     // Send welcome email (fire-and-forget so registration response is fast)
     sendWelcomeEmail(user).catch(error => {

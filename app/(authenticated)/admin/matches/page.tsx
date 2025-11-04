@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { redirect } from 'next/navigation';
 import MatchScheduleModal from '@/components/admin/MatchScheduleModal';
@@ -65,29 +65,30 @@ export default function AdminMatchesPage() {
     }
   }, [session, status]);
 
-  useEffect(() => {
-    if (session?.user.isAdmin) {
-      fetchMatches();
-    }
-  }, [session, searchTerm, selectedLeague, selectedStatus]);
-
-  const fetchMatches = async () => {
+  const fetchMatches = useCallback(async () => {
     try {
+      setLoading(true);
       const params = new URLSearchParams();
       if (selectedLeague !== 'all') params.append('leagueId', selectedLeague);
       if (selectedStatus !== 'all') params.append('status', selectedStatus);
       if (searchTerm) params.append('search', searchTerm);
 
       const response = await fetch(`/api/admin/matches?${params.toString()}`);
-      const data = await response.json();
-      setMatches(data.matches || []);
-      setLeagues(data.leagues || []);
+      const data = (await response.json()) as { matches?: Match[]; leagues?: League[] };
+      setMatches(data.matches ?? []);
+      setLeagues(data.leagues ?? []);
     } catch (error) {
       console.error('Error fetching matches:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [searchTerm, selectedLeague, selectedStatus]);
+
+  useEffect(() => {
+    if (session?.user.isAdmin) {
+      fetchMatches();
+    }
+  }, [session, fetchMatches]);
 
   const handleDeleteMatch = async (matchId: string) => {
     if (!confirm('Are you sure you want to delete this match? This will also delete all associated game scores.')) {
@@ -100,7 +101,7 @@ export default function AdminMatchesPage() {
       });
 
       if (response.ok) {
-        fetchMatches();
+        await fetchMatches();
       } else {
         alert('Failed to delete match');
       }

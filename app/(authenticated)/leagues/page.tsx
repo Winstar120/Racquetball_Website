@@ -37,7 +37,7 @@ interface Division {
 }
 
 export default function Leagues() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const router = useRouter();
   const [leagues, setLeagues] = useState<League[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -58,8 +58,9 @@ export default function Leagues() {
       if (!response.ok) throw new Error('Failed to fetch leagues');
       const data = await response.json();
       setLeagues(data.leagues || []);
-    } catch (err) {
-      setError('Failed to load leagues');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to load leagues';
+      setError(message);
     } finally {
       setIsLoading(false);
     }
@@ -86,12 +87,13 @@ export default function Leagues() {
         }
       }
 
-      const data = await response.json();
+      await response.json();
       await fetchLeagues();
       alert('Successfully registered for the league!');
-    } catch (err: any) {
-      console.error('Registration error:', err);
-      alert(err.message || 'Failed to register for league');
+    } catch (error) {
+      console.error('Registration error:', error);
+      const message = error instanceof Error ? error.message : 'Failed to register for league';
+      alert(message);
     }
   }
 
@@ -107,7 +109,8 @@ export default function Leagues() {
 
       await fetchLeagues();
       alert('Registration cancelled successfully');
-    } catch (err) {
+    } catch (error) {
+      console.error('Failed to cancel registration:', error);
       alert('Failed to cancel registration');
     }
   }

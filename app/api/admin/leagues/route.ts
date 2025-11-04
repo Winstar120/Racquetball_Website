@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
+import type { Prisma } from "@prisma/client";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
@@ -90,7 +91,7 @@ export async function POST(request: Request) {
       parsedNumberOfGames = Math.round(parsedNumberOfGames);
     }
 
-    const leagueData: Record<string, any> = {
+    const leagueData: Record<string, unknown> = {
       name,
       description: typeof description === 'string' && description.trim().length > 0 ? description.trim() : null,
       gameType: gameType || 'SINGLES',
@@ -116,11 +117,14 @@ export async function POST(request: Request) {
     }
 
     const league = await prisma.league.create({
-      data: leagueData as any,
+      data: leagueData as Prisma.LeagueCreateInput,
     });
 
+    const rawDivisionValues: unknown[] = Array.isArray(divisions) ? divisions : [];
     const divisionLevels = new Set<string>(
-      Array.isArray(divisions) ? divisions.map((level: string) => level) : []
+      rawDivisionValues
+        .map((level) => String(level).trim())
+        .filter(Boolean)
     );
     divisionLevels.add('N/A');
 

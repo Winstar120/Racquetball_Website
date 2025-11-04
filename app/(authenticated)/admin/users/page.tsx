@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import AdminPageLayout from '@/components/admin/AdminPageLayout';
 
 interface User {
@@ -34,9 +34,30 @@ export default function ManageUsersPage() {
     fetchUsers();
   }, []);
 
+  const filterUsers = useCallback(() => {
+    let filtered = users;
+
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      filtered = filtered.filter(
+        (user) =>
+          user.name.toLowerCase().includes(term) ||
+          user.email.toLowerCase().includes(term)
+      );
+    }
+
+    if (roleFilter !== 'all') {
+      filtered = filtered.filter((user) =>
+        roleFilter === 'admin' ? user.isAdmin : !user.isAdmin
+      );
+    }
+
+    setFilteredUsers(filtered);
+  }, [users, searchTerm, roleFilter]);
+
   useEffect(() => {
     filterUsers();
-  }, [users, searchTerm, roleFilter]);
+  }, [filterUsers]);
 
   async function fetchUsers() {
     try {
@@ -50,25 +71,6 @@ export default function ManageUsersPage() {
     } finally {
       setIsLoading(false);
     }
-  }
-
-  function filterUsers() {
-    let filtered = users;
-
-    if (searchTerm) {
-      filtered = filtered.filter(user =>
-        user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    if (roleFilter !== 'all') {
-      filtered = filtered.filter(user =>
-        roleFilter === 'admin' ? user.isAdmin : !user.isAdmin
-      );
-    }
-
-    setFilteredUsers(filtered);
   }
 
   async function handleToggleAdmin(userId: string, currentStatus: boolean) {
@@ -88,6 +90,7 @@ export default function ManageUsersPage() {
 
       await fetchUsers();
     } catch (error) {
+      console.error('Failed to update user role:', error);
       alert('Failed to update user role');
     }
   }
@@ -104,6 +107,7 @@ export default function ManageUsersPage() {
 
       await fetchUsers();
     } catch (error) {
+      console.error('Failed to delete user:', error);
       alert('Failed to delete user');
     }
   }

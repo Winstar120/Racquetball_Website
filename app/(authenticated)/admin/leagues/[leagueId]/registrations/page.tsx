@@ -48,7 +48,7 @@ type FetchResponse = {
 type UserSummary = {
   id: string;
   name: string;
-  email: string;
+  email: string | null;
   skillLevel?: string | null;
 };
 
@@ -144,15 +144,14 @@ export default function LeagueRegistrationsPage({ params }: { params: Promise<{ 
       const url = query ? `/api/admin/users?search=${encodeURIComponent(query)}` : '/api/admin/users';
       const response = await fetch(url, { credentials: 'include' });
       if (!response.ok) throw new Error('Search failed');
-      const data = await response.json();
-      const results: UserSummary[] = (data.users || [])
-        .filter((user: any) => !registeredUserIds.has(user.id))
-        .map((user: any) => ({
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          skillLevel: user.skillLevel,
-        }));
+      const data = (await response.json()) as { users?: UserSummary[] };
+      const availableUsers = (data.users ?? []).filter((user) => !registeredUserIds.has(user.id));
+      const results: UserSummary[] = availableUsers.map((user) => ({
+        id: user.id,
+        name: user.name,
+        email: user.email ?? null,
+        skillLevel: user.skillLevel ?? null,
+      }));
       setSearchResults(results);
       if (results.length === 0) {
         setActionMessage(
@@ -191,11 +190,11 @@ export default function LeagueRegistrationsPage({ params }: { params: Promise<{ 
         }),
       });
       if (!response.ok) {
-        const payload = await response.json().catch(() => ({}));
-        const message = (payload as any).error ?? 'Failed to add registration';
+        const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+        const message = payload?.error ?? 'Failed to add registration';
         throw new Error(message);
       }
-      const data = await response.json();
+      const data = (await response.json()) as { registration: Registration };
       if (state.kind === 'ready') {
         setState({
           kind: 'ready',
@@ -227,8 +226,8 @@ export default function LeagueRegistrationsPage({ params }: { params: Promise<{ 
         }
       );
       if (!response.ok) {
-        const payload = await response.json().catch(() => ({}));
-        const message = (payload as any).error ?? 'Failed to remove registration';
+        const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+        const message = payload?.error ?? 'Failed to remove registration';
         throw new Error(message);
       }
       if (state.kind === 'ready') {

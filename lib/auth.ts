@@ -1,4 +1,5 @@
 import { NextAuthOptions } from "next-auth";
+import type { Adapter } from "next-auth/adapters";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
@@ -20,7 +21,7 @@ const resolvedDatabaseUrlPrefix = () => {
 }
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma) as any,
+  adapter: PrismaAdapter(prisma) as Adapter,
   session: {
     strategy: "jwt"
   },
@@ -99,15 +100,22 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.id = user.id;
-        token.isAdmin = (user as any).isAdmin;
+        if ('id' in user) {
+          token.id = user.id;
+        }
+        if ('isAdmin' in user) {
+          token.isAdmin = (user as { isAdmin?: boolean }).isAdmin ?? false;
+        }
       }
       return token;
     },
     async session({ session, token }) {
       if (token) {
-        session.user.id = token.id as string;
-        session.user.isAdmin = token.isAdmin as boolean;
+        session.user = {
+          ...session.user,
+          id: typeof token.id === 'string' ? token.id : '',
+          isAdmin: typeof token.isAdmin === 'boolean' ? token.isAdmin : false,
+        };
       }
       return session;
     }

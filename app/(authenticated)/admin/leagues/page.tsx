@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { formatGameType } from '@/lib/utils';
 
 interface League {
@@ -19,7 +18,6 @@ interface League {
 }
 
 export default function ManageLeaguesPage() {
-  const router = useRouter();
   const [leagues, setLeagues] = useState<League[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -34,8 +32,9 @@ export default function ManageLeaguesPage() {
       if (!response.ok) throw new Error('Failed to fetch leagues');
       const data = await response.json();
       setLeagues(data.leagues || []);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load leagues');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to load leagues';
+      setError(message);
     } finally {
       setLoading(false);
     }

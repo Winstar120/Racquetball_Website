@@ -1,8 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useIsMobile } from '@/lib/hooks/useIsMobile';
 
@@ -50,7 +49,6 @@ interface Match {
 
 export default function MatchDetailPage({ params }: { params: Promise<{ matchId: string }> }) {
   const { data: session } = useSession();
-  const router = useRouter();
   const [match, setMatch] = useState<Match | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -61,24 +59,27 @@ export default function MatchDetailPage({ params }: { params: Promise<{ matchId:
     params.then(p => setMatchId(p.matchId));
   }, [params]);
 
-  useEffect(() => {
-    if (matchId) {
-      fetchMatch();
-    }
-  }, [matchId]);
-
-  const fetchMatch = async () => {
+  const fetchMatch = useCallback(async () => {
+    if (!matchId) return;
+    setLoading(true);
     try {
       const response = await fetch(`/api/matches/${matchId}`);
       if (!response.ok) throw new Error('Failed to fetch match');
-      const data = await response.json();
+      const data = (await response.json()) as { match: Match };
       setMatch(data.match);
-    } catch (err) {
+    } catch (error) {
+      console.error('Failed to load match details:', error);
       setError('Failed to load match details');
     } finally {
       setLoading(false);
     }
-  };
+  }, [matchId]);
+
+  useEffect(() => {
+    if (matchId) {
+      void fetchMatch();
+    }
+  }, [fetchMatch, matchId]);
 
   const formatGameType = (gameType: string): string => {
     switch (gameType) {

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
+import type { Prisma } from "@prisma/client";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
@@ -18,21 +19,22 @@ export async function GET(request: Request) {
 
   try {
     const now = new Date();
-    let whereClause: any = {
-      OR: [
-        { player1Id: session.user.id },
-        { player2Id: session.user.id },
-        { player3Id: session.user.id },
-        { player4Id: session.user.id },
-      ],
+    const orConditions: Prisma.MatchWhereInput[] = [
+      { player1Id: session.user.id },
+      { player2Id: session.user.id },
+      { player3Id: session.user.id },
+      { player4Id: session.user.id },
+    ];
+    const whereClause: Prisma.MatchWhereInput = {
+      OR: orConditions,
     };
 
     if (filter === 'upcoming') {
       whereClause.scheduledTime = { gte: now };
       whereClause.status = { in: ['SCHEDULED'] };
     } else if (filter === 'past') {
-      whereClause.OR.push({ scheduledTime: { lt: now } });
-      whereClause.OR.push({ status: { in: ['COMPLETED', 'CANCELLED'] } });
+      orConditions.push({ scheduledTime: { lt: now } });
+      orConditions.push({ status: { in: ['COMPLETED', 'CANCELLED'] } });
     }
 
     const matches = await prisma.match.findMany({

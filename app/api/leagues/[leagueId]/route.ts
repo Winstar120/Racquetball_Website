@@ -57,7 +57,7 @@ export async function GET(
       registrations: division.registrations.length,
     }));
 
-    const numberOfGames = (league as any).numberOfGames ?? 3;
+    const numberOfGames = typeof league.numberOfGames === 'number' ? league.numberOfGames : 3;
 
     return NextResponse.json({
       league: {

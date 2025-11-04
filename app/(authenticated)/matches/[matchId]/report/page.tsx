@@ -1,7 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { formatGameType } from '@/lib/utils';
@@ -41,7 +40,6 @@ interface Game {
 }
 
 export default function ReportScore({ params }: { params: Promise<{ matchId: string }> }) {
-  const { data: session } = useSession();
   const router = useRouter();
   const [match, setMatch] = useState<Match | null>(null);
   // Default to 3 games (standard racquetball match)
@@ -60,17 +58,13 @@ export default function ReportScore({ params }: { params: Promise<{ matchId: str
     params.then(p => setMatchId(p.matchId));
   }, [params]);
 
-  useEffect(() => {
-    if (matchId) {
-      fetchMatch();
-    }
-  }, [matchId]);
-
-  async function fetchMatch() {
+  const fetchMatch = useCallback(async () => {
+    if (!matchId) return;
+    setIsLoading(true);
     try {
       const response = await fetch(`/api/matches/${matchId}`);
       if (!response.ok) throw new Error('Failed to fetch match');
-      const data = await response.json();
+      const data = (await response.json()) as { match: Match };
       setMatch(data.match);
 
       // Initialize games for cut-throat (3 games standard)
@@ -88,12 +82,19 @@ export default function ReportScore({ params }: { params: Promise<{ matchId: str
           { gameNumber: 3, player1Score: 0, player2Score: 0 }
         ]);
       }
-    } catch (err) {
+    } catch (error) {
+      console.error('Failed to load match details:', error);
       setError('Failed to load match details');
     } finally {
       setIsLoading(false);
     }
-  }
+  }, [matchId]);
+
+  useEffect(() => {
+    if (matchId) {
+      void fetchMatch();
+    }
+  }, [fetchMatch, matchId]);
 
   // Removed add/remove game functions - fixed at 3 games
 
@@ -153,13 +154,14 @@ export default function ReportScore({ params }: { params: Promise<{ matchId: str
       });
 
       if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Failed to submit scores');
+        const data = (await response.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(data?.error || 'Failed to submit scores');
       }
 
       router.push('/matches');
-    } catch (err: any) {
-      setError(err.message || 'Failed to submit scores');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to submit scores';
+      setError(message);
     } finally {
       setIsSaving(false);
     }

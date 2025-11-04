@@ -68,7 +68,8 @@ export default function StandingsClient({ initialLeagueId }: StandingsClientProp
       } else if (data.leagues && data.leagues.length > 0) {
         setSelectedLeague(data.leagues[0].leagueId);
       }
-    } catch (err) {
+    } catch (error) {
+      console.error('Failed to load standings:', error);
       setError('Failed to load standings');
     } finally {
       setIsLoading(false);

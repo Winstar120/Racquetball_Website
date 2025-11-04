@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -59,13 +59,9 @@ export default function ResultsPage() {
     }
   }, [status, router]);
 
-  useEffect(() => {
-    if (session) {
-      fetchCompletedMatches();
-    }
-  }, [session, selectedLeague]);
-
-  const fetchCompletedMatches = async () => {
+  const fetchCompletedMatches = useCallback(async () => {
+    if (!session) return;
+    setLoading(true);
     try {
       const params = new URLSearchParams();
       params.append('status', 'COMPLETED');
@@ -76,12 +72,12 @@ export default function ResultsPage() {
       const response = await fetch(`/api/matches?${params.toString()}`);
       if (!response.ok) throw new Error('Failed to fetch matches');
 
-      const data = await response.json();
+      const data = (await response.json()) as { matches?: Match[] };
       setMatches(data.matches || []);
 
       // Extract unique leagues from matches
       const uniqueLeagues = new Map<string, League>();
-      data.matches?.forEach((match: Match) => {
+      data.matches?.forEach((match) => {
         if (!uniqueLeagues.has(match.league.id)) {
           uniqueLeagues.set(match.league.id, match.league);
         }
@@ -92,7 +88,13 @@ export default function ResultsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedLeague, session]);
+
+  useEffect(() => {
+    if (session) {
+      void fetchCompletedMatches();
+    }
+  }, [fetchCompletedMatches, session]);
 
   const formatGameType = (gameType: string): string => {
     switch (gameType) {

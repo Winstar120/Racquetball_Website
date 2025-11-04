@@ -1,7 +1,27 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
+import type { Prisma } from "@prisma/client";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+
+type SubmittedGame = {
+  player1Score: number;
+  player2Score: number;
+  player3Score?: number | null;
+};
+
+type PersistedGame = SubmittedGame & {
+  matchId: string;
+  gameNumber: number;
+  winnerId: string | null;
+};
+
+type MatchWithLeague = Prisma.MatchGetPayload<{
+  include: {
+    games: true;
+    league: true;
+  };
+}>;
 
 export async function POST(
   request: Request,
@@ -18,7 +38,15 @@ export async function POST(
   }
 
   try {
-    const { games } = await request.json();
+    const body = (await request.json()) as { games?: SubmittedGame[] };
+    const games = body.games;
+
+    if (!Array.isArray(games) || games.length === 0) {
+      return NextResponse.json(
+        { error: "No game scores provided" },
+        { status: 400 }
+      );
+    }
 
     // Fetch the match to verify user is a player
     const match = await prisma.match.findUnique({
@@ -36,12 +64,14 @@ export async function POST(
       );
     }
 
+    const resolvedMatch = match as MatchWithLeague;
+
     // Check if user is part of this match
     const userIsPlayer =
-      match.player1Id === session.user.id ||
-      match.player2Id === session.user.id ||
-      match.player3Id === session.user.id ||
-      match.player4Id === session.user.id;
+      resolvedMatch.player1Id === session.user.id ||
+      resolvedMatch.player2Id === session.user.id ||
+      resolvedMatch.player3Id === session.user.id ||
+      resolvedMatch.player4Id === session.user.id;
 
     if (!userIsPlayer) {
       return NextResponse.json(
@@ -51,7 +81,7 @@ export async function POST(
     }
 
     // Check if scores have already been reported
-    if (match.games.length > 0 && match.scoreReportedBy !== session.user.id) {
+    if (resolvedMatch.games.length > 0 && resolvedMatch.scoreReportedBy !== session.user.id) {
       // Different user reported, need confirmation
       return NextResponse.json(
         { error: "Scores have already been reported by another player. Please confirm the scores instead." },
@@ -59,14 +89,14 @@ export async function POST(
       );
     }
 
-    const winningScore = match.league.pointsToWin ?? 11;
+    const winningScore = resolvedMatch.league.pointsToWin ?? 11;
 
     for (let i = 0; i < games.length; i++) {
       const game = games[i];
       const scores = [
         game.player1Score,
         game.player2Score,
-        match.player3Id ? game.player3Score : undefined,
+        resolvedMatch.player3Id ? game.player3Score : undefined,
       ].filter((score) => typeof score === 'number');
 
       const playersAtWinningScore = scores.filter((score) => score === winningScore);
@@ -87,13 +117,13 @@ export async function POST(
     }
 
     // Create new game records
-    const gameData = games.map((game: any, index: number) => ({
+    const gameData: PersistedGame[] = games.map((game, index) => ({
       matchId,
       gameNumber: index + 1,
       player1Score: game.player1Score,
       player2Score: game.player2Score,
-      player3Score: game.player3Score || null,
-      winnerId: determineGameWinner(game, match),
+      player3Score: game.player3Score ?? null,
+      winnerId: determineGameWinner(game, resolvedMatch),
     }));
 
     await prisma.game.createMany({
@@ -104,7 +134,7 @@ export async function POST(
     const matchWinnerId = determineMatchWinner(gameData);
 
     // Update match with score information
-    const updateData: any = {
+    const updateData: Prisma.MatchUpdateInput = {
       scoreReportedBy: session.user.id,
       scoreReportedAt: new Date(),
       status: 'IN_PROGRESS',
@@ -112,9 +142,9 @@ export async function POST(
     };
 
     // Auto-confirm if the reporter is player1
-    if (match.player1Id === session.user.id) {
+    if (resolvedMatch.player1Id === session.user.id) {
       updateData.player1Confirmed = true;
-    } else if (match.player2Id === session.user.id) {
+    } else if (resolvedMatch.player2Id === session.user.id) {
       updateData.player2Confirmed = true;
     }
 
@@ -133,7 +163,7 @@ export async function POST(
   }
 }
 
-function determineGameWinner(game: any, match: any): string | null {
+function determineGameWinner(game: SubmittedGame, match: MatchWithLeague): string | null {
   const { player1Score, player2Score, player3Score } = game;
   const { pointsToWin } = match.league;
 
@@ -166,7 +196,7 @@ function determineGameWinner(game: any, match: any): string | null {
   return null;
 }
 
-function determineMatchWinner(games: any[]): string | null {
+function determineMatchWinner(games: PersistedGame[]): string | null {
   const winCounts: Record<string, number> = {};
 
   games.forEach(game => {

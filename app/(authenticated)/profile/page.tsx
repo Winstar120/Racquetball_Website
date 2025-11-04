@@ -5,6 +5,23 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
+type ProfileStats = {
+  stats?: {
+    totalMatches: number;
+    wins: number;
+    losses: number;
+    winRate: string;
+    totalGamesWon: number;
+    totalGamesPlayed: number;
+    gameWinRate: string;
+    totalPointsScored: number;
+    totalPointsConceded: number;
+    avgPointsPerGame: string;
+    pointDifferential: number;
+    activeLeagues: number;
+  };
+};
+
 export default function Profile() {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -20,7 +37,7 @@ export default function Profile() {
   });
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<ProfileStats | null>(null);
   const [isLoadingStats, setIsLoadingStats] = useState(true);
 
   useEffect(() => {
@@ -56,7 +73,7 @@ export default function Profile() {
     try {
       const response = await fetch('/api/stats');
       if (response.ok) {
-        const data = await response.json();
+        const data = (await response.json()) as ProfileStats;
         setStats(data);
       }
     } catch (error) {
@@ -96,6 +113,7 @@ export default function Profile() {
         setErrorMessage(error.error || 'Failed to update profile');
       }
     } catch (error) {
+      console.error('Error updating profile:', error);
       setErrorMessage('An error occurred while updating your profile');
     } finally {
       setIsLoading(false);

@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useSession, signOut } from 'next-auth/react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 
 export function Navigation() {
@@ -68,14 +69,14 @@ export function Navigation() {
         {/* Mobile header - clean logo only */}
         <div className="md:hidden flex flex-col items-center py-4">
           <Link href="/dashboard" className="mb-2">
-            <img src="/logo.png" alt="DRA" className="h-8 w-auto" />
+            <Image src="/logo.png" alt="Durango Racquetball Association" width={128} height={32} className="h-8 w-auto" priority />
           </Link>
         </div>
 
         {/* Desktop Logo Section */}
         <div className="hidden md:flex flex-col items-center py-4">
           <Link href="/dashboard" className="flex items-center mb-2">
-            <img src="/logo.png" alt="DRA" className="h-8 w-auto" />
+            <Image src="/logo.png" alt="Durango Racquetball Association" width={160} height={40} className="h-8 w-auto" priority />
           </Link>
         </div>
 
