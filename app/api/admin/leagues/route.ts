@@ -119,13 +119,18 @@ export async function POST(request: Request) {
       data: leagueData as any,
     });
 
-    if (divisions && divisions.length > 0) {
-      const divisionData = divisions.map((level: string) => ({
-        name: `Division ${level}`,
-        level,
-        leagueId: league.id,
-      }));
+    const divisionLevels = new Set<string>(
+      Array.isArray(divisions) ? divisions.map((level: string) => level) : []
+    );
+    divisionLevels.add('N/A');
 
+    const divisionData = Array.from(divisionLevels).map((level) => ({
+      name: `Division ${level}`,
+      level,
+      leagueId: league.id,
+    }));
+
+    if (divisionData.length > 0) {
       await prisma.division.createMany({
         data: divisionData,
       });

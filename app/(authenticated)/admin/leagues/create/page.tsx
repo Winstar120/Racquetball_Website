@@ -680,6 +680,7 @@ export default function CreateLeague() {
                   { value: 'B', label: 'Division B (Intermediate)' },
                   { value: 'C', label: 'Division C (Beginner)' },
                   { value: 'D', label: 'Division D (Novice)' },
+                  { value: 'N/A', label: 'Division N/A (Open Play - All Skill Levels)' },
                 ].map((division) => (
                   <label
                     key={division.value}
