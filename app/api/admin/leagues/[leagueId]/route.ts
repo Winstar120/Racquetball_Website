@@ -334,7 +334,7 @@ export async function PATCH(
 
     const includeConfig = {
       divisions: {
-        orderBy: { level: 'asc' },
+        orderBy: { level: 'asc' as const },
       },
       _count: {
         select: {
