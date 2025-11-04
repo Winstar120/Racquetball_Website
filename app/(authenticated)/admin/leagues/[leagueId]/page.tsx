@@ -250,7 +250,15 @@ export default function EditLeaguePage({ params }: { params: Promise<{ leagueId:
         registrationCloses: formatDateInput(updated.registrationCloses),
         isFree: updated.isFree ? 'true' : 'false',
         leagueFee: String(updated.leagueFee ?? 0),
+        weeksForCutthroat: updated.weeksForCutthroat ? String(updated.weeksForCutthroat) : '',
+        blackoutDates: (updated.blackoutDates ?? [])
+          .map((date) => formatDateInput(date))
+          .filter(Boolean)
+          .join('\n'),
       });
+      setSelectedDivisions(
+        Array.from(new Set([...(updated.divisions?.map((division) => division.level) ?? []), 'N/A']))
+      );
       setState({ kind: 'ready', league: data.league });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to update league');
