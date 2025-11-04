@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -49,90 +50,47 @@ export default function Register() {
       }
 
       router.push('/login?registered=true');
-    } catch (error) {
+    } catch {
       setError('An error occurred. Please try again.');
     } finally {
       setIsLoading(false);
     }
   }
 
-  const inputStyle = {
-    display: 'block',
-    width: '100%',
-    padding: '0.75rem',
-    fontSize: '1rem',
-    color: '#111827',
-    backgroundColor: 'white',
-    border: '1px solid #d1d5db',
-    outline: 'none',
-    transition: 'all 0.2s'
-  };
-
-  const labelStyle = {
-    display: 'block',
-    fontSize: '0.875rem',
-    fontWeight: '500',
-    color: '#374151',
-    marginBottom: '0.25rem'
-  };
-
   return (
-    <div style={{
-      minHeight: '100vh',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      background: 'linear-gradient(135deg, #1f2937 0%, #374151 50%, #1f2937 100%)',
-      padding: '1rem'
-    }}>
-      <div style={{
-        width: '100%',
-        maxWidth: '28rem',
-        backgroundColor: 'white',
-        padding: '3rem',
-        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-        maxHeight: '90vh',
-        overflowY: 'auto'
-      }}>
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 px-4 py-12 sm:px-6">
+      <div className="w-full max-w-md rounded-3xl bg-white px-6 py-8 shadow-2xl sm:px-8 sm:py-10">
+        <div className="text-center">
           <Link href="/">
-            <img src="/logo.png" alt="DRA" style={{
-              height: '100px',
-              width: 'auto',
-              margin: '0 auto 1.5rem',
-              display: 'block',
-              cursor: 'pointer'
-            }} />
+            <Image
+              src="/logo.png"
+              alt="Durango Racquetball Association logo"
+              width={160}
+              height={160}
+              className="mx-auto mb-6 h-20 w-auto cursor-pointer sm:mb-8 sm:h-24"
+              priority
+            />
           </Link>
-          <h1 style={{
-            fontSize: '2rem',
-            fontFamily: 'var(--font-playfair), Georgia, serif',
-            color: '#111827',
-            marginBottom: '0.5rem'
-          }}>Join the League</h1>
-          <p style={{
-            color: '#6b7280',
-            fontSize: '1rem'
-          }}>Create your account to get started</p>
+          <h1 className="font-serif text-3xl text-slate-900 sm:text-4xl">Join the League</h1>
+          <p className="mt-2 text-base text-slate-600">Create your account to get started</p>
         </div>
 
-        <form onSubmit={onSubmit}>
+        <form onSubmit={onSubmit} className="mt-8 space-y-6">
           {error && (
-            <div style={{
-              marginBottom: '1rem',
-              padding: '0.75rem',
-              backgroundColor: '#fef2f2',
-              border: '1px solid #fecaca',
-              fontSize: '0.875rem',
-              color: '#991b1b'
-            }}>
+            <div
+              role="alert"
+              className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"
+            >
               {error}
             </div>
           )}
 
-          <div style={{ marginBottom: '1.5rem' }}>
-            <div style={{ marginBottom: '1rem' }}>
-              <label htmlFor="name" style={labelStyle}>
+          <div className="space-y-5">
+            <div className="space-y-2">
+              <label
+                htmlFor="name"
+                className="block text-sm font-medium text-slate-700"
+              >
                 Full Name
               </label>
               <input
@@ -141,20 +99,15 @@ export default function Register() {
                 type="text"
                 required
                 disabled={isLoading}
-                style={inputStyle}
-                onFocus={(e) => {
-                  e.target.style.borderColor = '#111827';
-                  e.target.style.boxShadow = '0 0 0 1px #111827';
-                }}
-                onBlur={(e) => {
-                  e.target.style.borderColor = '#d1d5db';
-                  e.target.style.boxShadow = 'none';
-                }}
+                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-base text-slate-900 transition focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100"
               />
             </div>
 
-            <div style={{ marginBottom: '1rem' }}>
-              <label htmlFor="email" style={labelStyle}>
+            <div className="space-y-2">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-slate-700"
+              >
                 Email
               </label>
               <input
@@ -164,20 +117,15 @@ export default function Register() {
                 autoComplete="email"
                 required
                 disabled={isLoading}
-                style={inputStyle}
-                onFocus={(e) => {
-                  e.target.style.borderColor = '#111827';
-                  e.target.style.boxShadow = '0 0 0 1px #111827';
-                }}
-                onBlur={(e) => {
-                  e.target.style.borderColor = '#d1d5db';
-                  e.target.style.boxShadow = 'none';
-                }}
+                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-base text-slate-900 transition focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100"
               />
             </div>
 
-            <div style={{ marginBottom: '1rem' }}>
-              <label htmlFor="phone" style={labelStyle}>
+            <div className="space-y-2">
+              <label
+                htmlFor="phone"
+                className="block text-sm font-medium text-slate-700"
+              >
                 Phone
               </label>
               <input
@@ -188,27 +136,18 @@ export default function Register() {
                 required
                 disabled={isLoading}
                 placeholder="(555) 123-4567"
-                style={inputStyle}
-                onFocus={(e) => {
-                  e.target.style.borderColor = '#111827';
-                  e.target.style.boxShadow = '0 0 0 1px #111827';
-                }}
-                onBlur={(e) => {
-                  e.target.style.borderColor = '#d1d5db';
-                  e.target.style.boxShadow = 'none';
-                }}
+                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-base text-slate-900 transition focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100"
               />
-              <p style={{
-                marginTop: '0.25rem',
-                fontSize: '0.75rem',
-                color: '#9ca3af'
-              }}>
+              <p className="text-xs text-slate-400">
                 For match reminders and opponent contact info
               </p>
             </div>
 
-            <div style={{ marginBottom: '1rem' }}>
-              <label htmlFor="password" style={labelStyle}>
+            <div className="space-y-2">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-slate-700"
+              >
                 Password
               </label>
               <input
@@ -218,20 +157,15 @@ export default function Register() {
                 autoComplete="new-password"
                 required
                 disabled={isLoading}
-                style={inputStyle}
-                onFocus={(e) => {
-                  e.target.style.borderColor = '#111827';
-                  e.target.style.boxShadow = '0 0 0 1px #111827';
-                }}
-                onBlur={(e) => {
-                  e.target.style.borderColor = '#d1d5db';
-                  e.target.style.boxShadow = 'none';
-                }}
+                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-base text-slate-900 transition focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100"
               />
             </div>
 
-            <div>
-              <label htmlFor="confirmPassword" style={labelStyle}>
+            <div className="space-y-2">
+              <label
+                htmlFor="confirmPassword"
+                className="block text-sm font-medium text-slate-700"
+              >
                 Confirm Password
               </label>
               <input
@@ -241,60 +175,27 @@ export default function Register() {
                 autoComplete="new-password"
                 required
                 disabled={isLoading}
-                style={inputStyle}
-                onFocus={(e) => {
-                  e.target.style.borderColor = '#111827';
-                  e.target.style.boxShadow = '0 0 0 1px #111827';
-                }}
-                onBlur={(e) => {
-                  e.target.style.borderColor = '#d1d5db';
-                  e.target.style.boxShadow = 'none';
-                }}
+                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-base text-slate-900 transition focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100"
               />
             </div>
           </div>
 
-          <div style={{ marginTop: '1.5rem' }}>
+          <div>
             <button
               type="submit"
               disabled={isLoading}
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                fontSize: '1rem',
-                fontWeight: '500',
-                color: 'white',
-                backgroundColor: isLoading ? '#6b7280' : '#1f2937',
-                border: 'none',
-                cursor: isLoading ? 'not-allowed' : 'pointer',
-                transition: 'all 0.2s'
-              }}
-              onMouseOver={(e) => {
-                if (!isLoading) {
-                  e.currentTarget.style.backgroundColor = '#111827';
-                }
-              }}
-              onMouseOut={(e) => {
-                if (!isLoading) {
-                  e.currentTarget.style.backgroundColor = '#1f2937';
-                }
-              }}
+              className="w-full rounded-full bg-slate-900 px-4 py-3 text-base font-semibold text-white transition hover:bg-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:bg-slate-400"
             >
               {isLoading ? 'Creating account...' : 'Sign up'}
             </button>
           </div>
 
-          <div style={{
-            marginTop: '1.5rem',
-            textAlign: 'center',
-            fontSize: '0.875rem'
-          }}>
-            <span style={{ color: '#6b7280' }}>Already have an account? </span>
-            <Link href="/login" style={{
-              color: '#111827',
-              fontWeight: '500',
-              textDecoration: 'none'
-            }}>
+          <div className="text-center text-sm text-slate-600">
+            <span>Already have an account? </span>
+            <Link
+              href="/login"
+              className="font-medium text-slate-900 transition hover:text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
+            >
               Sign in
             </Link>
           </div>

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useIsMobile } from '@/lib/hooks/useIsMobile';
 
 interface Match {
   id: string;
@@ -56,6 +57,7 @@ export default function ConfirmScore({ params }: { params: Promise<{ matchId: st
   const [showDispute, setShowDispute] = useState(false);
   const [disputedGames, setDisputedGames] = useState<Game[]>([]);
   const [isDisputing, setIsDisputing] = useState(false);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     params.then(p => setMatchId(p.matchId));
@@ -177,7 +179,7 @@ export default function ConfirmScore({ params }: { params: Promise<{ matchId: st
         <div style={{
           maxWidth: '48rem',
           margin: '0 auto',
-          padding: '2rem 1rem'
+          padding: isMobile ? '1.75rem 0.75rem' : '2rem 1rem'
         }}>
           <div style={{
             backgroundColor: 'white',
@@ -235,7 +237,7 @@ export default function ConfirmScore({ params }: { params: Promise<{ matchId: st
         <div style={{
           maxWidth: '80rem',
           margin: '0 auto',
-          padding: '1.5rem 1rem'
+          padding: isMobile ? '1.25rem 0.75rem' : '1.5rem 1rem'
         }}>
           <nav style={{ display: 'flex' }} aria-label="Breadcrumb">
             <ol style={{
@@ -300,12 +302,12 @@ export default function ConfirmScore({ params }: { params: Promise<{ matchId: st
       <div style={{
         maxWidth: '80rem',
         margin: '0 auto',
-        padding: '2rem 1rem'
+        padding: isMobile ? '1.5rem 0.75rem 2.5rem' : '2rem 1rem'
       }}>
         <div style={{
           backgroundColor: 'white',
           boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-          padding: '2rem',
+          padding: isMobile ? '1.5rem' : '2rem',
           display: 'flex',
           flexDirection: 'column',
           gap: '1.75rem'
@@ -487,7 +489,14 @@ export default function ConfirmScore({ params }: { params: Promise<{ matchId: st
                   <p style={{ color: '#6b7280', fontSize: '0.9rem' }}>
                     By confirming, you acknowledge these scores are accurate to the best of your knowledge.
                   </p>
-                  <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexDirection: isMobile ? 'column' : 'row',
+                      gap: '0.75rem',
+                      flexWrap: isMobile ? 'nowrap' : 'wrap'
+                    }}
+                  >
                     <Link
                       href="/matches"
                       style={{
@@ -524,7 +533,8 @@ export default function ConfirmScore({ params }: { params: Promise<{ matchId: st
                         backgroundColor: '#ca8a04',
                         border: '1px solid #ca8a04',
                         cursor: 'pointer',
-                        transition: 'all 0.2s'
+                        transition: 'all 0.2s',
+                        width: isMobile ? '100%' : 'auto'
                       }}
                       onMouseEnter={(e) => {
                         e.currentTarget.style.backgroundColor = '#b45309';
@@ -549,7 +559,8 @@ export default function ConfirmScore({ params }: { params: Promise<{ matchId: st
                         border: '1px solid ' + (isConfirming ? '#4b5563' : '#059669'),
                         cursor: isConfirming ? 'not-allowed' : 'pointer',
                         opacity: isConfirming ? 0.75 : 1,
-                        transition: 'all 0.2s'
+                        transition: 'all 0.2s',
+                        width: isMobile ? '100%' : 'auto'
                       }}
                       onMouseEnter={(e) => {
                         if (!isConfirming) {
@@ -599,7 +610,9 @@ export default function ConfirmScore({ params }: { params: Promise<{ matchId: st
                           <div style={{
                             display: 'grid',
                             gap: '1rem',
-                            gridTemplateColumns: `repeat(${isCutthroat ? 3 : 2}, minmax(0, 1fr))`
+                            gridTemplateColumns: isMobile
+                              ? '1fr'
+                              : `repeat(${isCutthroat ? 3 : 2}, minmax(0, 1fr))`
                           }}>
                             <div>
                               <label style={{

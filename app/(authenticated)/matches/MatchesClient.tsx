@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { formatGameType } from '@/lib/utils';
+import { useIsMobile } from '@/lib/hooks/useIsMobile';
 
 interface Match {
   id: string;
@@ -54,6 +55,7 @@ export default function MatchesClient({ initialFilter }: MatchesClientProps) {
   const [filter, setFilter] = useState<'upcoming' | 'past' | 'all'>(initialFilter);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const filterParam = searchParams.get('filter');
@@ -178,14 +180,16 @@ export default function MatchesClient({ initialFilter }: MatchesClientProps) {
           style={{
             maxWidth: '80rem',
             margin: '0 auto',
-            padding: '1.5rem 1rem',
+            padding: isMobile ? '1.25rem 0.75rem' : '1.5rem 1rem',
           }}
         >
           <div
             style={{
               display: 'flex',
+              flexDirection: isMobile ? 'column' : 'row',
               justifyContent: 'space-between',
-              alignItems: 'center',
+              alignItems: isMobile ? 'flex-start' : 'center',
+              gap: isMobile ? '1rem' : '0',
             }}
           >
             <div>
@@ -252,7 +256,7 @@ export default function MatchesClient({ initialFilter }: MatchesClientProps) {
         style={{
           maxWidth: '80rem',
           margin: '0 auto',
-          padding: '2rem 1rem',
+          padding: isMobile ? '1.5rem 0.75rem 2.5rem' : '2rem 1rem',
         }}
       >
         {error && (
@@ -272,9 +276,11 @@ export default function MatchesClient({ initialFilter }: MatchesClientProps) {
         <div
           style={{
             display: 'flex',
+            flexDirection: isMobile ? 'column' : 'row',
+            alignItems: isMobile ? 'stretch' : 'center',
             gap: '1rem',
             marginBottom: '1.5rem',
-            flexWrap: 'wrap',
+            flexWrap: isMobile ? 'nowrap' : 'wrap',
           }}
         >
           {(['upcoming', 'past', 'all'] as const).map(option => (
@@ -296,6 +302,7 @@ export default function MatchesClient({ initialFilter }: MatchesClientProps) {
                 cursor: 'pointer',
                 transition: 'all 0.2s',
                 borderRadius: 0,
+                width: isMobile ? '100%' : 'auto',
               }}
             >
               {option === 'upcoming' && 'Upcoming Matches'}
@@ -320,8 +327,8 @@ export default function MatchesClient({ initialFilter }: MatchesClientProps) {
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-              gap: '1.5rem',
+              gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(280px, 1fr))',
+              gap: isMobile ? '1rem' : '1.5rem',
             }}
           >
             {matches.map(match => {
@@ -344,15 +351,17 @@ export default function MatchesClient({ initialFilter }: MatchesClientProps) {
                 >
                   <div
                     style={{
-                      padding: '1.25rem',
+                      padding: isMobile ? '1rem' : '1.25rem',
                       borderBottom: '1px solid #e5e7eb',
                     }}
                   >
                     <div
                       style={{
                         display: 'flex',
+                        flexDirection: isMobile ? 'column' : 'row',
                         justifyContent: 'space-between',
-                        alignItems: 'baseline',
+                        alignItems: isMobile ? 'flex-start' : 'baseline',
+                        gap: isMobile ? '0.5rem' : '0',
                         marginBottom: '0.75rem',
                       }}
                     >
@@ -395,7 +404,7 @@ export default function MatchesClient({ initialFilter }: MatchesClientProps) {
 
                   <div
                     style={{
-                      padding: '1.25rem',
+                      padding: isMobile ? '1rem' : '1.25rem',
                       flexGrow: 1,
                       display: 'flex',
                       flexDirection: 'column',
@@ -486,7 +495,7 @@ export default function MatchesClient({ initialFilter }: MatchesClientProps) {
 
                   <div
                     style={{
-                      padding: '1.25rem',
+                      padding: isMobile ? '1rem' : '1.25rem',
                       borderTop: '1px solid #e5e7eb',
                       backgroundColor: '#f9fafb',
                       display: 'flex',
@@ -508,6 +517,7 @@ export default function MatchesClient({ initialFilter }: MatchesClientProps) {
                         textDecoration: 'none',
                         border: 'none',
                         cursor: 'pointer',
+                        width: isMobile ? '100%' : 'auto',
                       }}
                     >
                       View Match Details
@@ -533,6 +543,7 @@ export default function MatchesClient({ initialFilter }: MatchesClientProps) {
                                   textDecoration: 'none',
                                   pointerEvents:
                                     match.player1Confirmed && match.player2Confirmed ? 'none' : 'auto',
+                                  width: isMobile ? '100%' : 'auto',
                                 }}
                               >
                                 {match.player1Confirmed && match.player2Confirmed
@@ -553,6 +564,7 @@ export default function MatchesClient({ initialFilter }: MatchesClientProps) {
                                   backgroundColor: 'white',
                                   border: '1px solid #d1d5db',
                                   textDecoration: 'none',
+                                  width: isMobile ? '100%' : 'auto',
                                 }}
                               >
                                 Report Scores

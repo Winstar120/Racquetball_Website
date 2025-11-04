@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { formatGameType } from '@/lib/utils';
+import { useIsMobile } from '@/lib/hooks/useIsMobile';
 
 interface Match {
   id: string;
@@ -53,6 +54,7 @@ export default function ReportScore({ params }: { params: Promise<{ matchId: str
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState('');
   const [matchId, setMatchId] = useState<string>('');
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     params.then(p => setMatchId(p.matchId));
@@ -187,7 +189,7 @@ export default function ReportScore({ params }: { params: Promise<{ matchId: str
         <div style={{
           maxWidth: '80rem',
           margin: '0 auto',
-          padding: '1.5rem 1rem'
+          padding: isMobile ? '1.25rem 0.75rem' : '1.5rem 1rem'
         }}>
           <nav style={{ display: 'flex' }} aria-label="Breadcrumb">
             <ol style={{
@@ -239,12 +241,12 @@ export default function ReportScore({ params }: { params: Promise<{ matchId: str
       <div style={{
         maxWidth: '80rem',
         margin: '0 auto',
-        padding: '2rem 1rem'
+        padding: isMobile ? '1.5rem 0.75rem 2.5rem' : '2rem 1rem'
       }}>
         <div style={{
           backgroundColor: 'white',
           boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-          padding: '2rem',
+          padding: isMobile ? '1.5rem' : '2rem',
           display: 'flex',
           flexDirection: 'column',
           gap: '1.75rem'
@@ -261,7 +263,7 @@ export default function ReportScore({ params }: { params: Promise<{ matchId: str
             <dl style={{
               display: 'grid',
               gap: '1.25rem',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+              gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(220px, 1fr))',
               fontSize: '0.95rem'
             }}>
               <div>

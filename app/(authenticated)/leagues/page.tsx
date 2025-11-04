@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { formatGameType } from '@/lib/utils';
+import { useIsMobile } from '@/lib/hooks/useIsMobile';
 
 interface League {
   id: string;
@@ -41,6 +42,7 @@ export default function Leagues() {
   const [leagues, setLeagues] = useState<League[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -165,12 +167,14 @@ export default function Leagues() {
         <div style={{
           maxWidth: '80rem',
           margin: '0 auto',
-          padding: '1.5rem 1rem'
+          padding: isMobile ? '1.25rem 0.75rem' : '1.5rem 1rem'
         }}>
           <div style={{
             display: 'flex',
+            flexDirection: isMobile ? 'column' : 'row',
             justifyContent: 'space-between',
-            alignItems: 'center'
+            alignItems: isMobile ? 'flex-start' : 'center',
+            gap: isMobile ? '1rem' : '0'
           }}>
             <div>
               <nav style={{ display: 'flex' }}>
@@ -209,6 +213,32 @@ export default function Leagues() {
                 fontFamily: 'var(--font-playfair), Georgia, serif'
               }}>Available Leagues</h1>
             </div>
+            <Link
+              href="/admin/leagues/create"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '0.75rem 1.5rem',
+                fontSize: '0.95rem',
+                fontWeight: 600,
+                color: 'white',
+                backgroundColor: '#1f2937',
+                border: '1px solid #1f2937',
+                textDecoration: 'none',
+                transition: 'all 0.2s',
+                width: isMobile ? '100%' : 'auto',
+                textAlign: 'center'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#111827';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#1f2937';
+              }}
+            >
+              Create League
+            </Link>
           </div>
         </div>
       </div>
@@ -216,7 +246,7 @@ export default function Leagues() {
       <div style={{
         maxWidth: '80rem',
         margin: '0 auto',
-        padding: '2rem 1rem'
+        padding: isMobile ? '1.5rem 0.75rem 2.5rem' : '2rem 1rem'
       }}>
         {error && (
           <div style={{
@@ -242,8 +272,8 @@ export default function Leagues() {
         ) : (
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
-            gap: '1.5rem'
+            gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(320px, 1fr))',
+            gap: isMobile ? '1rem' : '1.5rem'
           }}>
             {leagues.map((league) => (
               <div key={league.id} style={{
@@ -251,11 +281,13 @@ export default function Leagues() {
                 boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
                 overflow: 'hidden'
               }}>
-                <div style={{ padding: '1.5rem' }}>
+                <div style={{ padding: isMobile ? '1.25rem' : '1.5rem' }}>
                   <div style={{
                     display: 'flex',
+                    flexDirection: isMobile ? 'column' : 'row',
                     justifyContent: 'space-between',
-                    alignItems: 'flex-start',
+                    alignItems: isMobile ? 'flex-start' : 'center',
+                    gap: isMobile ? '0.75rem' : '0',
                     marginBottom: '1rem'
                   }}>
                     <h3 style={{
@@ -297,7 +329,7 @@ export default function Leagues() {
                     color: '#6b7280',
                     marginBottom: '1rem'
                   }}>
-                    <div style={{ display: 'flex', gap: '1rem' }}>
+                    <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
                       <span style={{
                         padding: '0.25rem 0.5rem',
                         fontSize: '0.75rem',
@@ -454,12 +486,22 @@ export default function Leagues() {
                     </div>
                   )}
 
-                  <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem', flexWrap: 'wrap' }}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexDirection: isMobile ? 'column' : 'row',
+                      alignItems: 'stretch',
+                      gap: '0.75rem',
+                      marginTop: '1rem',
+                      flexWrap: isMobile ? 'nowrap' : 'wrap'
+                    }}
+                  >
                     <Link
                       href={`/leagues/${league.id}`}
                       style={{
                         flex: '1 1 140px',
                         minWidth: '140px',
+                        width: isMobile ? '100%' : 'auto',
                         padding: '0.5rem 1rem',
                         fontSize: '0.875rem',
                         fontWeight: '500',
@@ -486,6 +528,7 @@ export default function Leagues() {
                       style={{
                         flex: '1 1 140px',
                         minWidth: '140px',
+                        width: isMobile ? '100%' : 'auto',
                         padding: '0.5rem 1rem',
                         fontSize: '0.875rem',
                         fontWeight: '500',

@@ -1,50 +1,42 @@
+import Image from 'next/image';
 import Link from 'next/link';
 
 export default function PrivacyPolicy() {
+  const lastUpdated = new Date().toLocaleDateString();
+
   return (
-    <div style={{
-      minHeight: '100vh',
-      backgroundColor: '#f9fafb',
-      padding: '2rem 1rem'
-    }}>
-      <div style={{
-        maxWidth: '48rem',
-        margin: '0 auto',
-        backgroundColor: 'white',
-        padding: '3rem',
-        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-      }}>
-        <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+    <div className="min-h-screen bg-slate-50 px-4 py-12 text-slate-800 sm:px-6 sm:py-16">
+      <div className="mx-auto w-full max-w-4xl rounded-3xl bg-white px-6 py-10 shadow-lg sm:px-10 sm:py-12">
+        <div className="text-center">
           <Link href="/">
-            <img src="/logo.png" alt="DRA" style={{
-              height: '80px',
-              width: 'auto',
-              margin: '0 auto 1rem',
-              display: 'block',
-              cursor: 'pointer'
-            }} />
+            <Image
+              src="/logo.png"
+              alt="Durango Racquetball Association logo"
+              width={128}
+              height={128}
+              priority
+              className="mx-auto mb-6 h-16 w-auto cursor-pointer sm:mb-8 sm:h-20"
+            />
           </Link>
-          <h1 style={{
-            fontSize: '2.5rem',
-            fontFamily: 'var(--font-playfair), Georgia, serif',
-            color: '#111827',
-            marginBottom: '0.5rem'
-          }}>Privacy Policy</h1>
-          <p style={{ color: '#6b7280' }}>Last updated: {new Date().toLocaleDateString()}</p>
+          <h1 className="font-serif text-3xl text-slate-900 sm:text-4xl">
+            Privacy Policy
+          </h1>
+          <p className="mt-2 text-sm text-slate-500">Last updated: {lastUpdated}</p>
         </div>
 
-        <div style={{ lineHeight: '1.6', color: '#374151' }}>
-          <section style={{ marginBottom: '2rem' }}>
-            <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: '#111827' }}>
+        <div className="mt-10 space-y-10 text-base leading-relaxed text-slate-700 sm:mt-12">
+          <section>
+            <h2 className="font-serif text-2xl text-slate-900">
               1. Information We Collect
             </h2>
-            <p>
-              We collect information you provide directly to us, such as when you create an account, register for leagues, or contact us for support.
+            <p className="mt-4">
+              We collect information you provide directly to us, such as when you
+              create an account, register for leagues, or contact us for support.
             </p>
-            <h3 style={{ fontSize: '1.25rem', marginTop: '1rem', marginBottom: '0.5rem', color: '#111827' }}>
-              Personal Information:
+            <h3 className="mt-6 font-serif text-xl text-slate-900">
+              Personal Information
             </h3>
-            <ul style={{ marginLeft: '2rem' }}>
+            <ul className="mt-3 list-disc space-y-2 pl-6">
               <li>Name and email address</li>
               <li>Phone number (for match notifications)</li>
               <li>Skill level and player preferences</li>
@@ -52,12 +44,12 @@ export default function PrivacyPolicy() {
             </ul>
           </section>
 
-          <section style={{ marginBottom: '2rem' }}>
-            <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: '#111827' }}>
+          <section>
+            <h2 className="font-serif text-2xl text-slate-900">
               2. How We Use Your Information
             </h2>
-            <p>We use the information we collect to:</p>
-            <ul style={{ marginLeft: '2rem', marginTop: '1rem' }}>
+            <p className="mt-4">We use the information we collect to:</p>
+            <ul className="mt-3 list-disc space-y-2 pl-6">
               <li>Provide and maintain our service</li>
               <li>Process league registrations and manage leagues</li>
               <li>Send match reminders and notifications</li>
@@ -67,61 +59,74 @@ export default function PrivacyPolicy() {
             </ul>
           </section>
 
-          <section style={{ marginBottom: '2rem' }}>
-            <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: '#111827' }}>
+          <section>
+            <h2 className="font-serif text-2xl text-slate-900">
               3. Information Sharing
             </h2>
-            <p>
-              We do not sell, trade, or otherwise transfer your personal information to third parties. However, we may share certain information in the following circumstances:
+            <p className="mt-4">
+              We do not sell, trade, or otherwise transfer your personal
+              information to third parties. However, we may share certain information
+              in the following circumstances:
             </p>
-            <ul style={{ marginLeft: '2rem', marginTop: '1rem' }}>
-              <li><strong>With other players:</strong> Your name and contact information may be visible to other players in your leagues for match coordination</li>
-              <li><strong>Public standings:</strong> Your name and match results appear in league standings visible to other league participants</li>
-              <li><strong>Legal requirements:</strong> We may disclose information if required by law or in response to valid requests by public authorities</li>
+            <ul className="mt-3 list-disc space-y-2 pl-6">
+              <li>
+                <strong>With other players:</strong> Your name and contact
+                information may be visible to other players in your leagues for
+                match coordination.
+              </li>
+              <li>
+                <strong>Public standings:</strong> Your name and match results
+                appear in league standings visible to other league participants.
+              </li>
+              <li>
+                <strong>Legal requirements:</strong> We may disclose information if
+                required by law or in response to valid requests by public
+                authorities.
+              </li>
             </ul>
           </section>
 
-          <section style={{ marginBottom: '2rem' }}>
-            <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: '#111827' }}>
-              4. Data Security
-            </h2>
-            <p>
-              We implement appropriate technical and organizational security measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction. However, no method of transmission over the Internet or electronic storage is 100% secure.
+          <section>
+            <h2 className="font-serif text-2xl text-slate-900">4. Data Security</h2>
+            <p className="mt-4">
+              We implement appropriate technical and organizational security
+              measures to protect your personal information against unauthorized
+              access, alteration, disclosure, or destruction. However, no method of
+              transmission over the Internet or electronic storage is 100% secure.
             </p>
           </section>
 
-          <section style={{ marginBottom: '2rem' }}>
-            <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: '#111827' }}>
+          <section>
+            <h2 className="font-serif text-2xl text-slate-900">
               5. Email Communications
             </h2>
-            <p>
-              We may send you emails about:
-            </p>
-            <ul style={{ marginLeft: '2rem', marginTop: '1rem' }}>
+            <p className="mt-4">We may send you emails about:</p>
+            <ul className="mt-3 list-disc space-y-2 pl-6">
               <li>Match reminders and league updates</li>
               <li>Important account or service notifications</li>
               <li>Password reset requests</li>
             </ul>
-            <p style={{ marginTop: '1rem' }}>
+            <p className="mt-4">
               You can manage your email preferences in your account settings.
             </p>
           </section>
 
-          <section style={{ marginBottom: '2rem' }}>
-            <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: '#111827' }}>
+          <section>
+            <h2 className="font-serif text-2xl text-slate-900">
               6. Data Retention
             </h2>
-            <p>
-              We retain your personal information for as long as your account is active or as needed to provide you services. We will retain and use your information as necessary to comply with our legal obligations, resolve disputes, and enforce our agreements.
+            <p className="mt-4">
+              We retain your personal information for as long as your account is
+              active or as needed to provide you services. We will retain and use
+              your information as necessary to comply with our legal obligations,
+              resolve disputes, and enforce our agreements.
             </p>
           </section>
 
-          <section style={{ marginBottom: '2rem' }}>
-            <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: '#111827' }}>
-              7. Your Rights
-            </h2>
-            <p>You have the right to:</p>
-            <ul style={{ marginLeft: '2rem', marginTop: '1rem' }}>
+          <section>
+            <h2 className="font-serif text-2xl text-slate-900">7. Your Rights</h2>
+            <p className="mt-4">You have the right to:</p>
+            <ul className="mt-3 list-disc space-y-2 pl-6">
               <li>Access and update your personal information</li>
               <li>Request deletion of your account and data</li>
               <li>Opt out of non-essential communications</li>
@@ -129,40 +134,43 @@ export default function PrivacyPolicy() {
             </ul>
           </section>
 
-          <section style={{ marginBottom: '2rem' }}>
-            <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: '#111827' }}>
-              8. Children's Privacy
+          <section>
+            <h2 className="font-serif text-2xl text-slate-900">
+              8. Children&apos;s Privacy
             </h2>
-            <p>
-              Our service is not intended for children under 13 years of age. We do not knowingly collect personal information from children under 13.
+            <p className="mt-4">
+              Our service is not intended for children under 13 years of age. We do
+              not knowingly collect personal information from children under 13.
             </p>
           </section>
 
-          <section style={{ marginBottom: '2rem' }}>
-            <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: '#111827' }}>
+          <section>
+            <h2 className="font-serif text-2xl text-slate-900">
               9. Changes to This Policy
             </h2>
-            <p>
-              We may update this privacy policy from time to time. We will notify you of any changes by posting the new privacy policy on this page and updating the "last updated" date.
+            <p className="mt-4">
+              We may update this privacy policy from time to time. We will notify
+              you of any changes by posting the new privacy policy on this page and
+              updating the last updated date.
             </p>
           </section>
 
-          <section style={{ marginBottom: '2rem' }}>
-            <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: '#111827' }}>
+          <section>
+            <h2 className="font-serif text-2xl text-slate-900">
               10. Contact Us
             </h2>
-            <p>
-              If you have any questions about this Privacy Policy, please contact us through the website contact form or email us directly.
+            <p className="mt-4">
+              If you have any questions about this Privacy Policy, please contact us
+              through the website contact form or email us directly.
             </p>
           </section>
         </div>
 
-        <div style={{ textAlign: 'center', marginTop: '3rem' }}>
-          <Link href="/" style={{
-            color: '#111827',
-            textDecoration: 'none',
-            fontWeight: '500'
-          }}>
+        <div className="mt-12 text-center">
+          <Link
+            href="/"
+            className="inline-flex items-center justify-center text-sm font-semibold text-slate-900 transition hover:text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
+          >
             ← Back to Home
           </Link>
         </div>

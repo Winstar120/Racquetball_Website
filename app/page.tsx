@@ -1,273 +1,126 @@
+import Image from 'next/image'
 import Link from 'next/link'
 
+const features = [
+  {
+    title: 'Competitive Play',
+    description:
+      'Join leagues matched to your skill level and compete in a friendly, challenging environment.',
+  },
+  {
+    title: 'Weekly Matches',
+    description:
+      'Regular match schedules keep you active and engaged throughout the season.',
+  },
+  {
+    title: 'Community',
+    description:
+      'Connect with fellow racquetball enthusiasts and build lasting friendships.',
+  },
+]
+
 export default function Home() {
+  const currentYear = new Date().getFullYear()
+
   return (
-    <main style={{ minHeight: '100vh', backgroundColor: '#f9fafb' }}>
-      {/* Hero Section with Full Height */}
-      <section style={{
-        position: 'relative',
-        height: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: 'linear-gradient(135deg, #1f2937 0%, #374151 50%, #1f2937 100%)',
-        overflow: 'hidden'
-      }}>
-        {/* Content */}
-        <div style={{
-          position: 'relative',
-          zIndex: 10,
-          textAlign: 'center',
-          padding: '0 1rem',
-          maxWidth: '64rem',
-          margin: '0 auto'
-        }}>
-          <img
+    <main className="flex min-h-screen flex-col bg-slate-50 text-slate-900">
+      <section className="relative isolate overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.12),transparent_55%)]" />
+
+        <div className="relative mx-auto flex w-full max-w-5xl flex-col items-center px-6 py-24 text-center sm:px-8 md:py-28 lg:px-10">
+          <Image
             src="/logo.png"
-            alt="DRA Logo"
-            style={{
-              height: '250px',
-              width: 'auto',
-              margin: '0 auto 3rem',
-              display: 'block'
-            }}
+            alt="Durango Racquetball Association"
+            width={256}
+            height={256}
+            priority
+            className="mb-10 h-32 w-auto max-w-[16rem] sm:mb-12 sm:h-40"
           />
 
-          <h1 style={{
-            fontSize: 'clamp(2.5rem, 7vw, 5rem)',
-            fontFamily: 'var(--font-playfair), Georgia, serif',
-            marginBottom: '1.5rem',
-            color: 'white',
-            lineHeight: '1.1'
-          }}>
-            Durango Racquetball Association
-          </h1>
+          <div className="flex flex-col items-center gap-6 sm:gap-8">
+            <h1 className="font-serif text-4xl font-semibold leading-tight text-white sm:text-5xl sm:leading-tight lg:text-6xl">
+              Durango Racquetball Association
+            </h1>
 
-          <p style={{
-            fontSize: 'clamp(1.25rem, 3vw, 1.75rem)',
-            color: '#d1d5db',
-            marginBottom: '3rem',
-            fontWeight: '300'
-          }}>
-            Premier racquetball league in Durango, Colorado
-          </p>
+            <p className="max-w-2xl text-lg leading-relaxed text-slate-200 sm:text-xl">
+              Premier racquetball league in Durango, Colorado
+            </p>
 
-          <div
-            style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: '1rem',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <Link
-              href="/register"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '1rem 2rem',
-                fontSize: '1rem',
-                fontWeight: '500',
-                color: 'black',
-                backgroundColor: 'white',
-                border: '1px solid white',
-                textDecoration: 'none',
-                transition: 'all 0.2s'
-              }}
-            >
-              Join the League
-            </Link>
-            <Link
-              href="/login"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '1rem 2rem',
-                fontSize: '1rem',
-                fontWeight: '500',
-                color: 'white',
-                backgroundColor: 'transparent',
-                border: '1px solid white',
-                textDecoration: 'none',
-                transition: 'all 0.2s'
-              }}
-            >
-              Member Login
-            </Link>
+            <div className="flex w-full flex-col items-center justify-center gap-3 sm:w-auto sm:flex-row sm:gap-4">
+              <Link
+                href="/register"
+                className="inline-flex w-full items-center justify-center rounded-full bg-white px-6 py-3 text-base font-semibold text-slate-900 transition hover:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white sm:w-auto"
+              >
+                Join the League
+              </Link>
+              <Link
+                href="/login"
+                className="inline-flex w-full items-center justify-center rounded-full border border-white px-6 py-3 text-base font-semibold text-white transition hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white sm:w-auto"
+              >
+                Member Login
+              </Link>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Info Section */}
-      <section style={{
-        padding: '6rem 1rem',
-        backgroundColor: 'white'
-      }}>
-        <div style={{
-          maxWidth: '72rem',
-          margin: '0 auto',
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-          gap: '3rem'
-        }}>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{
-              width: '64px',
-              height: '64px',
-              backgroundColor: '#1f2937',
-              borderRadius: '50%',
-              margin: '0 auto 1.5rem'
-            }}></div>
-            <h3 style={{
-              fontSize: '1.5rem',
-              fontFamily: 'var(--font-playfair), Georgia, serif',
-              marginBottom: '1rem',
-              color: '#111827'
-            }}>Competitive Play</h3>
-            <p style={{
-              color: '#6b7280',
-              lineHeight: '1.6'
-            }}>
-              Join leagues matched to your skill level and compete in a friendly, challenging environment.
-            </p>
-          </div>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{
-              width: '64px',
-              height: '64px',
-              backgroundColor: '#1f2937',
-              borderRadius: '50%',
-              margin: '0 auto 1.5rem'
-            }}></div>
-            <h3 style={{
-              fontSize: '1.5rem',
-              fontFamily: 'var(--font-playfair), Georgia, serif',
-              marginBottom: '1rem',
-              color: '#111827'
-            }}>Weekly Matches</h3>
-            <p style={{
-              color: '#6b7280',
-              lineHeight: '1.6'
-            }}>
-              Regular match schedules keep you active and engaged throughout the season.
-            </p>
-          </div>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{
-              width: '64px',
-              height: '64px',
-              backgroundColor: '#1f2937',
-              borderRadius: '50%',
-              margin: '0 auto 1.5rem'
-            }}></div>
-            <h3 style={{
-              fontSize: '1.5rem',
-              fontFamily: 'var(--font-playfair), Georgia, serif',
-              marginBottom: '1rem',
-              color: '#111827'
-            }}>Community</h3>
-            <p style={{
-              color: '#6b7280',
-              lineHeight: '1.6'
-            }}>
-              Connect with fellow racquetball enthusiasts and build lasting friendships.
-            </p>
-          </div>
+      <section className="bg-white py-16 sm:py-20">
+        <div className="mx-auto grid w-full max-w-6xl gap-10 px-6 sm:px-8 md:grid-cols-3">
+          {features.map(({ title, description }) => (
+            <article
+              key={title}
+              className="flex flex-col items-center text-center"
+            >
+              <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-slate-900/90 text-white shadow-md sm:h-20 sm:w-20" />
+              <h3 className="font-serif text-2xl text-slate-900">{title}</h3>
+              <p className="mt-3 max-w-sm text-base leading-relaxed text-slate-600">
+                {description}
+              </p>
+            </article>
+          ))}
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section style={{
-        padding: '6rem 1rem',
-        backgroundColor: '#f3f4f6'
-      }}>
-        <div style={{
-          maxWidth: '48rem',
-          margin: '0 auto',
-          textAlign: 'center'
-        }}>
-          <h2 style={{
-            fontSize: 'clamp(2rem, 5vw, 3rem)',
-            fontFamily: 'var(--font-playfair), Georgia, serif',
-            marginBottom: '1.5rem',
-            color: '#111827'
-          }}>
+      <section className="bg-slate-100 py-16 sm:py-20">
+        <div className="mx-auto flex w-full max-w-3xl flex-col items-center px-6 text-center sm:px-8">
+          <h2 className="font-serif text-3xl font-semibold text-slate-900 sm:text-4xl">
             Ready to Play?
           </h2>
-          <p style={{
-            fontSize: '1.25rem',
-            color: '#6b7280',
-            marginBottom: '2rem'
-          }}>
+          <p className="mt-4 text-lg leading-relaxed text-slate-600 sm:text-xl">
             Join the Durango Racquetball Association today
           </p>
           <Link
             href="/register"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '1rem 2rem',
-              fontSize: '1rem',
-              fontWeight: '500',
-              color: 'white',
-              backgroundColor: '#1f2937',
-              border: '1px solid #1f2937',
-              textDecoration: 'none',
-              transition: 'all 0.2s'
-            }}
+            className="mt-8 inline-flex items-center justify-center rounded-full bg-slate-900 px-6 py-3 text-base font-semibold text-white transition hover:bg-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
           >
             Get Started
           </Link>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer style={{
-        padding: '3rem 1rem',
-        backgroundColor: 'white',
-        borderTop: '1px solid #e5e7eb'
-      }}>
-        <div style={{
-          maxWidth: '72rem',
-          margin: '0 auto',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: '1rem'
-        }}>
-          <p style={{
-            fontSize: '0.875rem',
-            color: '#6b7280'
-          }}>
-            © 2024 Durango Racquetball Association. All rights reserved.
+      <footer className="border-t border-slate-200 bg-white py-12">
+        <div className="mx-auto flex w-full max-w-6xl flex-col items-center gap-6 px-6 text-center sm:flex-row sm:justify-between sm:px-8 sm:text-left">
+          <p className="text-sm text-slate-500">
+            © {currentYear} Durango Racquetball Association. All rights
+            reserved.
           </p>
-          <div style={{
-            display: 'flex',
-            gap: '1.5rem'
-          }}>
-            <Link href="/about" style={{
-              fontSize: '0.875rem',
-              color: '#6b7280',
-              textDecoration: 'none'
-            }}>
+          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-slate-500 sm:justify-end">
+            <Link
+              href="/about"
+              className="transition hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
+            >
               About
             </Link>
-            <Link href="/contact" style={{
-              fontSize: '0.875rem',
-              color: '#6b7280',
-              textDecoration: 'none'
-            }}>
+            <Link
+              href="/contact"
+              className="transition hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
+            >
               Contact
             </Link>
-            <Link href="/privacy" style={{
-              fontSize: '0.875rem',
-              color: '#6b7280',
-              textDecoration: 'none'
-            }}>
+            <Link
+              href="/privacy"
+              className="transition hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
+            >
               Privacy
             </Link>
           </div>

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useIsMobile } from '@/lib/hooks/useIsMobile';
 
 interface Player {
   id: string;
@@ -54,6 +55,7 @@ export default function MatchDetailPage({ params }: { params: Promise<{ matchId:
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [matchId, setMatchId] = useState<string>('');
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     params.then(p => setMatchId(p.matchId));
@@ -180,10 +182,10 @@ export default function MatchDetailPage({ params }: { params: Promise<{ matchId:
       <div style={{
         maxWidth: '80rem',
         margin: '0 auto',
-        padding: '2rem 1rem'
+        padding: isMobile ? '1.5rem 0.75rem 2.5rem' : '2rem 1rem'
       }}>
         {/* Header */}
-        <div style={{ marginBottom: '2rem' }}>
+        <div style={{ marginBottom: isMobile ? '1.5rem' : '2rem' }}>
           <Link
             href="/matches"
             style={{
@@ -208,7 +210,7 @@ export default function MatchDetailPage({ params }: { params: Promise<{ matchId:
             Match Details
           </h1>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'flex-start' : 'center', gap: '1rem' }}>
             <span style={{
               padding: '0.25rem 0.75rem',
               backgroundColor: `${getStatusColor(match.status)}20`,
@@ -229,7 +231,7 @@ export default function MatchDetailPage({ params }: { params: Promise<{ matchId:
         <div style={{
           backgroundColor: 'white',
           borderRadius: '0.5rem',
-          padding: '1.5rem',
+          padding: isMobile ? '1.25rem' : '1.5rem',
           marginBottom: '1.5rem',
           boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
         }}>
@@ -244,8 +246,8 @@ export default function MatchDetailPage({ params }: { params: Promise<{ matchId:
 
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-            gap: '1.5rem'
+            gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(250px, 1fr))',
+            gap: isMobile ? '1rem' : '1.5rem'
           }}>
             <div>
               <div style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.25rem' }}>
@@ -313,7 +315,7 @@ export default function MatchDetailPage({ params }: { params: Promise<{ matchId:
           <div style={{
             backgroundColor: 'white',
             borderRadius: '0.5rem',
-            padding: '1.5rem',
+            padding: isMobile ? '1.25rem' : '1.5rem',
             marginBottom: '1.5rem',
             boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
           }}>
