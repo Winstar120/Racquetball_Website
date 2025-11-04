@@ -140,7 +140,7 @@ This link will expire in 1 hour. If you did not request a password reset, you ca
 
   try {
     await transporter.sendMail({
-      from: `"Racquetball League" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
+      from: `"Durango Racquetball Association" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
       to: user.email,
       subject,
       text: textContent,
@@ -300,7 +300,7 @@ If you need to cancel or reschedule, please contact your opponent directly and n
 
   try {
     await transporter.sendMail({
-      from: `"Racquetball League" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
+      from: `"Durango Racquetball Association" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
       to: recipient.email,
       subject,
       text: textContent,
@@ -433,7 +433,7 @@ If you need assistance, reply to this email or contact the league administrator.
 
     try {
       await transporter.sendMail({
-        from: `"Racquetball League" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
+        from: `"Durango Racquetball Association" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
         to: recipient.email,
         subject,
         text: textContent,
@@ -510,7 +510,7 @@ export async function sendWelcomeEmail(user: User) {
           <p style="margin-top: 30px;">If you have any questions, feel free to reach out to us.</p>
 
           <p>See you on the court!</p>
-          <p>- The Durango Racquetball League Team</p>
+          <p>- Durango Racquetball Association</p>
         </div>
       </div>
     </body>
@@ -519,7 +519,7 @@ export async function sendWelcomeEmail(user: User) {
 
   try {
     await transporter.sendMail({
-      from: `"Racquetball League" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
+      from: `"Durango Racquetball Association" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
       to: user.email,
       subject,
       html: htmlContent,
@@ -647,7 +647,7 @@ export async function sendScoreConfirmationRequest(
 
   try {
     await transporter.sendMail({
-      from: `"Racquetball League" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
+      from: `"Durango Racquetball Association" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
       to: otherPlayer.email,
       subject,
       html: htmlContent,
@@ -671,12 +671,27 @@ export async function sendLeagueRegistrationConfirmation(
     return;
   }
   const division = league.divisions.find(d => d.id === divisionId);
+  const divisionLabel = division
+    ? division.level === 'N/A'
+      ? 'All skill levels'
+      : division.name
+    : 'TBD';
   const subject = `Registration Confirmed - ${league.name}`;
   const formatLeagueDate = (value: Date | string | null | undefined) => {
     if (!value) return 'Pending';
     const parsed = new Date(value);
     return Number.isNaN(parsed.getTime()) ? 'Pending' : parsed.toLocaleDateString();
   };
+  const sanitizeHtml = (value: string | null | undefined) =>
+    value
+      ? value
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;')
+      : '';
+  const descriptionHtml = sanitizeHtml(league.description ?? '');
 
   const htmlContent = `
     <!DOCTYPE html>
@@ -700,12 +715,12 @@ export async function sendLeagueRegistrationConfirmation(
         <div class="content">
           <p>Hi ${user.name},</p>
 
-         <p>Your registration for the following league has been confirmed:</p>
+          <p>Your registration for the following league has been confirmed:</p>
 
           <div class="details">
             <h3 style="margin-top: 0; color: #10b981;">League Details</h3>
             <p><strong>League:</strong> ${league.name}</p>
-            <p><strong>Division:</strong> ${division?.name || 'TBD'}</p>
+            <p><strong>Division:</strong> ${divisionLabel}</p>
             <p><strong>Start Date:</strong> ${formatLeagueDate(league.startDate)}</p>
             <p><strong>End Date:</strong> ${formatLeagueDate(league.endDate)}</p>
             <p><strong>Game Type:</strong> ${league.gameType}</p>
@@ -721,6 +736,17 @@ export async function sendLeagueRegistrationConfirmation(
             <p><strong>Schedule Generated:</strong> ${league.scheduleGenerated ? 'Yes' : 'Not yet'}</p>
           </div>
 
+          ${
+            descriptionHtml
+              ? `
+          <div class="details">
+            <h3 style="margin-top: 0; color: #10b981;">League Overview</h3>
+            <p style="white-space: pre-line;">${descriptionHtml}</p>
+          </div>
+          `
+              : ''
+          }
+
           <p>Your match schedule will be available soon. You'll receive an email notification when it's ready.</p>
 
           <div style="text-align: center;">
@@ -728,7 +754,7 @@ export async function sendLeagueRegistrationConfirmation(
           </div>
 
           <p style="margin-top: 30px;">Good luck in the league!</p>
-          <p>- The Racquetball League Team</p>
+          <p>- Durango Racquetball Association</p>
         </div>
       </div>
     </body>
@@ -737,7 +763,7 @@ export async function sendLeagueRegistrationConfirmation(
 
   try {
     await transporter.sendMail({
-      from: `"Racquetball League" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
+      from: `"Durango Racquetball Association" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
       to: user.email,
       subject,
       html: htmlContent,
@@ -810,7 +836,7 @@ export async function sendLeagueAnnouncement(
 
     try {
       await transporter.sendMail({
-        from: `"Racquetball League" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
+        from: `"Durango Racquetball Association" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
         to: recipient.email,
         subject,
         html: htmlContent,
