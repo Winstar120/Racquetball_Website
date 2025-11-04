@@ -47,8 +47,14 @@ async function recordEmailLog(params: {
   status: EmailStatusEnum;
   error?: unknown;
 }) {
+  const emailLogClient = (prisma as any).emailLog;
+  if (!emailLogClient) {
+    console.warn('Email log client unavailable; skipping log write.');
+    return;
+  }
+
   try {
-    await prisma.emailLog.create({
+    await emailLogClient.create({
       data: {
         matchId: params.matchId ?? null,
         recipientId: params.recipientId,
