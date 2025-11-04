@@ -411,7 +411,7 @@ export default function Leagues() {
                         <option value="" disabled>Choose division</option>
                         {league.divisions.map((division) => (
                           <option key={division.id} value={division.level}>
-                            {division.name}
+                            {division.level === 'N/A' ? 'All skill levels' : division.name}
                           </option>
                         ))}
                       </select>

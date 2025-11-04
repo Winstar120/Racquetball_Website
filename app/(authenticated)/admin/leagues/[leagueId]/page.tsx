@@ -26,6 +26,14 @@ type League = {
   isFree: boolean;
   leagueFee: number | null;
   scheduleGenerated: boolean;
+  weeksForCutthroat?: number | null;
+  blackoutDates?: string[];
+  playersPerMatch: number;
+  divisions: { id: string; level: string; name: string }[];
+  _count?: {
+    registrations: number;
+    matches: number;
+  };
 };
 
 const baseInputStyle: CSSProperties = {
@@ -82,12 +90,15 @@ export default function EditLeaguePage({ params }: { params: Promise<{ leagueId:
     registrationCloses: '',
     isFree: 'true',
     leagueFee: '0',
+    weeksForCutthroat: '',
+    blackoutDates: '',
   });
 
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [selectedDivisions, setSelectedDivisions] = useState<string[]>(['N/A']);
 
   useEffect(() => {
     let isMounted = true;
@@ -111,6 +122,15 @@ export default function EditLeaguePage({ params }: { params: Promise<{ leagueId:
       const payload = await response.json();
       const league: League = payload.league;
 
+      const formattedBlackouts = (league.blackoutDates ?? [])
+        .map((date) => formatDateInput(date))
+        .filter(Boolean)
+        .join('\n');
+
+      const nextSelectedDivisions = Array.from(
+        new Set([...(league.divisions?.map((division) => division.level) ?? []), 'N/A'])
+      );
+
       setForm({
         name: league.name ?? '',
         description: league.description ?? '',
@@ -125,7 +145,10 @@ export default function EditLeaguePage({ params }: { params: Promise<{ leagueId:
         registrationCloses: formatDateInput(league.registrationCloses),
         isFree: league.isFree ? 'true' : 'false',
         leagueFee: String(league.leagueFee ?? 0),
+        weeksForCutthroat: league.weeksForCutthroat ? String(league.weeksForCutthroat) : '',
+        blackoutDates: formattedBlackouts,
       });
+      setSelectedDivisions(nextSelectedDivisions);
       setState({ kind: 'ready', league });
     } catch (err) {
       setState({
@@ -150,8 +173,24 @@ export default function EditLeaguePage({ params }: { params: Promise<{ leagueId:
           leagueFee: isFree ? '0' : prev.leagueFee,
         };
       }
+      if (key === 'gameType') {
+        const next = { ...prev, gameType: value };
+        if (value !== 'CUTTHROAT') {
+          next.weeksForCutthroat = '';
+        }
+        return next;
+      }
       return { ...prev, [key]: value };
     });
+  }
+
+  function handleDivisionToggle(value: string) {
+    if (value === 'N/A') return;
+    setSelectedDivisions((prev) =>
+      prev.includes(value)
+        ? prev.filter((division) => division !== value)
+        : [...prev, value]
+    );
   }
 
   async function handleSubmit(event: FormEvent) {
@@ -175,6 +214,10 @@ export default function EditLeaguePage({ params }: { params: Promise<{ leagueId:
         registrationCloses: form.registrationCloses,
         isFree: form.isFree === 'true',
         leagueFee: Number(form.leagueFee),
+        weeksForCutthroat: form.gameType === 'CUTTHROAT' ? form.weeksForCutthroat : '',
+        blackoutDates: form.blackoutDates,
+        divisions: Array.from(new Set([...selectedDivisions, 'N/A'])),
+        playersPerMatch: form.gameType === 'SINGLES' ? 2 : form.gameType === 'CUTTHROAT' ? 3 : 4,
       };
 
       const response = await fetch(`/api/admin/leagues/${leagueId}`, {
@@ -555,6 +598,25 @@ export default function EditLeaguePage({ params }: { params: Promise<{ leagueId:
               Includes any built-in warmup time.
             </p>
           </div>
+          {form.gameType === 'CUTTHROAT' && (
+            <div>
+              <label
+                htmlFor="weeksForCutthroat"
+                style={{ display: 'block', fontSize: '0.95rem', fontWeight: 500, color: '#374151', marginBottom: '0.5rem' }}
+              >
+                Weeks (Cut-throat)
+              </label>
+              <input
+                id="weeksForCutthroat"
+                type="number"
+                min="1"
+                value={form.weeksForCutthroat}
+                onChange={(e) => handleChange('weeksForCutthroat', e.target.value)}
+                style={baseInputStyle}
+                {...focusHandlers(false)}
+              />
+            </div>
+          )}
         </div>
       </section>
 
@@ -703,6 +765,92 @@ export default function EditLeaguePage({ params }: { params: Promise<{ leagueId:
                 {...focusHandlers(form.isFree === 'true')}
               />
             </div>
+          </div>
+        </section>
+
+        <section
+          style={{
+            backgroundColor: 'white',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+            padding: '1.75rem',
+          }}
+        >
+          <h2 style={{ fontSize: '1.1rem', fontWeight: 600, color: '#111827', marginBottom: '1rem' }}>
+            Holiday Blackouts
+          </h2>
+          <div style={{ maxWidth: '30rem', margin: '0 auto' }}>
+            <p style={{ color: '#6b7280', fontSize: '0.85rem', marginBottom: '0.75rem', textAlign: 'center' }}>
+              Enter one date per line (YYYY-MM-DD) or separate with commas to pause scheduling on specific days.
+            </p>
+            <textarea
+              id="blackoutDates"
+              value={form.blackoutDates}
+              onChange={(e) => handleChange('blackoutDates', e.target.value)}
+              rows={6}
+              style={{
+                ...baseInputStyle,
+                fontFamily: 'inherit',
+                resize: 'vertical',
+              }}
+              {...focusHandlers(false)}
+            />
+          </div>
+        </section>
+
+        <section
+          style={{
+            backgroundColor: 'white',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+            padding: '1.75rem',
+          }}
+        >
+          <h2 style={{ fontSize: '1.1rem', fontWeight: 600, color: '#111827', marginBottom: '1rem' }}>
+            Skill Divisions
+          </h2>
+          <p style={{ color: '#6b7280', fontSize: '0.9rem', marginBottom: '0.75rem', textAlign: 'center' }}>
+            Choose the divisions available for registration. Open Play (N/A) is always included for all skill levels.
+          </p>
+          <div
+            style={{
+              display: 'grid',
+              gap: '0.75rem',
+              maxWidth: '28rem',
+              margin: '0 auto',
+            }}
+          >
+            {[
+              { value: 'A', label: 'Division A (Advanced)' },
+              { value: 'B', label: 'Division B (Intermediate)' },
+              { value: 'C', label: 'Division C (Beginner)' },
+              { value: 'D', label: 'Division D (Novice)' },
+              { value: 'N/A', label: 'Division N/A (Open Play - All Skill Levels)', disabled: true },
+            ].map((division) => {
+              const isDisabled = division.disabled === true;
+              const isChecked = isDisabled || selectedDivisions.includes(division.value);
+
+              return (
+                <label
+                  key={division.value}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.75rem',
+                    fontSize: '0.95rem',
+                    color: isDisabled ? '#9ca3af' : '#374151',
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    value={division.value}
+                    checked={isChecked}
+                    disabled={isDisabled || saving}
+                    onChange={() => handleDivisionToggle(division.value)}
+                    style={{ width: '1.1rem', height: '1.1rem' }}
+                  />
+                  <span>{division.label}</span>
+                </label>
+              );
+            })}
           </div>
         </section>
 

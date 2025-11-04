@@ -663,7 +663,7 @@ export async function sendScoreConfirmationRequest(
 
 export async function sendLeagueRegistrationConfirmation(
   user: User,
-  league: League & { divisions: Division[] },
+  league: League & { divisions: Division[]; _count?: { registrations: number; matches: number }; scheduleGenerated?: boolean },
   divisionId: string
 ) {
   if (!transporter) {
@@ -700,7 +700,7 @@ export async function sendLeagueRegistrationConfirmation(
         <div class="content">
           <p>Hi ${user.name},</p>
 
-          <p>Your registration for the following league has been confirmed:</p>
+         <p>Your registration for the following league has been confirmed:</p>
 
           <div class="details">
             <h3 style="margin-top: 0; color: #10b981;">League Details</h3>
@@ -710,6 +710,15 @@ export async function sendLeagueRegistrationConfirmation(
             <p><strong>End Date:</strong> ${formatLeagueDate(league.endDate)}</p>
             <p><strong>Game Type:</strong> ${league.gameType}</p>
             <p><strong>League Fee:</strong> ${league.isFree ? 'FREE' : `$${league.leagueFee?.toFixed(2) || '0.00'}`}</p>
+          </div>
+
+          <div class="details">
+            <h3 style="margin-top: 0; color: #10b981;">Overview</h3>
+            <p><strong>Ranking Method:</strong> ${league.rankingMethod === 'BY_POINTS' ? 'By Points' : 'By Wins'}</p>
+            <p><strong>Players per Match:</strong> ${league.playersPerMatch}</p>
+            <p><strong>Registrations:</strong> ${league._count?.registrations ?? 'TBD'}</p>
+            <p><strong>Matches Scheduled:</strong> ${league._count?.matches ?? 'TBD'}</p>
+            <p><strong>Schedule Generated:</strong> ${league.scheduleGenerated ? 'Yes' : 'Not yet'}</p>
           </div>
 
           <p>Your match schedule will be available soon. You'll receive an email notification when it's ready.</p>

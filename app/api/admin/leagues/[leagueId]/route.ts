@@ -88,7 +88,7 @@ export async function PATCH(
       rankingMethod,
       pointsToWin,
       matchDuration,
-    numberOfGames,
+      numberOfGames,
       startDate,
       endDate,
       registrationOpens,
@@ -96,6 +96,9 @@ export async function PATCH(
       isFree,
       leagueFee,
       description,
+      blackoutDates,
+      weeksForCutthroat,
+      divisions,
     } = body ?? {};
 
     if (
@@ -109,11 +112,28 @@ export async function PATCH(
       );
     }
 
+    const derivePlayersPerMatch = (value: string) => {
+      switch (value) {
+        case 'SINGLES':
+          return 2;
+        case 'CUTTHROAT':
+          return 3;
+        default:
+          return 4;
+      }
+    };
+
     const updateData: Record<string, any> = {};
 
     if (typeof name === 'string') updateData.name = name.trim();
     if (typeof rankingMethod === 'string') updateData.rankingMethod = rankingMethod;
-    if (typeof gameType === 'string') updateData.gameType = gameType;
+    if (typeof gameType === 'string') {
+      updateData.gameType = gameType;
+      updateData.playersPerMatch = derivePlayersPerMatch(gameType);
+      if (gameType !== 'CUTTHROAT') {
+        updateData.weeksForCutthroat = null;
+      }
+    }
     if (typeof description === 'string') updateData.description = description.trim();
 
     if (pointsToWin !== undefined) {
@@ -147,6 +167,22 @@ export async function PATCH(
         );
       }
       updateData.matchDuration = parsed;
+    }
+
+    if (weeksForCutthroat !== undefined) {
+      const rawWeeks = String(weeksForCutthroat).trim();
+      if (rawWeeks === '') {
+        updateData.weeksForCutthroat = null;
+      } else {
+        const parsedWeeks = Number(rawWeeks);
+        if (!Number.isFinite(parsedWeeks) || parsedWeeks <= 0) {
+          return NextResponse.json(
+            { error: "Weeks for cut-throat must be a positive number." },
+            { status: 400 }
+          );
+        }
+        updateData.weeksForCutthroat = Math.round(parsedWeeks);
+      }
     }
 
     if (isFree !== undefined) {
@@ -203,28 +239,121 @@ export async function PATCH(
       updateData[key] = parsedDate;
     }
 
-    if (Object.keys(updateData).length === 0) {
+    if (blackoutDates !== undefined) {
+      const values = Array.isArray(blackoutDates)
+        ? blackoutDates
+        : typeof blackoutDates === 'string'
+        ? blackoutDates.split(/[\n,]+/)
+        : [];
+
+      const parsedDates = values
+        .map((value) => (typeof value === 'string' ? value.trim() : ''))
+        .filter(Boolean)
+        .map((value) => new Date(value))
+        .filter((date) => !Number.isNaN(date.getTime()));
+
+      updateData.blackoutDates = parsedDates;
+    }
+
+    let divisionsUpdated = false;
+    if (divisions !== undefined) {
+      divisionsUpdated = true;
+      const rawLevels = Array.isArray(divisions)
+        ? divisions
+        : typeof divisions === 'string'
+        ? divisions.split(',')
+        : [];
+
+      const normalizedLevels = Array.from(
+        new Set(
+          [...rawLevels.map((level: any) => String(level).trim()).filter(Boolean), 'N/A']
+        )
+      );
+
+      const existingDivisions = await prisma.division.findMany({
+        where: { leagueId },
+        select: { id: true, level: true },
+      });
+
+      const existingLevels = new Set(existingDivisions.map((division) => division.level));
+      const toDeleteIds = existingDivisions
+        .filter((division) => !normalizedLevels.includes(division.level))
+        .map((division) => division.id);
+      const toAddLevels = normalizedLevels.filter((level) => !existingLevels.has(level));
+
+      const divisionTransactions: any[] = [];
+
+      if (toDeleteIds.length > 0) {
+        divisionTransactions.push(
+          prisma.division.deleteMany({
+            where: {
+              id: {
+                in: toDeleteIds,
+              },
+            },
+          })
+        );
+      }
+
+      if (toAddLevels.length > 0) {
+        divisionTransactions.push(
+          prisma.division.createMany({
+            data: toAddLevels.map((level) => ({
+              leagueId,
+              level,
+              name: `Division ${level}`,
+            })),
+          })
+        );
+      }
+
+      const divisionsToUpdate = existingDivisions.filter((division) =>
+        normalizedLevels.includes(division.level)
+      );
+
+      divisionsToUpdate.forEach((division) => {
+        divisionTransactions.push(
+          prisma.division.update({
+            where: { id: division.id },
+            data: { name: `Division ${division.level}` },
+          })
+        );
+      });
+
+      if (divisionTransactions.length > 0) {
+        await prisma.$transaction(divisionTransactions);
+      }
+    }
+
+    if (Object.keys(updateData).length === 0 && !divisionsUpdated) {
       return NextResponse.json(
         { error: "No valid fields provided for update." },
         { status: 400 }
       );
     }
 
-    const updatedLeague = await prisma.league.update({
-      where: { id: leagueId },
-      data: updateData,
-      include: {
-        divisions: {
-          orderBy: { level: 'asc' }
-        },
-        _count: {
-          select: {
-            registrations: true,
-            matches: true,
-          },
+    const includeConfig = {
+      divisions: {
+        orderBy: { level: 'asc' },
+      },
+      _count: {
+        select: {
+          registrations: true,
+          matches: true,
         },
       },
-    });
+    };
+
+    const updatedLeague = Object.keys(updateData).length > 0
+      ? await prisma.league.update({
+          where: { id: leagueId },
+          data: updateData,
+          include: includeConfig,
+        })
+      : await prisma.league.findUnique({
+          where: { id: leagueId },
+          include: includeConfig,
+        });
 
     return NextResponse.json({ league: updatedLeague });
   } catch (error) {
