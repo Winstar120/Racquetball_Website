@@ -76,10 +76,10 @@ function ResetPasswordForm() {
             <Image
               src="/logo.png"
               alt="Durango Racquetball Association logo"
-              width={160}
-              height={160}
+              width={220}
+              height={220}
               priority
-              className="mx-auto mb-6 h-20 w-auto cursor-pointer sm:mb-8 sm:h-24"
+              className="mx-auto mb-6 h-24 w-auto cursor-pointer sm:mb-8 sm:h-28"
             />
           </Link>
           <h1 className="font-serif text-3xl text-slate-900 sm:text-4xl">

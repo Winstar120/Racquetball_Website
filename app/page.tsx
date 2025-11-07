@@ -29,14 +29,14 @@ export default function Home() {
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.12),transparent_55%)]" />
 
           <div className="relative mx-auto flex w-full max-w-5xl flex-col items-center px-6 py-24 text-center sm:px-8 md:py-28 lg:px-10">
-            <Image
-              src="/logo.png"
-              alt="Durango Racquetball Association"
-              width={256}
-              height={256}
-              priority
-              className="mb-10 h-32 w-auto max-w-[16rem] sm:mb-12 sm:h-40"
-            />
+          <Image
+            src="/logo.png"
+            alt="Durango Racquetball Association"
+            width={320}
+            height={320}
+            priority
+            className="mb-10 h-40 w-auto max-w-[20rem] sm:mb-12 sm:h-48"
+          />
 
             <div className="flex flex-col items-center gap-6 sm:gap-8">
               <h1 className="font-serif text-4xl font-semibold leading-tight text-white sm:text-5xl sm:leading-tight lg:text-6xl">

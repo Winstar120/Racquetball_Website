@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useMemo, useState, type CSSProperties, type FormEvent } from 'react';
-import Link from 'next/link';
 
 type CourtOption = {
   id: string;
@@ -217,31 +216,9 @@ export default function GlobalAvailabilityPage() {
             padding: '1.5rem 1rem',
           }}
         >
-          <nav style={{ display: 'flex' }} aria-label="Breadcrumb">
-            <ol
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                margin: 0,
-                padding: 0,
-                listStyle: 'none',
-              }}
-            >
-              <li>
-                <Link href="/admin/courts" style={{ color: '#6b7280', textDecoration: 'none', fontSize: '0.875rem' }}>
-                  Courts
-                </Link>
-                <span style={{ margin: '0 0.5rem', color: '#9ca3af' }}>/</span>
-              </li>
-              <li>
-                <span style={{ color: '#111827', fontWeight: 500, fontSize: '0.875rem' }}>Global Availability</span>
-              </li>
-            </ol>
-          </nav>
           <h1
             style={{
-              marginTop: '0.75rem',
+              margin: 0,
               fontSize: '1.75rem',
               fontWeight: 'bold',
               color: '#111827',

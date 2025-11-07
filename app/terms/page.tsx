@@ -12,10 +12,10 @@ export default function TermsOfService() {
             <Image
               src="/logo.png"
               alt="Durango Racquetball Association logo"
-              width={128}
-              height={128}
+              width={200}
+              height={200}
               priority
-              className="mx-auto mb-6 h-16 w-auto cursor-pointer sm:mb-8 sm:h-20"
+              className="mx-auto mb-6 h-24 w-auto cursor-pointer sm:mb-8 sm:h-28"
             />
           </Link>
           <h1 className="font-serif text-3xl text-slate-900 sm:text-4xl">

@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 
 interface League {
   id: string;
@@ -223,36 +222,8 @@ export default function AdminEmails() {
             alignItems: 'center'
           }}>
             <div>
-              <nav style={{ display: 'flex' }}>
-                <ol style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem'
-                }}>
-                  <li>
-                    <Link href="/admin" style={{
-                      color: '#6b7280',
-                      textDecoration: 'none',
-                      fontSize: '0.875rem'
-                    }}>
-                      Admin
-                    </Link>
-                    <span style={{
-                      margin: '0 0.5rem',
-                      color: '#9ca3af'
-                    }}>/</span>
-                  </li>
-                  <li>
-                    <span style={{
-                      color: '#111827',
-                      fontWeight: '500',
-                      fontSize: '0.875rem'
-                    }}>Email Management</span>
-                  </li>
-                </ol>
-              </nav>
               <h1 style={{
-                marginTop: '0.5rem',
+                margin: 0,
                 fontSize: '1.5rem',
                 fontWeight: 'bold',
                 color: '#111827',

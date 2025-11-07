@@ -72,9 +72,9 @@ export function Navigation() {
             <Image
               src="/logo.png"
               alt="Durango Racquetball Association"
-              width={192}
-              height={56}
-              className="h-12 w-auto"
+              width={600}
+              height={180}
+              className="h-56 w-auto"
               priority
             />
           </Link>
@@ -86,9 +86,9 @@ export function Navigation() {
             <Image
               src="/logo.png"
               alt="Durango Racquetball Association"
-              width={220}
-              height={64}
-              className="h-16 w-auto"
+              width={880}
+              height={264}
+              className="h-80 w-auto"
               priority
             />
           </Link>

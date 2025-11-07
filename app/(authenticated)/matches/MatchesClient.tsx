@@ -198,52 +198,9 @@ export default function MatchesClient({ initialFilter }: MatchesClientProps) {
             }}
           >
             <div>
-              <nav style={{ display: 'flex' }}>
-                <ol
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    listStyle: 'none',
-                    padding: 0,
-                    margin: 0,
-                  }}
-                >
-                  <li style={{ display: 'flex', alignItems: 'center' }}>
-                    <Link
-                      href="/dashboard"
-                      style={{
-                        color: '#6b7280',
-                        textDecoration: 'none',
-                        fontSize: '0.875rem',
-                      }}
-                    >
-                      Dashboard
-                    </Link>
-                    <span
-                      style={{
-                        margin: '0 0.5rem',
-                        color: '#9ca3af',
-                      }}
-                    >
-                      /
-                    </span>
-                  </li>
-                  <li>
-                    <span
-                      style={{
-                        color: '#111827',
-                        fontWeight: 500,
-                        fontSize: '0.875rem',
-                      }}
-                    >
-                      Matches
-                    </span>
-                  </li>
-                </ol>
-              </nav>
               <h1
                 style={{
-                  marginTop: '0.75rem',
+                  margin: 0,
                   fontSize: '1.75rem',
                   fontWeight: 'bold',
                   color: '#111827',
