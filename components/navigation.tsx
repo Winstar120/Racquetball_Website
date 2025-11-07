@@ -67,21 +67,35 @@ export function Navigation() {
     <nav className="bg-white border-b border-gray-200" ref={menuRef}>
       <div className="container-width bg-white">
         {/* Mobile header - clean logo only */}
-        <div className="md:hidden flex flex-col items-center py-4">
+        <div className="flex flex-col items-center py-4 md:hidden">
           <Link href="/dashboard" className="mb-2">
-            <Image src="/logo.png" alt="Durango Racquetball Association" width={128} height={32} className="h-8 w-auto" priority />
+            <Image
+              src="/logo.png"
+              alt="Durango Racquetball Association"
+              width={192}
+              height={56}
+              className="h-12 w-auto"
+              priority
+            />
           </Link>
         </div>
 
         {/* Desktop Logo Section */}
-        <div className="hidden md:flex flex-col items-center py-4">
-          <Link href="/dashboard" className="flex items-center mb-2">
-            <Image src="/logo.png" alt="Durango Racquetball Association" width={160} height={40} className="h-8 w-auto" priority />
+        <div className="hidden flex-col items-center py-4 md:flex">
+          <Link href="/dashboard" className="mb-2 flex items-center">
+            <Image
+              src="/logo.png"
+              alt="Durango Racquetball Association"
+              width={220}
+              height={64}
+              className="h-16 w-auto"
+              priority
+            />
           </Link>
         </div>
 
         {/* Menu */}
-        <div className="flex justify-center items-center py-3 space-x-8">
+        <div className="flex flex-wrap items-center justify-center gap-3 px-4 py-3 md:flex-nowrap md:gap-6">
           {menuItems.map((menu) => (
             <div key={menu.label} className="relative">
               <button

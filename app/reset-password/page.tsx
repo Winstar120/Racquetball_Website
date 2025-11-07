@@ -69,8 +69,8 @@ function ResetPasswordForm() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 px-4 py-12 sm:px-6">
-      <div className="w-full max-w-md rounded-3xl bg-white px-6 py-8 shadow-2xl sm:px-8 sm:py-10">
+    <div className="app-gradient-bg flex min-h-screen items-center justify-center px-4 py-12 sm:px-6">
+      <div className="form-card mx-auto rounded-3xl bg-white px-6 py-8 shadow-2xl sm:px-8 sm:py-10">
         <div className="text-center">
           <Link href="/">
             <Image
@@ -88,7 +88,7 @@ function ResetPasswordForm() {
           <p className="mt-2 text-base text-slate-600">Enter your new password</p>
         </div>
 
-        <form onSubmit={onSubmit} className="mt-8 space-y-6">
+        <form onSubmit={onSubmit} className="mt-8 w-full space-y-6">
           {message && (
             <div
               role="status"

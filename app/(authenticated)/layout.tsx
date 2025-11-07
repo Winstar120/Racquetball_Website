@@ -6,14 +6,9 @@ export default function AuthenticatedLayout({
   children: React.ReactNode
 }) {
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #1f2937 0%, #4b5563 50%, #1f2937 100%)',
-      backgroundAttachment: 'fixed',
-      backgroundColor: '#1f2937'
-    }}>
+    <div className="app-gradient-bg min-h-screen">
       <Navigation />
-      <main style={{ paddingTop: '2rem', paddingBottom: '2rem' }}>
+      <main className="py-8 md:py-10">
         {children}
       </main>
     </div>

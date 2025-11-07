@@ -58,8 +58,8 @@ export default function Register() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 px-4 py-12 sm:px-6">
-      <div className="w-full max-w-md rounded-3xl bg-white px-6 py-8 shadow-2xl sm:px-8 sm:py-10">
+    <div className="app-gradient-bg flex min-h-screen items-center justify-center px-4 py-12 sm:px-6">
+      <div className="form-card mx-auto rounded-3xl bg-white px-6 py-8 shadow-2xl sm:px-8 sm:py-10">
         <div className="text-center">
           <Link href="/">
             <Image
@@ -75,7 +75,7 @@ export default function Register() {
           <p className="mt-2 text-base text-slate-600">Create your account to get started</p>
         </div>
 
-        <form onSubmit={onSubmit} className="mt-8 space-y-6">
+        <form onSubmit={onSubmit} className="mt-8 w-full space-y-6">
           {error && (
             <div
               role="alert"
@@ -138,7 +138,7 @@ export default function Register() {
                 placeholder="(555) 123-4567"
                 className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-base text-slate-900 transition focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100"
               />
-              <p className="text-xs text-slate-400">
+              <p className="text-left text-xs text-slate-400">
                 For match reminders and opponent contact info
               </p>
             </div>

@@ -13,5 +13,9 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     ? registeredParam[0] ?? null
     : registeredParam ?? null;
 
-  return <LoginForm registered={registered} />;
+  return (
+    <div className="app-gradient-bg flex min-h-screen items-center justify-center px-4 py-12 sm:px-6">
+      <LoginForm registered={registered} />
+    </div>
+  );
 }

@@ -29,6 +29,11 @@ A comprehensive web application for managing racquetball leagues, player registr
 - **Database**: PostgreSQL with Prisma ORM
 - **Hosting**: Optimized for Vercel deployment
 
+## UI Styling Notes
+
+- **Gradient Background**: Public and authenticated shells share the `.app-gradient-bg` helper (defined in `app/globals.css`) so every page gets the same slate gradient used on `/dashboard`.
+- **Auth Form Width**: Login, register, forgot-password, and reset-password cards use the `.form-card` helper to keep input groups to `min(90vw, 26rem)`. If you build new auth-like forms, wrap their outer container with this class to prevent inputs from stretching across very wide screens.
+
 ## Project Structure
 
 ```
